@@ -1,0 +1,13 @@
+{
+  "name": "adhit-portfolio",
+  "version": "1.0.0",
+  "description": "Personal developer portfolio website with REST API backend and admin portal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["portfolio", "developer", "rest-api"],
+  "author": "ADHITHYA",
+  "license": "ISC"
+}

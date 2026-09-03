@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADHITHYA | Portfolio Admin Portal</title>
+  <meta name="description" content="Admin Dashboard to update, create, or delete portfolio projects, skills, profile details, and work experience.">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Admin Stylesheet -->
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+
+  <!-- Passcode Lock Screen (Default PIN: admin123) -->
+  <div id="lock-screen" class="lock-screen-wrapper">
+    <div class="lock-card">
+      <div class="lock-icon-box">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h2 class="lock-title">Admin Access Required</h2>
+      <p class="lock-desc">Enter your administrative password to manage portfolio details. Default is <strong>admin123</strong>.</p>
+      
+      <div style="margin-bottom: 16px;">
+        <div class="password-input-wrap">
+          <input type="password" id="pin-input" class="form-input" placeholder="Enter password (default: admin123)" autofocus autocomplete="off" />
+          <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('pin-input', this)" aria-label="Show password" title="Show password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </button>
+        </div>
+        <div id="lock-error" class="lock-error">Incorrect password. Try again.</div>
+      </div>
+
+      <button id="unlock-btn" class="btn-primary" style="width: 100%;">
+        <span>Unlock Dashboard</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Admin Header -->
+  <header class="admin-header">
+    <div class="admin-container header-inner">
+      <div class="admin-brand">
+        <a href="admin.html" class="brand-title">
+          <span>ADHITHYA</span>
+        </a>
+        <span class="brand-badge">Admin Portal</span>
+      </div>
+
+      <div class="header-actions">
+        <a href="index.html" class="btn-header" target="_blank" rel="noopener noreferrer" title="Preview changes on live website">
+          <span>View Live Site</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </a>
+        <button id="logout-btn" class="btn-header" title="Lock the dashboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Lock</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="admin-tabs-nav">
+    <div class="admin-container tabs-row">
+      <button class="tab-btn active" data-tab="projects">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+        </svg>
+        <span>Projects</span>
+      </button>
+      <button class="tab-btn" data-tab="profile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Profile &amp; Bio</span>
+      </button>
+      <button class="tab-btn" data-tab="skills">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span>Skills</span>
+      </button>
+      <button class="tab-btn" data-tab="experience">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+          <line x1="8" y1="21" x2="16" y2="21"></line>
+          <line x1="12" y1="17" x2="12" y2="21"></line>
+        </svg>
+        <span>Experience</span>
+      </button>
+      <button class="tab-btn" data-tab="education">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <span>Education</span>
+      </button>
+      <button class="tab-btn" data-tab="backups">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Security</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Dashboard Body -->
+  <main class="admin-container dashboard-body">
+
+    <!-- 1. PROJECTS TAB -->
+    <section id="tab-projects" class="tab-pane active">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Projects Manager</h2>
+          <p class="pane-desc">Create, update, or remove portfolio project cards.</p>
+        </div>
+        <button class="btn-primary" onclick="openProjectModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add New Project</span>
+        </button>
+      </div>
+
+      <div id="admin-projects-grid" class="admin-projects-grid">
+        <!-- Rendered by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 2. PROFILE TAB -->
+    <section id="tab-profile" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Profile &amp; Bio Information</h2>
+          <p class="pane-desc">Update your headline, biography, location, and social links.</p>
+        </div>
+      </div>
+
+      <div class="admin-card-box">
+        <form id="profile-form" onsubmit="saveProfileForm(event)">
+          <!-- Profile Photo Upload -->
+          <div class="profile-avatar-row">
+            <input type="file" id="profile-photo-input" class="file-input-hidden" accept="image/*" />
+            <div class="profile-avatar-preview">
+              <img id="profile-avatar-preview-img" src="" alt="Avatar" style="display: none;" />
+              <svg id="profile-avatar-placeholder" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="color: var(--text-muted);">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+            <div class="profile-avatar-controls">
+              <button type="button" class="btn-browse-file" onclick="document.getElementById('profile-photo-input').click()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span>Choose Profile Photo from Computer</span>
+              </button>
+              <span id="profile-photo-name" class="file-name-label">Current photo</span>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-role">Primary Role / Specialization</label>
+              <input type="text" id="prof-role" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prof-location">Location</label>
+              <input type="text" id="prof-location" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-email">Email Address</label>
+              <input type="email" id="prof-email" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prof-tagline">Main Headline</label>
+            <input type="text" id="prof-tagline" class="form-input" required />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prof-bio">Short Bio / Elevator Pitch</label>
+            <textarea id="prof-bio" class="form-textarea" required></textarea>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prof-github">GitHub Profile URL</label>
+              <input type="url" id="prof-github" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-linkedin">LinkedIn Profile URL</label>
+              <input type="url" id="prof-linkedin" class="form-input" />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <span>Save Profile Changes</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 3. SKILLS TAB -->
+    <section id="tab-skills" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Skills &amp; Capabilities</h2>
+          <p class="pane-desc">Add or remove skills across your technical categories.</p>
+        </div>
+      </div>
+
+      <div id="admin-skills-container" class="skills-admin-grid">
+        <!-- Rendered by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 4. EXPERIENCE TAB -->
+    <section id="tab-experience" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Professional Experience</h2>
+          <p class="pane-desc">Manage career positions, internships, and engineering contributions.</p>
+        </div>
+        <button class="btn-primary" onclick="openExpModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Career Milestone</span>
+        </button>
+      </div>
+
+      <div id="admin-exp-container" class="exp-admin-list">
+        <!-- Rendered by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 5. EDUCATION TAB -->
+    <section id="tab-education" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Academic Background &amp; Education</h2>
+          <p class="pane-desc">Manage academic degrees, colleges/universities, and coursework.</p>
+        </div>
+        <button class="btn-primary" onclick="openEducationModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Education</span>
+        </button>
+      </div>
+
+      <div id="admin-education-container" class="exp-admin-list">
+        <!-- Rendered by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 5. SECURITY & PASSWORD TAB -->
+    <section id="tab-backups" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Admin Security</h2>
+          <p class="pane-desc">Change the administrative password required to access this portal.</p>
+        </div>
+      </div>
+
+      <div class="admin-card-box" style="max-width: 520px; margin: 0 auto;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">Change Admin Password</h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 22px;">
+          Enter your current password and choose a new secure password.
+        </p>
+
+        <form id="change-password-form" onsubmit="updateAdminPassword(event)">
+          <div class="form-group">
+            <label class="form-label" for="current-pass-input">Current Password <span class="required-star">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="current-pass-input" class="form-input" placeholder="Enter current password" required autocomplete="current-password" />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('current-pass-input', this)" aria-label="Show password" title="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="new-pass-input">New Password <span class="required-star">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="new-pass-input" class="form-input" placeholder="Enter new password" required autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('new-pass-input', this)" aria-label="Show password" title="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+            <p class="field-hint-line">Must be at least 8 characters, with 1 uppercase letter, 1 number, and 1 special character.</p>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="confirm-pass-input">Confirm New Password <span class="required-star">*</span></label>
+            <div class="password-input-wrap">
+              <input type="password" id="confirm-pass-input" class="form-input" placeholder="Re-enter new password" required autocomplete="new-password" />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirm-pass-input', this)" aria-label="Show password" title="Show password">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+          </div>
+
+          <div id="password-error-msg" class="lock-error" style="display: none; margin-bottom: 16px;"></div>
+
+          <button type="submit" class="btn-primary" style="width: 100%;">
+            <span>Update Password</span>
+          </button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Add/Edit Project Modal (With File Explorer Image Picker & Preview) -->
+  <div id="project-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-project-title" class="modal-title">Add New Project</h3>
+        <button class="modal-close-btn" onclick="closeProjectModal()" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="project-form" onsubmit="saveProjectForm(event)">
+        <div class="form-group">
+          <label class="form-label" for="project-title">Project Title</label>
+          <input type="text" id="project-title" class="form-input" placeholder="e.g. Realtime Analytics Portal" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="project-category">Project Category</label>
+          <select id="project-category" class="form-select" onchange="handleCategoryChange(this)" required>
+            <option value="testing">Software Tester</option>
+            <option value="fullstack">Full Stack</option>
+            <option value="frontend">Frontend</option>
+            <option value="backend">Backend &amp; APIs</option>
+            <option value="tools">Developer Tools</option>
+            <option value="others">Others</option>
+          </select>
+        </div>
+
+        <!-- Custom Category Input (Shown when Others is selected) -->
+        <div id="custom-category-group" class="form-group" style="display: none;">
+          <label class="form-label" for="custom-category-input">Enter Custom Category Name</label>
+          <input type="text" id="custom-category-input" class="form-input" placeholder="e.g. Automation Testing, Mobile App, AI System..." />
+        </div>
+
+        <!-- File Explorer Image Picker & Live Preview -->
+        <div class="form-group image-upload-wrapper">
+          <label class="form-label">Project Banner Image</label>
+          <div class="file-picker-row">
+            <input type="file" id="project-file-input" class="file-input-hidden" accept="image/*" />
+            <button type="button" class="btn-browse-file" onclick="document.getElementById('project-file-input').click()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>Choose Image from Computer</span>
+            </button>
+            <span id="selected-file-name" class="file-name-label">No file selected</span>
+          </div>
+
+          <!-- Live Image Preview Box -->
+          <div id="image-preview-container" class="image-preview-box">
+            <img id="image-preview" src="assets/projects/nexus_ai.jpg" alt="Preview" style="display: none;" />
+            <div id="image-preview-placeholder" class="image-preview-placeholder">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span>Image Preview</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="project-summary">Short Summary (2-3 sentences)</label>
+          <textarea id="project-summary" class="form-textarea" placeholder="Describe the purpose, features, and functionality..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="project-tech">Tech Stack (comma-separated)</label>
+          <input type="text" id="project-tech" class="form-input" placeholder="React, TypeScript, Node.js, PostgreSQL" required />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="project-live">Live Preview Demo URL</label>
+            <input type="url" id="project-live" class="form-input" placeholder="https://example.com/demo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="project-github">GitHub Repository URL</label>
+            <input type="url" id="project-github" class="form-input" placeholder="https://github.com/..." />
+          </div>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-secondary" onclick="closeProjectModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Experience Modal -->
+  <div id="exp-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-exp-title" class="modal-title">Add Career Milestone</h3>
+        <button class="modal-close-btn" onclick="closeExpModal()" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="exp-form" onsubmit="saveExperienceForm(event)">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="exp-role">Role Title / Degree</label>
+            <input type="text" id="exp-role" class="form-input" placeholder="e.g. Software Engineer" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-period">Active Period</label>
+            <input type="text" id="exp-period" class="form-input" placeholder="e.g. 2024 — Present" required />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="exp-company">Company / Institution</label>
+            <input type="text" id="exp-company" class="form-input" placeholder="e.g. Apex Tech" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-location">Location</label>
+            <input type="text" id="exp-location" class="form-input" placeholder="e.g. Bengaluru, India" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-desc">Summary Description</label>
+          <textarea id="exp-desc" class="form-textarea" placeholder="Key responsibilities and technical focus..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-bullets">Key Achievements / Bullets (one per line)</label>
+          <textarea id="exp-bullets" class="form-textarea" placeholder="Engineered microservice APIs&#10;Optimized page load speed by 30%"></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-secondary" onclick="closeExpModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Milestone</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Education Modal -->
+  <div id="education-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-education-title" class="modal-title">Add Education</h3>
+        <button class="modal-close-btn" onclick="closeEducationModal()" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="education-form" onsubmit="saveEducationForm(event)">
+        <input type="hidden" id="education-index" value="" />
+
+        <div class="form-group">
+          <label class="form-label" for="edu-degree">Degree / Subject <span class="required-star">*</span></label>
+          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. B.Tech in Artificial Intelligence & Data Science" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edu-institution">University or College Name <span class="required-star">*</span></label>
+          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. Anna University Affiliated College" required />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="edu-year">Year <span class="required-star">*</span></label>
+            <input type="text" id="edu-year" class="form-input" placeholder="e.g. 2020 — 2024" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edu-score">Marks / CGPA / Percentage <span class="required-star">*</span></label>
+            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 8.5 CGPA or 85%" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edu-location">Location</label>
+          <input type="text" id="edu-location" class="form-input" placeholder="e.g. Chennai, Tamil Nadu" />
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-secondary" onclick="closeEducationModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Education</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="admin-toast" class="admin-toast"></div>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADHITHYA | Software Tester Portfolio</title>
+  <meta name="description" content="Portfolio of ADHITHYA, a Software Tester specializing in SDLC, STLC, manual &amp; automated testing, and reliable software delivery.">
+  <meta name="author" content="ADHITHYA">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="ADHITHYA | Software Tester">
+  <meta property="og:description" content="Explore software testing projects, automated frameworks, and technical proficiencies by ADHITHYA.">
+  <meta property="og:image" content="assets/projects/nexus_ai.jpg">
+
+  <!-- Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Swiggy / Zomato Inspired Header -->
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <div class="brand-section">
+        <a href="#top" class="brand-logo">
+          <span id="hero-brand-name">ADHITHYA</span>
+        </a>
+        <div class="location-pill" title="Current Location">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span id="location-text">Bengaluru / Remote</span>
+        </div>
+      </div>
+
+      <ul id="nav-links" class="nav-links">
+        <li class="nav-item"><a href="#education">Education</a></li>
+        <li class="nav-item"><a href="#projects">Projects</a></li>
+        <li class="nav-item"><a href="#skills">Skills</a></li>
+        <li class="nav-item"><a href="#experience">Experience</a></li>
+        <li class="nav-item"><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button id="theme-btn" class="theme-btn" aria-label="Toggle Theme" title="Toggle Light / Dark Mode">
+          <!-- Populated by JS with SVG icon -->
+        </button>
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero / About & Search Filter Section -->
+  <section id="about" class="hero-banner">
+    <div id="top"></div>
+    <div class="container hero-content">
+      <!-- Profile Avatar Display -->
+      <div id="hero-avatar-wrap" class="hero-avatar-wrap" style="display: none;">
+        <img id="hero-avatar-img" src="" alt="Profile Photo" class="hero-avatar-img" />
+      </div>
+
+      <div id="hero-tagline" class="hero-tagline">
+        Software Engineer &amp; Full-Stack Developer
+      </div>
+      <h1 id="hero-title" class="hero-title">
+        Building reliable web apps &amp; scalable systems.
+      </h1>
+      <p id="hero-bio" class="hero-subtitle">
+        Specializing in clean user interfaces, modern JavaScript/TypeScript architectures, and high-performance backend services.
+      </p>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section id="education" class="section-wrapper" style="background: var(--bg-card); border-bottom: 1px solid var(--border-light);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-head-title">Academic Background &amp; Education</h2>
+          <p class="section-head-desc">Formal degree qualifications, technical foundations, and specialized testing coursework.</p>
+        </div>
+      </div>
+
+      <!-- Injected dynamically by js/main.js -->
+      <div id="education-container" class="education-grid"></div>
+    </div>
+  </section>
+
+  <!-- Projects Section (Swiggy / Zomato Card Grid) -->
+  <section id="projects" class="section-wrapper">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-head-title">Featured Engineering Projects</h2>
+          <p class="section-head-desc">Production-ready software architectures, automated testing suites, and scalable web solutions.</p>
+        </div>
+        <div id="results-count" class="results-count">4 Projects</div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="cards-grid" class="cards-grid">
+        <!-- Injected dynamically by js/main.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section (Menu Style) -->
+  <section id="skills" class="section-wrapper" style="background: var(--bg-card); border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-head-title">Technical Expertise &amp; Core Competencies</h2>
+          <p class="section-head-desc">Industry-standard engineering frameworks, automated QA methodologies, and developer tooling.</p>
+        </div>
+      </div>
+
+      <!-- Injected dynamically by js/main.js -->
+      <div id="skills-container" class="skills-container-grid"></div>
+    </div>
+  </section>
+
+  <!-- Experience Section -->
+  <section id="experience" class="section-wrapper">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-head-title">Professional Experience</h2>
+          <p class="section-head-desc">Career milestones, engineering deliverables, and quality assurance contributions.</p>
+        </div>
+      </div>
+
+      <!-- Injected dynamically by js/main.js -->
+      <div id="experience-container" class="timeline-card-list"></div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="section-wrapper" style="background: var(--bg-card); border-top: 1px solid var(--border-light);">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <h2 class="section-head-title">Get in Touch</h2>
+          <p class="section-head-desc">Have an open opportunity or a project in mind? Reach out directly.</p>
+        </div>
+      </div>
+
+      <div class="contact-layout-grid">
+        <!-- Direct Info Card -->
+        <div class="contact-info-panel">
+          <h3 class="contact-panel-title">Let's Connect</h3>
+          <p class="contact-panel-desc">
+            I am currently open to full-time engineering roles, contracting opportunities, and open source collaborations.
+          </p>
+
+          <!-- Direct Copy Card -->
+          <div id="copy-email-card" class="contact-direct-card" title="Click to copy email address">
+            <div class="direct-card-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Direct Email</div>
+              <div id="contact-email-display" style="font-size: 1rem; font-weight: 700; color: var(--text-main);">adhithyam0210@gmail.com</div>
+            </div>
+          </div>
+
+          <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; font-weight: 600;">
+            Follow &amp; Connect Online:
+          </div>
+
+          <!-- Social Buttons (Clean SVGs) -->
+          <div class="social-links-row">
+            <a id="social-github" href="https://github.com/adhithyam0210-ai" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="GitHub">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+              </svg>
+            </a>
+            <a id="social-linkedin" href="https://www.linkedin.com/in/adhithya03" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="LinkedIn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                <rect x="2" y="9" width="4" height="12"></rect>
+                <circle cx="4" cy="4" r="2"></circle>
+              </svg>
+            </a>
+            <a id="social-mail" href="https://mail.google.com/mail/?view=cm&fs=1&to=adhithyam0210@gmail.com" target="_blank" rel="noopener noreferrer" class="social-link-btn" title="Open in Gmail">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                <polyline points="22,6 12,13 2,6"></polyline>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Message Form -->
+        <div class="contact-form-panel">
+          <form id="contact-form">
+            <div class="form-field-group">
+              <label for="name" class="field-label">Your Name</label>
+              <input type="text" id="name" class="field-input" placeholder="e.g. Alex Rivera" required>
+            </div>
+            <div class="form-field-group">
+              <label for="email" class="field-label">Email Address</label>
+              <input type="email" id="email" class="field-input" placeholder="alex@example.com" required>
+            </div>
+            <div class="form-field-group">
+              <label for="message" class="field-label">Your Message</label>
+              <textarea id="message" class="field-textarea" placeholder="Tell me about your project, team, or opportunity..." required></textarea>
+            </div>
+            <button type="submit" class="btn-submit">
+              <span>Send Message</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>
+        <strong id="footer-brand-name">ADHITHYA.</strong> <span id="footer-role-text">Software Tester Portfolio.</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 20px;">
+        <span>&copy; <span id="year">2026</span> <span id="footer-copy-name">ADHITHYA</span>.</span>
+        <!-- Admin Link -->
+        <a href="admin.html" style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;" title="Open Admin Portal">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Admin Portal</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
