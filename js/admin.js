@@ -114,6 +114,7 @@ function switchTab(target, updateHash = true) {
   if (target === 'projects') renderProjectsList();
   if (target === 'skills') renderSkillsManager();
   if (target === 'profile') renderProfileForm();
+  if (target === 'cloud-sync') renderCloudSyncTab();
 }
 
 function initTabs() {
@@ -246,6 +247,7 @@ async function renderAll() {
   await renderSkillsManager();
   await renderExperienceManager();
   await renderEducationManager();
+  renderCloudSyncStatus();
 }
 
 /* ==========================================================================
@@ -422,11 +424,11 @@ async function saveProjectForm(e) {
   };
 
   if (currentEditingProjectId) {
-    await PortfolioAPI.updateProject(currentEditingProjectId, projectPayload);
-    showToast('Project updated successfully');
+    const res = await PortfolioAPI.updateProject(currentEditingProjectId, projectPayload);
+    notifySaveResult('Project updated', res);
   } else {
-    await PortfolioAPI.createProject(projectPayload);
-    showToast('Project created successfully');
+    const res = await PortfolioAPI.createProject(projectPayload);
+    notifySaveResult('Project created', res);
   }
 
   closeProjectModal();
@@ -436,9 +438,9 @@ async function saveProjectForm(e) {
 async function deleteProject(id) {
   if (!confirm('Are you sure you want to delete this project?')) return;
 
-  await PortfolioAPI.deleteProject(id);
+  const res = await PortfolioAPI.deleteProject(id);
   renderProjectsList();
-  showToast('Project deleted');
+  notifySaveResult('Project deleted', res);
 }
 
 /* ==========================================================================
@@ -486,12 +488,8 @@ async function saveProfileForm(e) {
     avatar: profileAvatarData || existingAvatar
   };
 
-  await PortfolioAPI.updateProfile(profilePayload);
-  showToast('Profile saved successfully! Redirecting to home page...');
-
-  setTimeout(() => {
-    window.location.href = 'index.html';
-  }, 1100);
+  const res = await PortfolioAPI.updateProfile(profilePayload);
+  notifySaveResult('Profile updated', res);
 }
 
 /* ==========================================================================
@@ -660,9 +658,10 @@ async function saveExperienceForm(e) {
     showToast('Experience entry added');
   }
 
-  await PortfolioAPI.updateExperience(data.experience);
+  const res = await PortfolioAPI.updateExperience(data.experience);
   closeExpModal();
   renderExperienceManager();
+  notifySaveResult('Experience saved', res);
 }
 
 async function deleteExperience(index) {
@@ -783,9 +782,10 @@ async function saveEducationForm(e) {
   }
 
   currentEditingEduIndex = null;
-  await PortfolioAPI.updateEducation(data.education);
+  const res = await PortfolioAPI.updateEducation(data.education);
   closeEducationModal();
   renderEducationManager();
+  notifySaveResult('Education saved', res);
 }
 
 async function deleteEducation(index) {
@@ -952,3 +952,148 @@ async function exportPortfolioJson() {
     alert('Failed to export data: ' + err.message);
   }
 }
+
+/* ==========================================================================
+   Save & Publish Notification Helper
+   ========================================================================== */
+function notifySaveResult(actionText, res) {
+  if (res?.publishedToGitHub) {
+    showToast(`${actionText} & published to GitHub! Vercel is redeploying (~30s).`);
+  } else if (res?.ghError) {
+    showToast(`${actionText} locally, but GitHub sync failed: ${res.ghError}`);
+  } else if (!PortfolioAPI.isServerActive && !GitHubSync.hasToken()) {
+    showToast(`${actionText} in browser! Connect GitHub in Cloud Sync to update Vercel.`);
+  } else {
+    showToast(`${actionText} successfully`);
+  }
+}
+
+/* ==========================================================================
+   GitHub Cloud Sync & Vercel Auto-Deployment Controller
+   ========================================================================== */
+function renderCloudSyncStatus() {
+  const dot = document.getElementById('cloud-pill-dot');
+  const label = document.getElementById('cloud-sync-header-label');
+  const hasToken = GitHubSync.hasToken();
+
+  if (dot) {
+    dot.className = hasToken ? 'cloud-pill-status online' : 'cloud-pill-status';
+  }
+  if (label) {
+    label.textContent = hasToken ? 'Cloud Active' : 'Cloud Sync';
+  }
+
+  const card = document.getElementById('sync-status-card');
+  const text = document.getElementById('sync-status-text');
+  if (card && text) {
+    if (hasToken) {
+      card.className = 'sync-status-banner connected';
+      text.innerHTML = `<strong>Connected to GitHub:</strong> <code>${escapeHtml(GitHubSync.getRepo())}</code> (branch: <code>${escapeHtml(GitHubSync.getBranch())}</code>). Any updates you save will automatically commit and deploy to Vercel!`;
+    } else {
+      card.className = 'sync-status-banner disconnected';
+      text.innerHTML = `<strong>Cloud Sync Not Configured:</strong> Edits made on your live Vercel domain will stay in your personal browser only. Add your GitHub token below to enable instant auto-deployments to Vercel!`;
+    }
+  }
+}
+
+function renderCloudSyncTab() {
+  renderCloudSyncStatus();
+
+  const repoInput = document.getElementById('gh-repo-input');
+  const branchInput = document.getElementById('gh-branch-input');
+  const tokenInput = document.getElementById('gh-token-input');
+
+  if (repoInput) repoInput.value = GitHubSync.getRepo();
+  if (branchInput) branchInput.value = GitHubSync.getBranch();
+  if (tokenInput && GitHubSync.hasToken()) {
+    tokenInput.value = GitHubSync.getToken();
+  }
+}
+
+async function saveGitHubSyncSettings(e) {
+  e.preventDefault();
+
+  const repo = document.getElementById('gh-repo-input').value.trim();
+  const branch = document.getElementById('gh-branch-input').value.trim();
+  const token = document.getElementById('gh-token-input').value.trim();
+  const alertBox = document.getElementById('gh-sync-alert');
+  const saveBtn = document.getElementById('btn-save-sync');
+
+  if (!token) {
+    if (alertBox) {
+      alertBox.textContent = 'Please enter a GitHub Personal Access Token.';
+      alertBox.style.display = 'block';
+    }
+    return;
+  }
+
+  try {
+    if (saveBtn) {
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span>Verifying connection...</span>';
+    }
+    if (alertBox) alertBox.style.display = 'none';
+
+    // Test token and repository access
+    const test = await GitHubSync.testConnection(token, repo);
+
+    // Save settings
+    GitHubSync.setRepo(repo);
+    GitHubSync.setBranch(branch);
+    GitHubSync.setToken(token);
+
+    renderCloudSyncStatus();
+    showToast(`Connected to ${test.repoName}! Cloud Sync is now active.`);
+    alert(`Connected to GitHub successfully!\n\nRepository: ${test.repoName}\nBranch: ${branch}\n\nAny updates you save in this Admin Portal will now be automatically committed to GitHub and deployed live to Vercel!`);
+  } catch (err) {
+    if (alertBox) {
+      alertBox.textContent = `Connection failed: ${err.message}`;
+      alertBox.style.display = 'block';
+    }
+    showToast('Failed to connect to GitHub');
+  } finally {
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = '<span>Save &amp; Test Connection</span>';
+    }
+  }
+}
+
+async function triggerManualCloudPublish() {
+  if (!GitHubSync.hasToken()) {
+    alert('Please enter and save your GitHub Personal Access Token first.');
+    return;
+  }
+
+  const publishBtn = document.getElementById('btn-publish-now');
+  try {
+    if (publishBtn) {
+      publishBtn.disabled = true;
+      publishBtn.innerHTML = '<span>Publishing to GitHub & Vercel...</span>';
+    }
+
+    const data = await PortfolioAPI.getPortfolio();
+    const result = await GitHubSync.publishPortfolio(data, 'Manual publish from Portfolio Admin Portal');
+
+    showToast('Published to GitHub! Vercel is now deploying (~30s).');
+    alert(`Published successfully to GitHub!\n\nCommit SHA: ${result.commit?.sha?.slice(0, 7) || 'latest'}\n\nVercel will detect this commit and automatically update your live site within 30 seconds.`);
+  } catch (err) {
+    console.error('Publish error:', err);
+    alert('Publish failed: ' + err.message);
+  } finally {
+    if (publishBtn) {
+      publishBtn.disabled = false;
+      publishBtn.innerHTML = '<span>Publish Current Portfolio Now</span>';
+    }
+  }
+}
+
+function disconnectGitHubSync() {
+  if (!confirm('Are you sure you want to disconnect GitHub Cloud Sync?')) return;
+  GitHubSync.setToken('');
+  const tokenInput = document.getElementById('gh-token-input');
+  if (tokenInput) tokenInput.value = '';
+  renderCloudSyncStatus();
+  showToast('GitHub Cloud Sync disconnected');
+}
+

@@ -978,3 +978,55 @@ input::-ms-clear {
     justify-content: flex-end;
   }
 }
+
+/* ==========================================================================
+   Cloud Sync & Vercel Auto-Deployment Styles
+   ========================================================================== */
+.sync-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  border: 1px solid var(--border-light);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition: all var(--transition-normal);
+}
+
+.sync-status-banner.connected {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #10b981;
+}
+
+.sync-status-banner.disconnected {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #f59e0b;
+}
+
+.cloud-pill-status {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #94a3b8;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.cloud-pill-status.online {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.sync-info-box {
+  padding: 16px;
+  background: var(--bg-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  margin-top: 20px;
+}
+
