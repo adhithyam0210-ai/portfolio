@@ -58,7 +58,9 @@ const PORTFOLIO_DATA = {
   "skills": {
     "frontend": {
       "title": "Frontend Development",
-      "items": []
+      "items": [
+        "java"
+      ]
     },
     "backend": {
       "title": "Backend & Architecture",
