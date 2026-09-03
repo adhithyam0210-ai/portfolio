@@ -83,10 +83,9 @@ const PORTFOLIO_DATA = {
       "title": "Tools & DevOps",
       "items": [
         "Git & GitHub",
+        "Docker",
         "CI/CD Pipelines",
-        "Linux & Shell",
         "Postman",
-        "AWS (S3, EC2)",
         "Vercel / Netlify",
         "Webpack / Vite"
       ]
@@ -126,17 +125,5 @@ const PORTFOLIO_DATA = {
       "location": "Chennai, TamilNadu"
     }
   ],
-  "experience": [
-    {
-      "period": "2022 — 2024",
-      "role": "Junior Software Engineer",
-      "company": "Hyperion Solutions",
-      "location": "Bengaluru, India",
-      "description": "Contributed to RESTful backend services, database schema migrations, and responsive dashboard interfaces.",
-      "bullets": [
-        "Engineered real-time notification service using WebSockets and Redis pub/sub.",
-        "Created comprehensive unit and integration test suites, achieving 85%+ code coverage."
-      ]
-    }
-  ]
+  "experience": []
 };
