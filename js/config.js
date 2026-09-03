@@ -71,7 +71,6 @@ const PORTFOLIO_DATA = {
         "Node.js",
         "Express.js",
         "Python",
-        "FastAPI",
         "RESTful APIs",
         "GraphQL",
         "PostgreSQL",
