@@ -89,29 +89,54 @@ function initAuth() {
 }
 
 /* ==========================================================================
-   Tab Navigation
+   Tab Navigation & URL Hash Routing
    ========================================================================== */
-function initTabs() {
+function switchTab(target, updateHash = true) {
   const tabBtns = document.querySelectorAll('.tab-btn');
   const tabPanes = document.querySelectorAll('.tab-pane');
+  const targetBtn = document.querySelector(`.tab-btn[data-tab="${target}"]`);
+  const targetPane = document.getElementById(`tab-${target}`);
+
+  if (!targetPane || !targetBtn) return;
+
+  tabBtns.forEach(b => b.classList.remove('active'));
+  tabPanes.forEach(p => p.classList.remove('active'));
+
+  targetBtn.classList.add('active');
+  targetPane.classList.add('active');
+
+  if (updateHash) {
+    history.replaceState(null, '', '#' + target);
+  }
+
+  if (target === 'education') renderEducationManager();
+  if (target === 'experience') renderExperienceManager();
+  if (target === 'projects') renderProjectsList();
+  if (target === 'skills') renderSkillsManager();
+  if (target === 'profile') renderProfileForm();
+}
+
+function initTabs() {
+  const tabBtns = document.querySelectorAll('.tab-btn');
 
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-tab');
-
-      tabBtns.forEach(b => b.classList.remove('active'));
-      tabPanes.forEach(p => p.classList.remove('active'));
-
-      btn.classList.add('active');
-      const pane = document.getElementById(`tab-${target}`);
-      if (pane) pane.classList.add('active');
-
-      if (target === 'education') renderEducationManager();
-      if (target === 'experience') renderExperienceManager();
-      if (target === 'projects') renderProjectsList();
-      if (target === 'skills') renderSkillsManager();
-      if (target === 'profile') renderProfileForm();
+      switchTab(target, true);
     });
+  });
+
+  // Check URL hash on initial load (e.g. #skills or #projects)
+  const hash = window.location.hash.replace('#', '').trim();
+  if (hash) {
+    switchTab(hash, false);
+  }
+
+  window.addEventListener('hashchange', () => {
+    const currentHash = window.location.hash.replace('#', '').trim();
+    if (currentHash) {
+      switchTab(currentHash, false);
+    }
   });
 }
 
@@ -359,14 +384,14 @@ async function saveProjectForm(e) {
   const title = document.getElementById('project-title').value.trim();
   const rawCategory = document.getElementById('project-category').value;
   let category = rawCategory;
-  let categoryLabel = 'Software Tester';
+  let categoryLabel = 'Software Testing';
 
   if (rawCategory === 'others') {
     const customVal = document.getElementById('custom-category-input').value.trim();
     categoryLabel = customVal || 'Other';
     category = 'cat-' + categoryLabel.toLowerCase().replace(/[^a-z0-9]/g, '');
   } else if (rawCategory === 'testing') {
-    categoryLabel = 'Software Tester';
+    categoryLabel = 'Software Testing';
   } else {
     const categoryLabels = {
       fullstack: 'Full Stack',

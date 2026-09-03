@@ -32,6 +32,7 @@ function ensureDataFile() {
       },
       categories: [
         { id: "all", label: "All Projects" },
+        { id: "testing", label: "Software Testing" },
         { id: "fullstack", label: "Full Stack" },
         { id: "frontend", label: "Frontend" },
         { id: "backend", label: "Backend & APIs" },

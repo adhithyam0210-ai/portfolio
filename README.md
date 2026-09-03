@@ -47,7 +47,7 @@ The website delivers a consumer-tech card UI inspired by modern platforms like S
 ### 1. Public Portfolio (`index.html`)
 - **Modern Consumer-Tech UI:** Card-based design system with crisp borders, subtle elevation shadows, and hover interactions.
 - **Theme Engine:** Built-in Light and Dark modes with instant toggling and `localStorage` state persistence.
-- **Dynamic Category Filtering:** Filter projects across *Software Tester*, *Full Stack*, *Frontend*, *Backend & APIs*, and *Developer Tools*.
+- **Dynamic Category Filtering:** Filter projects across *Software Testing*, *Full Stack*, *Frontend*, *Backend & APIs*, and *Developer Tools*.
 - **Live Search & Results Counter:** Instantly filter projects by keyword, technology, or title.
 - **Structured Sections:**
   - **Hero & About:** Professional bio, current location badge, and avatar display.
@@ -265,7 +265,7 @@ All portfolio information is stored in `data/portfolio.json` with the following 
   },
   "categories": [
     { "id": "all", "label": "All Projects" },
-    { "id": "testing", "label": "Software Tester" },
+    { "id": "testing", "label": "Software Testing" },
     { "id": "fullstack", "label": "Full Stack" },
     { "id": "frontend", "label": "Frontend" },
     { "id": "backend", "label": "Backend & APIs" },

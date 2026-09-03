@@ -134,7 +134,7 @@ function initNavigation() {
 }
 
 /* ==========================================================================
-   Category Filter Pills (Includes Software Tester & Custom Categories)
+   Category Filter Pills (Includes Software Testing & Custom Categories)
    ========================================================================== */
 async function initFilterPills() {
   const container = document.getElementById('filter-pills');
@@ -144,7 +144,7 @@ async function initFilterPills() {
   
   const baseCats = [
     { id: "all", label: "All Projects" },
-    { id: "testing", label: "Software Tester" },
+    { id: "testing", label: "Software Testing" },
     { id: "fullstack", label: "Full Stack" },
     { id: "frontend", label: "Frontend" },
     { id: "backend", label: "Backend & APIs" },

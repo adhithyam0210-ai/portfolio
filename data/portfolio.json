@@ -16,6 +16,10 @@
       "label": "All Projects"
     },
     {
+      "id": "testing",
+      "label": "Software Testing"
+    },
+    {
       "id": "fullstack",
       "label": "Full Stack"
     },
