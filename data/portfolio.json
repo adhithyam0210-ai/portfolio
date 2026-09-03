@@ -96,11 +96,19 @@
       "period": "2022 - 2026",
       "score": "7.4 CGPA",
       "location": "Chennai, TamilNadu"
+    },
+    {
+      "degree": "Software Testing with Selenium",
+      "institution": "SLA Institute",
+      "year": "2026",
+      "period": "2026",
+      "score": ".",
+      "location": "Chennai, TamilNadu"
     }
   ],
   "experience": [
     {
-      "period": "2024 \u2014 Present",
+      "period": "2024 — Present",
       "role": "Software Developer",
       "company": "Apex Technologies",
       "location": "Bengaluru, India",
@@ -111,7 +119,7 @@
       ]
     },
     {
-      "period": "2022 \u2014 2024",
+      "period": "2022 — 2024",
       "role": "Junior Software Engineer",
       "company": "Hyperion Solutions",
       "location": "Bengaluru, India",
