@@ -109,6 +109,14 @@ const PORTFOLIO_DATA = {
       "period": "2026",
       "score": ".",
       "location": "Chennai, TamilNadu"
+    },
+    {
+      "degree": "HSC/Computer Science",
+      "institution": "Sir Ramaswami Mudaliar Higher Secondary School",
+      "year": "2021 - 2022",
+      "period": "2021 - 2022",
+      "score": "85.5%",
+      "location": "Chennai, TamilNadu"
     }
   ],
   "experience": [
