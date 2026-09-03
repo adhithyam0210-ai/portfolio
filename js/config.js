@@ -129,17 +129,6 @@ const PORTFOLIO_DATA = {
   ],
   "experience": [
     {
-      "period": "2024 — Present",
-      "role": "Software Developer",
-      "company": "Apex Technologies",
-      "location": "Bengaluru, India",
-      "description": "Developing scalable customer-facing web applications, collaborating on microservice API architectures, and optimizing core page performance.",
-      "bullets": [
-        "Implemented reusable frontend design system components used across 4 internal products.",
-        "Optimized client rendering and asset delivery, reducing average page load times by 32%."
-      ]
-    },
-    {
       "period": "2022 — 2024",
       "role": "Junior Software Engineer",
       "company": "Hyperion Solutions",
