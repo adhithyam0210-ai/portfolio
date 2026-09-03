@@ -212,9 +212,10 @@ const PortfolioAPI = (() => {
           }
         }
 
-        // 2. When deployed on Vercel, fetch static data/portfolio.json with cache-buster
+        // 2. When deployed on Vercel, fetch static /data/portfolio.json with cache-buster
         try {
-          const staticRes = await fetch('data/portfolio.json?t=' + Date.now(), { cache: 'no-cache' });
+          const fetchUrl = window.location.origin + '/data/portfolio.json?t=' + Date.now();
+          const staticRes = await fetch(fetchUrl, { cache: 'no-cache' });
           if (staticRes.ok) {
             const data = await staticRes.json();
             setLocalData(data);
