@@ -86,8 +86,8 @@ const PORTFOLIO_DATA = {
         "Docker",
         "CI/CD Pipelines",
         "Postman",
-        "Vercel / Netlify",
-        "Webpack / Vite"
+        "AWS (S3, EC2)",
+        "Vercel / Netlify"
       ]
     }
   },
