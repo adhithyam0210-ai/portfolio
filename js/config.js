@@ -117,6 +117,14 @@ const PORTFOLIO_DATA = {
       "period": "2021 - 2022",
       "score": "85.5%",
       "location": "Chennai, TamilNadu"
+    },
+    {
+      "degree": "SSLC",
+      "institution": "Sir Ramaswami Mudaliar Higher Secondary School",
+      "year": "20219- 2020",
+      "period": "20219- 2020",
+      "score": "73%",
+      "location": "Chennai, TamilNadu"
     }
   ],
   "experience": [
