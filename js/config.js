@@ -71,10 +71,9 @@ const PORTFOLIO_DATA = {
         "Node.js",
         "Express.js",
         "Python",
-        "FastAPI",
         "RESTful APIs",
         "GraphQL",
-        "MongoDB",
+        "PostgreSQL",
         "Redis Caching"
       ]
     },
@@ -82,10 +81,11 @@ const PORTFOLIO_DATA = {
       "title": "Tools & DevOps",
       "items": [
         "Git & GitHub",
+        "Docker",
         "CI/CD Pipelines",
         "Postman",
-        "Vercel / Netlify",
-        "Webpack / Vite"
+        "AWS (S3, EC2)",
+        "Vercel / Netlify"
       ]
     }
   },
