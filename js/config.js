@@ -138,14 +138,6 @@ const PORTFOLIO_DATA = {
         "Engineered real-time notification service using WebSockets and Redis pub/sub.",
         "Created comprehensive unit and integration test suites, achieving 85%+ code coverage."
       ]
-    },
-    {
-      "role": "Software Test Engineer",
-      "company": "Softrate Tech Park",
-      "location": "Chennai, TamilNadu",
-      "period": "Present",
-      "description": "Focusing on Delivering robust and High Quality Software",
-      "bullets": []
     }
   ]
 };
