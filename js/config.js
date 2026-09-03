@@ -124,5 +124,14 @@ const PORTFOLIO_DATA = {
       "location": "Chennai, TamilNadu"
     }
   ],
-  "experience": []
+  "experience": [
+    {
+      "role": "Software Test Engineer",
+      "company": "Softrate Tech Park",
+      "location": "Chennai, TamilNadu",
+      "period": "Present",
+      "description": "Delivering High Quality Software",
+      "bullets": []
+    }
+  ]
 };
