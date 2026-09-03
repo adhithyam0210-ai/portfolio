@@ -37,15 +37,28 @@ const PortfolioAPI = (() => {
 
     async getPortfolio() {
       if (isHttp) {
+        // 1. Try local REST API endpoint (when running node server.js / python server.py)
         try {
-          const res = await fetch(`${API_BASE}/portfolio`);
+          const res = await fetch(`${API_BASE}/portfolio`, { cache: 'no-cache' });
           if (res.ok) {
             const data = await res.json();
             setLocalData(data); // keep local mirror updated
             return data;
           }
         } catch (err) {
-          console.warn('REST API unavailable, falling back to local storage:', err);
+          // REST API not responding (normal on static hosts like Vercel)
+        }
+
+        // 2. When deployed on Vercel/GitHub Pages, fetch the static data/portfolio.json with cache buster
+        try {
+          const staticRes = await fetch('data/portfolio.json?t=' + Date.now(), { cache: 'no-cache' });
+          if (staticRes.ok) {
+            const data = await staticRes.json();
+            setLocalData(data); // keep local mirror updated
+            return data;
+          }
+        } catch (err) {
+          console.warn('Could not load data/portfolio.json:', err);
         }
       }
       return getLocalData();

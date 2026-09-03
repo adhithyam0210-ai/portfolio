@@ -928,3 +928,27 @@ function togglePasswordVisibility(inputId, btn) {
   btn.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
   btn.title = isPassword ? 'Hide password' : 'Show password';
 }
+
+/* ==========================================================================
+   Export / Download Updated JSON (For Vercel / GitHub Sync)
+   ========================================================================== */
+async function exportPortfolioJson() {
+  try {
+    const data = await PortfolioAPI.getPortfolio();
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'portfolio.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Downloaded portfolio.json');
+    alert('Exported portfolio.json!\n\nTo make your updates visible to everyone on Vercel:\n1. Replace the file in portfolio/data/portfolio.json with this downloaded file.\n2. Push to GitHub (git add . && git commit -m "Update portfolio" && git push).\n3. Vercel will automatically redeploy with your latest info!');
+  } catch (err) {
+    console.error('Export failed:', err);
+    alert('Failed to export data: ' + err.message);
+  }
+}

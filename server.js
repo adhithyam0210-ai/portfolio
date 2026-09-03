@@ -61,6 +61,9 @@ function writeData(data) {
   ensureDataFile();
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
+    const configPath = path.join(__dirname, 'js', 'config.js');
+    const configContent = `/**\n * Portfolio Configuration Data (Zero Emojis)\n * Fallback static data matching data/portfolio.json\n */\n\nconst PORTFOLIO_DATA = ${JSON.stringify(data, null, 2)};\n`;
+    fs.writeFileSync(configPath, configContent, 'utf8');
     return true;
   } catch (err) {
     console.error('Error writing portfolio.json:', err);

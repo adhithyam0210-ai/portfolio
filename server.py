@@ -57,7 +57,11 @@ def write_data(data):
     ensure_data_file()
     try:
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=2, ensure_ascii=False)
+        config_path = os.path.join(BASE_DIR, 'js', 'config.js')
+        config_content = "/**\n * Portfolio Configuration Data (Zero Emojis)\n * Fallback static data matching data/portfolio.json\n */\n\nconst PORTFOLIO_DATA = " + json.dumps(data, indent=2, ensure_ascii=False) + ";\n"
+        with open(config_path, 'w', encoding='utf-8') as f:
+            f.write(config_content)
         return True
     except Exception as e:
         print("Error writing data:", e)
