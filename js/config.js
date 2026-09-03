@@ -101,6 +101,14 @@ const PORTFOLIO_DATA = {
       "period": "2022 - 2026",
       "score": "7.4 CGPA",
       "location": "Chennai, TamilNadu"
+    },
+    {
+      "degree": "Software Testing with Selenium",
+      "institution": "SLA Institute",
+      "year": "2026",
+      "period": "2026",
+      "score": ".",
+      "location": "Chennai, TamilNadu"
     }
   ],
   "experience": [
