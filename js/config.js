@@ -74,7 +74,8 @@ const PORTFOLIO_DATA = {
         "RESTful APIs",
         "GraphQL",
         "PostgreSQL",
-        "Redis Caching"
+        "Redis Caching",
+        "java"
       ]
     },
     "tools": {
