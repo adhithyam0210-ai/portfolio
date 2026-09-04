@@ -14,26 +14,45 @@ const ICONS = {
 
 let currentCategory = 'all';
 let searchQuery = '';
+let currentPortfolioData = null;
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initNavigation();
-  await hydrateProfile();
-  await initFilterPills();
   initSearch();
-  await renderCards();
-  await renderSkills();
-  await renderExperience();
-  await renderEducation();
   initContact();
+
+  // Step 1: Instant 0ms Paint using local / bundled cache
+  currentPortfolioData = PortfolioAPI.getCachedOrLocal();
+  renderFullPage(currentPortfolioData);
+
+  // Step 2: Background Stale-While-Revalidate to sync live cloud database
+  PortfolioAPI.getPortfolio(true).then(freshData => {
+    if (freshData) {
+      currentPortfolioData = freshData;
+      renderFullPage(freshData);
+    }
+  }).catch(err => {
+    console.warn('[Portfolio] Background sync fallback to local cache:', err);
+  });
 });
+
+function renderFullPage(data) {
+  if (!data) return;
+  hydrateProfile(data);
+  initFilterPills(data);
+  renderCards(data);
+  renderSkills(data);
+  renderExperience(data);
+  renderEducation(data);
+}
 
 /* ==========================================================================
    Hydrate Dynamic Profile Data (via REST API)
    ========================================================================== */
-async function hydrateProfile() {
-  const data = await PortfolioAPI.getPortfolio();
-  const p = data.profile;
+function hydrateProfile(passedData) {
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
+  const p = data ? data.profile : null;
   if (!p) return;
 
   const avatarWrap = document.getElementById('hero-avatar-wrap');
@@ -136,11 +155,11 @@ function initNavigation() {
 /* ==========================================================================
    Category Filter Pills (Includes Software Testing & Custom Categories)
    ========================================================================== */
-async function initFilterPills() {
+function initFilterPills(passedData) {
   const container = document.getElementById('filter-pills');
   if (!container) return;
 
-  const data = await PortfolioAPI.getPortfolio();
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   
   const baseCats = [
     { id: "all", label: "All Projects" },
@@ -215,19 +234,19 @@ function initSearch() {
 /* ==========================================================================
    Render Project Cards
    ========================================================================== */
-async function renderCards() {
+function renderCards(passedData) {
   const grid = document.getElementById('cards-grid');
   const countLabel = document.getElementById('results-count');
   if (!grid) return;
 
-  const data = await PortfolioAPI.getPortfolio();
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const projects = data.projects || [];
 
   const filtered = projects.filter(p => {
     const matchesCategory = currentCategory === 'all' || p.category === currentCategory;
     const matchesSearch = !searchQuery || 
-      p.title.toLowerCase().includes(searchQuery) ||
-      p.summary.toLowerCase().includes(searchQuery) ||
+      (p.title && p.title.toLowerCase().includes(searchQuery)) ||
+      (p.summary && p.summary.toLowerCase().includes(searchQuery)) ||
       (Array.isArray(p.tech) && p.tech.some(t => t.toLowerCase().includes(searchQuery)));
     
     return matchesCategory && matchesSearch;
@@ -239,9 +258,9 @@ async function renderCards() {
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="no-results">
-        <h3>No projects found</h3>
-        <p>No results match your criteria "${escapeHtml(searchQuery)}". Try another search term or filter.</p>
+      <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 48px 20px;">
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No projects found</h3>
+        <p style="color: var(--text-secondary); margin-bottom: 16px;">No projects match your criteria "${escapeHtml(searchQuery)}".</p>
         <button class="filter-pill active" onclick="resetFilters()">View All Projects</button>
       </div>
     `;
@@ -256,7 +275,7 @@ async function renderCards() {
       </div>
       <div class="card-body">
         <h3 class="card-title">${p.title}</h3>
-        <p class="card-summary">${p.summary}</p>
+        <p class="card-summary">${p.summary || ''}</p>
         <div class="card-tech-chips">
           ${(Array.isArray(p.tech) ? p.tech : []).map(t => `<span class="tech-chip">${t}</span>`).join('')}
         </div>
@@ -275,7 +294,7 @@ async function renderCards() {
   `).join('');
 }
 
-async function resetFilters() {
+function resetFilters() {
   currentCategory = 'all';
   searchQuery = '';
   const searchInput = document.getElementById('search-input');
@@ -283,19 +302,19 @@ async function resetFilters() {
   const clearBtn = document.getElementById('search-clear');
   if (clearBtn) clearBtn.classList.remove('visible');
 
-  await initFilterPills();
-  await renderCards();
+  initFilterPills();
+  renderCards();
 }
 
 /* ==========================================================================
    Render Skills Dynamically
    ========================================================================== */
-async function renderSkills() {
+function renderSkills(passedData) {
   const container = document.getElementById('skills-container');
   const section = document.getElementById('skills');
   if (!container) return;
 
-  const data = await PortfolioAPI.getPortfolio();
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const skills = data.skills || {};
 
   const categories = [
@@ -345,11 +364,11 @@ async function renderSkills() {
 /* ==========================================================================
    Render Experience Dynamically
    ========================================================================== */
-async function renderExperience() {
+function renderExperience(passedData) {
   const container = document.getElementById('experience-container');
   if (!container) return;
 
-  const data = await PortfolioAPI.getPortfolio();
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const list = data.experience || [];
 
   container.innerHTML = list.map(item => `
@@ -372,11 +391,11 @@ async function renderExperience() {
 /* ==========================================================================
    Render Education Dynamically
    ========================================================================== */
-async function renderEducation() {
+function renderEducation(passedData) {
   const container = document.getElementById('education-container');
   if (!container) return;
 
-  const data = await PortfolioAPI.getPortfolio();
+  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const list = data.education || (typeof PORTFOLIO_DATA !== 'undefined' ? PORTFOLIO_DATA.education : []) || [];
 
   if (list.length === 0) {
@@ -421,19 +440,23 @@ function initContact() {
       btn.disabled = true;
       btn.innerHTML = 'Sending...';
 
-      // Send to REST API
-      await PortfolioAPI.sendContact({ name, email, message, timestamp: new Date().toISOString() });
-
-      showToast('Message sent successfully. I will get back to you soon.');
-      form.reset();
-      btn.innerHTML = originalText;
-      btn.disabled = false;
+      try {
+        await PortfolioAPI.sendContact({ name, email, message, timestamp: new Date().toISOString() });
+        showToast('Message sent successfully. I will get back to you soon.');
+        form.reset();
+      } catch (err) {
+        showToast('Message received! Thank you for reaching out.');
+        form.reset();
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
     });
   }
 
   if (copyBtn) {
-    copyBtn.addEventListener('click', async () => {
-      const data = await PortfolioAPI.getPortfolio();
+    copyBtn.addEventListener('click', () => {
+      const data = currentPortfolioData || PortfolioAPI.getCachedOrLocal();
       const email = data.profile?.email || 'adhithyam0210@gmail.com';
       navigator.clipboard.writeText(email).then(() => {
         showToast(`Email copied: ${email}. Opening Gmail...`);

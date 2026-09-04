@@ -1291,3 +1291,139 @@ function disconnectGitHubSync() {
   showToast('GitHub Sync disconnected');
 }
 
+/* ==========================================================================
+   Visitor Inquiries & Messages Controller
+   ========================================================================== */
+async function updateInquiriesBadge(cachedMessages) {
+  const badge = document.getElementById('inquiries-badge-count');
+  if (!badge) return;
+
+  try {
+    const messages = cachedMessages || await PortfolioAPI.getMessages();
+    const unreadCount = Array.isArray(messages) ? messages.filter(m => !m.is_read).length : 0;
+    
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (err) {
+    console.warn('Could not update inquiries badge:', err);
+    badge.style.display = 'none';
+  }
+}
+
+async function renderInquiriesManager() {
+  const container = document.getElementById('inquiries-container');
+  if (!container) return;
+
+  container.innerHTML = `
+    <div style="text-align: center; padding: 48px 20px; color: var(--text-muted);">
+      <span>Loading inquiries...</span>
+    </div>
+  `;
+
+  try {
+    const messages = await PortfolioAPI.getMessages();
+    updateInquiriesBadge(messages);
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      container.innerHTML = `
+        <div class="admin-card-box" style="text-align: center; padding: 60px 24px;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; color: var(--text-muted);">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; color: var(--text-main);">No Inquiries Yet</h3>
+          <p style="color: var(--text-secondary); max-width: 460px; margin: 0 auto; font-size: 0.92rem; line-height: 1.6;">
+            When recruiters, companies, or visitors submit the contact form on your live portfolio, their inquiries will appear here in real time.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = messages.map(msg => {
+      const isUnread = !msg.is_read;
+      const dateStr = msg.created_at ? new Date(msg.created_at).toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      }) : 'Recent';
+
+      const subject = encodeURIComponent(`Re: Inquiry from ${msg.name || 'Visitor'}`);
+      const body = encodeURIComponent(`\n\n--- Original Message from ${msg.name || 'Visitor'} ---\n${msg.message || ''}`);
+      const replyMailto = `mailto:${encodeURIComponent(msg.email || '')}?subject=${subject}&body=${body}`;
+
+      return `
+        <div class="inquiry-card ${isUnread ? 'unread' : ''}" id="inquiry-${msg.id}">
+          <div class="inquiry-head">
+            <div>
+              <span class="inquiry-sender">${escapeHtml(msg.name || 'Anonymous Visitor')}</span>
+              <a href="mailto:${escapeHtml(msg.email || '')}" class="inquiry-email">${escapeHtml(msg.email || '')}</a>
+            </div>
+            <div class="inquiry-meta">
+              <span class="inquiry-badge ${isUnread ? 'new' : 'read'}">${isUnread ? 'New' : 'Read'}</span>
+              <span class="inquiry-date">${dateStr}</span>
+            </div>
+          </div>
+          <div class="inquiry-body">${escapeHtml(msg.message || '')}</div>
+          <div class="inquiry-actions">
+            <a href="${replyMailto}" class="btn-inquiry-reply" target="_blank" rel="noopener noreferrer">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+              <span>Reply via Email</span>
+            </a>
+            <button type="button" class="btn-inquiry-action" onclick="toggleMessageRead('${msg.id}', ${!isUnread})">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>${isUnread ? 'Mark as Read' : 'Mark as Unread'}</span>
+            </button>
+            <button type="button" class="btn-inquiry-action" style="color: var(--accent-danger);" onclick="removeInquiry('${msg.id}')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error rendering inquiries:', err);
+    container.innerHTML = `
+      <div class="admin-card-box" style="color: var(--accent-danger); padding: 24px; text-align: center;">
+        Failed to load inquiries: ${escapeHtml(err.message)}
+      </div>
+    `;
+  }
+}
+
+async function toggleMessageRead(id, newStatus) {
+  try {
+    await PortfolioAPI.markMessageRead(id, newStatus);
+    showToast(newStatus ? 'Marked as read' : 'Marked as unread');
+    await renderInquiriesManager();
+  } catch (err) {
+    console.error('Error updating message:', err);
+    showToast('Failed to update message status');
+  }
+}
+
+async function removeInquiry(id) {
+  if (!confirm('Are you sure you want to delete this message?')) return;
+
+  try {
+    await PortfolioAPI.deleteMessage(id);
+    showToast('Message deleted');
+    await renderInquiriesManager();
+  } catch (err) {
+    console.error('Error deleting message:', err);
+    showToast('Failed to delete message');
+  }
+}
+

@@ -33,7 +33,9 @@ const DatabaseManager = (() => {
   let clientInstance = null;
 
   function getUrl() {
-    return (localStorage.getItem(URL_KEY) || DEFAULT_URL).trim();
+    const fromStorage = localStorage.getItem(URL_KEY);
+    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+    return ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || DEFAULT_URL).trim();
   }
 
   function setUrl(url) {
@@ -46,7 +48,9 @@ const DatabaseManager = (() => {
   }
 
   function getKey() {
-    return (localStorage.getItem(KEY_KEY) || DEFAULT_KEY).trim();
+    const fromStorage = localStorage.getItem(KEY_KEY);
+    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
+    return ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || DEFAULT_KEY).trim();
   }
 
   function setKey(key) {
@@ -115,11 +119,17 @@ const DatabaseManager = (() => {
     if (!client) return null;
 
     try {
-      const { data, error } = await client
+      const fetchPromise = client
         .from('portfolio')
         .select('*')
         .eq('id', 'main')
         .single();
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Supabase request timeout')), 2500)
+      );
+
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -142,7 +152,7 @@ const DatabaseManager = (() => {
         };
       }
     } catch (e) {
-      console.warn('[Database] fetchPortfolio exception:', e);
+      console.warn('[Database] fetchPortfolio exception:', e.message || e);
     }
     return null;
   }
@@ -431,6 +441,9 @@ const PortfolioAPI = (() => {
   const isLocalhost = isHttp && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
   const API_BASE = isLocalhost ? window.location.origin + '/api' : 'http://localhost:5000/api';
 
+  let cachedPortfolio = null;
+  let inflightPortfolioPromise = null;
+
   function getLocalData() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -447,6 +460,7 @@ const PortfolioAPI = (() => {
   }
 
   function setLocalData(data) {
+    cachedPortfolio = data;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {
@@ -466,9 +480,11 @@ const PortfolioAPI = (() => {
   function saveLocalMessage(msg) {
     const list = getLocalMessages();
     list.unshift({
-      id: 'msg-' + Date.now(),
-      ...msg,
-      created_at: new Date().toISOString(),
+      id: msg.id || 'msg-' + Date.now(),
+      name: msg.name || 'Anonymous',
+      email: msg.email || '',
+      message: msg.message || '',
+      created_at: msg.created_at || msg.timestamp || new Date().toISOString(),
       is_read: false
     });
     localStorage.setItem(MESSAGES_KEY, JSON.stringify(list));
@@ -478,52 +494,82 @@ const PortfolioAPI = (() => {
     isServerActive: isLocalhost,
     isDatabaseConnected: () => DatabaseManager.isConnected(),
 
-    async getPortfolio() {
-      // 1. Primary: Cloud Database (Supabase PostgreSQL)
-      // When configured, every visitor gets real-time dynamic data directly from the database!
-      if (DatabaseManager.isConnected()) {
-        try {
-          const dbData = await DatabaseManager.fetchPortfolio();
-          if (dbData && dbData.profile && (dbData.profile.name || dbData.projects?.length)) {
-            setLocalData(dbData);
-            return dbData;
-          }
-        } catch (dbErr) {
-          console.warn('[PortfolioAPI] Database fetch error, checking local fallback:', dbErr);
-        }
+    // Instant 0ms synchronous data retrieval for first-paint rendering
+    getCachedOrLocal() {
+      if (cachedPortfolio) return cachedPortfolio;
+      cachedPortfolio = getLocalData();
+      return cachedPortfolio;
+    },
+
+    async getPortfolio(forceRefresh = false) {
+      if (!forceRefresh && cachedPortfolio) {
+        return cachedPortfolio;
       }
 
-      if (isHttp) {
-        // 2. Secondary: If running locally with Node/Python server, fetch from REST API
-        if (isLocalhost) {
-          try {
-            const res = await fetch(`${API_BASE}/portfolio`, { cache: 'no-cache' });
-            if (res.ok) {
-              const data = await res.json();
-              setLocalData(data);
-              return data;
+      if (inflightPortfolioPromise) {
+        return inflightPortfolioPromise;
+      }
+
+      inflightPortfolioPromise = (async () => {
+        try {
+          // 1. Primary: Cloud Database (Supabase PostgreSQL)
+          if (DatabaseManager.isConnected()) {
+            try {
+              const dbData = await DatabaseManager.fetchPortfolio();
+              if (dbData && dbData.profile && (dbData.profile.name || (dbData.projects && dbData.projects.length))) {
+                setLocalData(dbData);
+                return dbData;
+              }
+            } catch (dbErr) {
+              console.warn('[PortfolioAPI] Database fetch error, checking fallbacks:', dbErr);
             }
-          } catch (err) {
-            // Local server not responding, continue
           }
-        }
 
-        // 3. Tertiary: Static JSON file from web server
-        try {
-          const fetchUrl = window.location.origin + '/data/portfolio.json?t=' + Date.now();
-          const staticRes = await fetch(fetchUrl, { cache: 'no-cache' });
-          if (staticRes.ok) {
-            const data = await staticRes.json();
-            setLocalData(data);
-            return data;
+          if (isHttp) {
+            // 2. Secondary: If running locally with Node/Python server, fetch from REST API
+            if (isLocalhost) {
+              try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const res = await fetch(`${API_BASE}/portfolio`, { cache: 'no-cache', signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (res.ok) {
+                  const data = await res.json();
+                  setLocalData(data);
+                  return data;
+                }
+              } catch (err) {
+                // Local server not responding, continue
+              }
+            }
+
+            // 3. Tertiary: Static JSON file from web server
+            try {
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 2500);
+              const fetchUrl = window.location.origin + '/data/portfolio.json?t=' + Date.now();
+              const staticRes = await fetch(fetchUrl, { cache: 'no-cache', signal: controller.signal });
+              clearTimeout(timeoutId);
+              if (staticRes.ok) {
+                const data = await staticRes.json();
+                setLocalData(data);
+                return data;
+              }
+            } catch (err) {
+              console.warn('Could not load data/portfolio.json:', err);
+            }
           }
-        } catch (err) {
-          console.warn('Could not load data/portfolio.json:', err);
-        }
-      }
 
-      // 4. Fallback: Browser localStorage or bundled config.js
-      return getLocalData();
+          // 4. Fallback: Browser localStorage or bundled config.js
+          const fallback = getLocalData();
+          cachedPortfolio = fallback;
+          return fallback;
+        } finally {
+          inflightPortfolioPromise = null;
+        }
+      })();
+
+      return inflightPortfolioPromise;
     },
 
     async savePortfolio(data, message = 'Update portfolio via Admin Portal') {
@@ -641,13 +687,15 @@ const PortfolioAPI = (() => {
        Contact Messages / Inquiries (Database + Local Server)
        ------------------------------------------------------------- */
     async sendContact(messageData) {
+      let savedToDb = false;
+      let savedToServer = false;
+
       // 1. Save to Cloud Database
       if (DatabaseManager.isConnected()) {
         try {
           const dbRes = await DatabaseManager.saveMessage(messageData);
-          if (dbRes.success) {
-            saveLocalMessage(messageData);
-            return { success: true, message: 'Message sent and stored in database!' };
+          if (dbRes && dbRes.success) {
+            savedToDb = true;
           }
         } catch (e) {
           console.warn('Database sendContact failed:', e);
@@ -663,31 +711,39 @@ const PortfolioAPI = (() => {
             body: JSON.stringify(messageData)
           });
           if (res.ok) {
-            saveLocalMessage(messageData);
-            return await res.json();
+            savedToServer = true;
           }
         } catch (err) {
           console.warn('REST API message post failed:', err);
         }
       }
 
-      // 3. Fallback: Save to browser storage
+      // 3. Fallback: Always record locally in browser storage
       saveLocalMessage(messageData);
-      return { success: true, message: 'Message recorded locally' };
+
+      return {
+        success: true,
+        savedToDb,
+        savedToServer,
+        message: 'Message sent successfully. I will get back to you soon.'
+      };
     },
 
     async getMessages() {
       // 1. From Cloud Database
       if (DatabaseManager.isConnected()) {
         const msgs = await DatabaseManager.fetchMessages();
-        if (msgs !== null) return msgs;
+        if (msgs !== null && Array.isArray(msgs)) return msgs;
       }
 
       // 2. From Local Server
       if (isLocalhost) {
         try {
           const res = await fetch(`${API_BASE}/messages`);
-          if (res.ok) return await res.json();
+          if (res.ok) {
+            const list = await res.json();
+            if (Array.isArray(list)) return list;
+          }
         } catch (e) {
           // ignore
         }
@@ -716,12 +772,24 @@ const PortfolioAPI = (() => {
       return { success: true };
     },
 
-    async markMessageRead(id) {
+    async markMessageRead(id, isRead = true) {
       if (DatabaseManager.isConnected()) {
         await DatabaseManager.markMessageRead(id);
       }
 
-      const list = getLocalMessages().map(m => m.id === id ? { ...m, is_read: true } : m);
+      if (isLocalhost) {
+        try {
+          await fetch(`${API_BASE}/messages/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ is_read: isRead })
+          });
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      const list = getLocalMessages().map(m => m.id === id ? { ...m, is_read: isRead } : m);
       localStorage.setItem(MESSAGES_KEY, JSON.stringify(list));
       return { success: true };
     }

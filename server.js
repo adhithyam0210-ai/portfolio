@@ -322,6 +322,23 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ success: true, message: 'Message deleted' }));
       }
 
+      // PATCH or PUT /api/messages/:id (mark as read / unread)
+      if (pathname.startsWith('/api/messages/') && (method === 'PATCH' || method === 'PUT')) {
+        const id = pathname.replace('/api/messages/', '');
+        const body = await parseBody(req);
+        const msgs = readMessages();
+        const msg = msgs.find(m => m.id === id);
+        if (msg) {
+          if (typeof body.is_read !== 'undefined') msg.is_read = Boolean(body.is_read);
+          else msg.is_read = true;
+          writeMessages(msgs);
+          res.writeHead(200);
+          return res.end(JSON.stringify({ success: true, message: 'Message updated', data: msg }));
+        }
+        res.writeHead(404);
+        return res.end(JSON.stringify({ error: 'Message not found' }));
+      }
+
       // 404 API Not Found
       res.writeHead(404);
       return res.end(JSON.stringify({ error: 'API route not found' }));

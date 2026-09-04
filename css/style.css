@@ -1131,61 +1131,312 @@ input::-ms-clear {
   color: var(--text-secondary);
 }
 
-/* Responsive */
+/* ==========================================================================
+   Responsive Design System (Mobile First & Adaptive Breakpoints)
+   ========================================================================== */
 @media (max-width: 1200px) {
   .container {
-    padding: 0 32px;
+    padding: 0 28px;
   }
 }
 
 @media (max-width: 992px) {
-  .timeline-card-list {
-    grid-template-columns: 1fr;
+  .hero-title {
+    font-size: 2.75rem;
   }
   .contact-layout-grid {
     grid-template-columns: 1fr;
+    gap: 32px;
   }
-  .hero-title {
-    font-size: 2.75rem;
+  .skills-container-grid.cols-3 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .container {
-    padding: 0 20px;
+  html, body {
+    overflow-x: hidden;
   }
+
+  .container {
+    padding: 0 16px;
+  }
+
   .location-pill {
     display: none;
   }
+
+  .brand-logo {
+    font-size: 1.25rem;
+  }
+
   .mobile-menu-btn {
     display: flex;
   }
+
   .nav-links {
     position: fixed;
-    top: 76px;
+    top: 68px;
     left: 0;
     right: 0;
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-light);
     flex-direction: column;
-    padding: 24px;
-    gap: 18px;
+    padding: 20px 16px;
+    gap: 8px;
     display: none;
     box-shadow: var(--shadow-card);
+    z-index: 999;
   }
+
   .nav-links.open {
     display: flex;
+    animation: mobileNavDown 0.2s ease forwards;
   }
+
+  .nav-item {
+    width: 100%;
+  }
+
+  .nav-item a {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .nav-item a:hover {
+    background: var(--bg-subtle);
+  }
+
+  .hero-banner {
+    padding: 48px 0 36px;
+  }
+
   .hero-title {
-    font-size: 2.2rem;
+    font-size: clamp(1.85rem, 5.5vw, 2.3rem);
+    line-height: 1.28;
+    margin-bottom: 14px;
   }
+
   .hero-subtitle {
-    font-size: 1.08rem;
+    font-size: 1.05rem;
+    line-height: 1.65;
   }
+
+  /* Projects Toolbar & Filter Pills Swipeable Row */
+  .projects-toolbar {
+    margin-bottom: 22px;
+  }
+
+  .filter-pills-row {
+    display: flex;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 8px;
+    padding-bottom: 8px;
+    justify-content: flex-start;
+  }
+
+  .filter-pills-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-pill {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 7px 14px;
+    font-size: 0.85rem;
+  }
+
   .cards-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
-  .timeline-card-list {
+
+  .card-banner-wrap {
+    height: 190px;
+  }
+
+  .skills-container-grid,
+  .skills-container-grid.cols-3,
+  .skills-container-grid.cols-2,
+  .skills-container-grid.cols-1 {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .skill-category-card {
+    padding: 20px 16px;
+  }
+
+  .education-grid {
+    gap: 14px;
+  }
+
+  .edu-card {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 16px 18px;
+  }
+
+  .exp-card {
+    padding: 20px 16px;
+  }
+
+  .exp-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .contact-layout-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .contact-info-panel,
+  .contact-form-panel {
+    padding: 28px 20px;
+  }
+
+  .field-input,
+  .field-textarea {
+    font-size: 16px; /* Prevents auto-zoom on iOS */
+  }
+
+  .footer-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-banner {
+    padding: 36px 0 28px;
+  }
+
+  .hero-avatar-wrap {
+    margin-bottom: 14px;
+  }
+
+  .hero-avatar-img {
+    width: 76px;
+    height: 76px;
+  }
+
+  .hero-tagline {
+    font-size: 0.82rem;
+    padding: 3px 10px;
+    margin-bottom: 10px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.65rem, 6.2vw, 2rem);
+    line-height: 1.25;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  .section-wrapper {
+    padding: 44px 0;
+  }
+
+  .section-head {
+    margin-bottom: 24px;
+  }
+
+  .section-head-title {
+    font-size: 1.35rem;
+  }
+
+  .section-head-desc {
+    font-size: 0.9rem;
+  }
+
+  .card-banner-wrap {
+    height: 175px;
+  }
+
+  .card-body {
+    padding: 18px 16px;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+  }
+
+  .card-summary {
+    font-size: 0.9rem;
+  }
+
+  .btn-card {
+    padding: 9px 12px;
+    font-size: 0.84rem;
+  }
+
+  .contact-info-panel,
+  .contact-form-panel {
+    padding: 22px 14px;
+    border-radius: var(--radius-md);
+  }
+
+  .contact-panel-title {
+    font-size: 1.35rem;
+  }
+
+  .contact-panel-desc {
+    font-size: 0.92rem;
+    margin-bottom: 20px;
+  }
+
+  .contact-direct-card {
+    padding: 12px 14px;
+  }
+
+  .direct-card-title {
+    font-size: 0.88rem;
+  }
+
+  .direct-card-value {
+    font-size: 0.82rem;
+  }
+
+  .btn-submit {
+    padding: 13px;
+    font-size: 0.95rem;
+  }
+
+  .social-link-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .toast-bar {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    justify-content: center;
+    font-size: 0.86rem;
+  }
+}
+
+@keyframes mobileNavDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
