@@ -618,10 +618,16 @@ button, input, textarea, select {
   justify-content: space-between;
   align-items: flex-start;
   gap: 20px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .exp-admin-info {
   flex-grow: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-admin-role {
@@ -895,6 +901,9 @@ input::-ms-clear {
   box-shadow: var(--shadow-sm);
   gap: 16px;
   transition: border-color var(--transition-fast);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .exp-admin-card:hover {
@@ -903,6 +912,9 @@ input::-ms-clear {
 
 .exp-admin-info {
   flex: 1;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-admin-role {
@@ -972,6 +984,8 @@ input::-ms-clear {
   .exp-admin-card {
     flex-direction: column;
     align-items: flex-start;
+    padding: 16px 14px;
+    gap: 12px;
   }
   .exp-admin-actions {
     width: 100%;

@@ -265,17 +265,22 @@ function renderExperience(passedData) {
   const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const list = data.experience || [];
 
+  if (list.length === 0) {
+    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 24px;">No experience records available.</p>`;
+    return;
+  }
+
   container.innerHTML = list.map(item => `
     <div class="exp-card">
       <div class="exp-header">
-        <h3 class="exp-role">${item.role}</h3>
-        <span class="exp-period">${item.period}</span>
+        <h3 class="exp-role">${escapeHtml(item.role || '')}</h3>
+        ${item.period ? `<span class="exp-period">${escapeHtml(item.period)}</span>` : ''}
       </div>
-      <div class="exp-meta">${item.company} • ${item.location}</div>
-      <p class="exp-desc">${item.description}</p>
+      <div class="exp-meta">${escapeHtml(item.company || '')}${item.location ? ` • ${escapeHtml(item.location)}` : ''}</div>
+      ${item.description ? `<p class="exp-desc">${escapeHtml(item.description)}</p>` : ''}
       ${item.bullets && item.bullets.length ? `
         <ul class="exp-bullets">
-          ${item.bullets.map(b => `<li>${b}</li>`).join('')}
+          ${item.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}
         </ul>
       ` : ''}
     </div>

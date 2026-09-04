@@ -861,7 +861,7 @@ input::-ms-clear {
    ========================================================================== */
 .timeline-card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(560px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr));
   gap: 28px;
   width: 100%;
 }
@@ -875,6 +875,11 @@ input::-ms-clear {
   display: flex;
   flex-direction: column;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-card:hover {
@@ -890,6 +895,7 @@ input::-ms-clear {
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 8px;
+  min-width: 0;
 }
 
 .exp-role {
@@ -897,6 +903,8 @@ input::-ms-clear {
   font-weight: 700;
   color: var(--text-main);
   line-height: 1.3;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-period {
@@ -907,6 +915,7 @@ input::-ms-clear {
   padding: 5px 14px;
   border-radius: var(--radius-full);
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .exp-meta {
@@ -914,6 +923,8 @@ input::-ms-clear {
   font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 16px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-desc {
@@ -921,6 +932,8 @@ input::-ms-clear {
   color: var(--text-secondary);
   line-height: 1.7;
   margin-bottom: 16px;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .exp-bullets {
@@ -1303,14 +1316,67 @@ input::-ms-clear {
     padding: 16px 18px;
   }
 
+  .timeline-card-list {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    width: 100%;
+  }
+
   .exp-card {
     padding: 20px 16px;
+    border-radius: var(--radius-md);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .exp-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 4px;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .exp-role {
+    font-size: 1.25rem;
+    line-height: 1.35;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .exp-period {
+    font-size: 0.82rem;
+    padding: 4px 12px;
+    white-space: normal;
+    display: inline-block;
+  }
+
+  .exp-meta {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .exp-desc {
+    font-size: 0.94rem;
+    line-height: 1.6;
+    margin-bottom: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .exp-bullets {
+    gap: 8px;
+  }
+
+  .exp-bullets li {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    padding-left: 18px;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   .contact-layout-grid {
@@ -1406,6 +1472,41 @@ input::-ms-clear {
   .btn-card {
     padding: 9px 12px;
     font-size: 0.84rem;
+  }
+
+  .timeline-card-list {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .exp-card {
+    padding: 16px 14px;
+  }
+
+  .exp-role {
+    font-size: 1.15rem;
+  }
+
+  .exp-period {
+    font-size: 0.78rem;
+    padding: 3px 10px;
+  }
+
+  .exp-meta {
+    font-size: 0.88rem;
+    margin-bottom: 8px;
+  }
+
+  .exp-desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+    margin-bottom: 10px;
+  }
+
+  .exp-bullets li {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    padding-left: 16px;
   }
 
   .contact-info-panel,
