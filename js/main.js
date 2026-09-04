@@ -12,14 +12,11 @@ const ICONS = {
   check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
 };
 
-let currentCategory = 'all';
-let searchQuery = '';
 let currentPortfolioData = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   initNavigation();
-  initSearch();
   initContact();
 
   // Step 1: Instant 0ms Paint using local / bundled cache
@@ -40,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
 function renderFullPage(data) {
   if (!data) return;
   hydrateProfile(data);
-  initFilterPills(data);
   renderCards(data);
   renderSkills(data);
   renderExperience(data);
@@ -59,7 +55,7 @@ function hydrateProfile(passedData) {
   const avatarImg = document.getElementById('hero-avatar-img');
   if (p.avatar && avatarImg && avatarWrap) {
     avatarImg.src = p.avatar;
-    avatarWrap.style.display = 'block';
+    avatarWrap.style.display = 'flex';
   } else if (avatarWrap) {
     avatarWrap.style.display = 'none';
   }
@@ -153,85 +149,6 @@ function initNavigation() {
 }
 
 /* ==========================================================================
-   Category Filter Pills (Includes Software Testing & Custom Categories)
-   ========================================================================== */
-function initFilterPills(passedData) {
-  const container = document.getElementById('filter-pills');
-  if (!container) return;
-
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  
-  const baseCats = [
-    { id: "all", label: "All Projects" },
-    { id: "testing", label: "Software Testing" },
-    { id: "fullstack", label: "Full Stack" },
-    { id: "frontend", label: "Frontend" },
-    { id: "backend", label: "Backend & APIs" },
-    { id: "tools", label: "Developer Tools" }
-  ];
-
-  const allCatMap = new Map();
-  baseCats.forEach(c => allCatMap.set(c.id, c));
-
-  // Dynamically include any custom categories from projects
-  (data.projects || []).forEach(p => {
-    if (p.category && !allCatMap.has(p.category)) {
-      allCatMap.set(p.category, {
-        id: p.category,
-        label: p.categoryLabel || p.category
-      });
-    }
-  });
-
-  const categories = Array.from(allCatMap.values());
-
-  container.innerHTML = categories.map(cat => `
-    <button class="filter-pill ${cat.id === currentCategory ? 'active' : ''}" data-cat="${cat.id}">
-      ${cat.label}
-    </button>
-  `).join('');
-
-  container.addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-pill');
-    if (!btn) return;
-
-    container.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    currentCategory = btn.getAttribute('data-cat');
-    renderCards();
-  });
-}
-
-/* ==========================================================================
-   Live Search
-   ========================================================================== */
-function initSearch() {
-  const input = document.getElementById('search-input');
-  const clearBtn = document.getElementById('search-clear');
-  if (!input) return;
-
-  input.addEventListener('input', (e) => {
-    searchQuery = e.target.value.trim().toLowerCase();
-    if (clearBtn) {
-      if (searchQuery) clearBtn.classList.add('visible');
-      else clearBtn.classList.remove('visible');
-    }
-    renderCards();
-  });
-
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      input.value = '';
-      searchQuery = '';
-      clearBtn.classList.remove('visible');
-      renderCards();
-      input.focus();
-    });
-  }
-}
-
-/* ==========================================================================
    Render Project Cards
    ========================================================================== */
 function renderCards(passedData) {
@@ -242,32 +159,21 @@ function renderCards(passedData) {
   const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
   const projects = data.projects || [];
 
-  const filtered = projects.filter(p => {
-    const matchesCategory = currentCategory === 'all' || p.category === currentCategory;
-    const matchesSearch = !searchQuery || 
-      (p.title && p.title.toLowerCase().includes(searchQuery)) ||
-      (p.summary && p.summary.toLowerCase().includes(searchQuery)) ||
-      (Array.isArray(p.tech) && p.tech.some(t => t.toLowerCase().includes(searchQuery)));
-    
-    return matchesCategory && matchesSearch;
-  });
-
   if (countLabel) {
-    countLabel.textContent = `${filtered.length} ${filtered.length === 1 ? 'Project' : 'Projects'}`;
+    countLabel.textContent = `${projects.length} ${projects.length === 1 ? 'Project' : 'Projects'}`;
   }
 
-  if (filtered.length === 0) {
+  if (projects.length === 0) {
     grid.innerHTML = `
       <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 48px 20px;">
         <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No projects found</h3>
-        <p style="color: var(--text-secondary); margin-bottom: 16px;">No projects match your criteria "${escapeHtml(searchQuery)}".</p>
-        <button class="filter-pill active" onclick="resetFilters()">View All Projects</button>
+        <p style="color: var(--text-secondary);">No projects currently available.</p>
       </div>
     `;
     return;
   }
 
-  grid.innerHTML = filtered.map(p => `
+  grid.innerHTML = projects.map(p => `
     <article class="product-card" id="project-${p.id}">
       <div class="card-banner-wrap">
         <img src="${p.image || 'assets/projects/nexus_ai.jpg'}" alt="${p.title}" class="card-banner-img" loading="lazy" />
@@ -292,18 +198,6 @@ function renderCards(passedData) {
       </div>
     </article>
   `).join('');
-}
-
-function resetFilters() {
-  currentCategory = 'all';
-  searchQuery = '';
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) searchInput.value = '';
-  const clearBtn = document.getElementById('search-clear');
-  if (clearBtn) clearBtn.classList.remove('visible');
-
-  initFilterPills();
-  renderCards();
 }
 
 /* ==========================================================================
