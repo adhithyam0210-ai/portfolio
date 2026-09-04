@@ -78,13 +78,13 @@ The website delivers a consumer-tech card UI inspired by modern platforms like S
 | :--- | :--- |
 | **Frontend** | Semantic HTML5, Vanilla JavaScript (ES6+), CSS3 Variables, SVG Icons |
 | **Typography** | [Plus Jakarta Sans](https://fonts.google.com/specimen/Plus+Jakarta+Sans), [JetBrains Mono](https://fonts.google.com/specimen/JetBrains+Mono) |
+| **Cloud Database** | [Supabase](https://supabase.com) (Hosted PostgreSQL with instant REST API & Realtime) |
 | **Node.js Backend** | Native Node.js `http`, `fs`, `path`, `url` (**Zero external npm dependencies**) |
-| **Python Backend** | Python Standard Library `http.server`, `json`, `urllib.parse` (**Zero pip dependencies**) |
-| **Database / Storage** | Single-source JSON file database (`data/portfolio.json`) + Client-side `localStorage` mirror |
+| **Local / Cache Storage** | Single-source JSON file database (`data/portfolio.json`), `data/messages.json` + `localStorage` fallback |
 
 ---
 
-## Project Architecture
+## Dynamic Multi-Tier Data Architecture
 
 ```
                       +-----------------------------+
@@ -94,19 +94,40 @@ The website delivers a consumer-tech card UI inspired by modern platforms like S
                                      |
                                      | Unified Data Layer (js/api.js)
                                      v
-                  +------------------+------------------+
-                  |                                     |
-           (Running via HTTP)                   (file:/// or Static)
-                  |                                     |
-                  v                                     v
-     +-------------------------+               +-----------------+
-     | REST API Server         |               | Browser Storage |
-     | (server.js / server.py) |               |  (localStorage) |
-     +------------+------------+               +-----------------+
-                  |
-                  v
-       data/portfolio.json
+           +-------------------------+-------------------------+
+           |                                                   |
+           v                                                   v
++-------------------------------+             +---------------------------------+
+| Tier 1: Cloud Database        |             | Tier 2: Local Server / Fallback |
+| (Supabase PostgreSQL)         |             | (Node.js REST API / Cache)      |
+| • Instant Live Global Updates |             | • localhost:5000 offline dev    |
+| • Contact Inquiries Storage   |             | • data/portfolio.json mirror    |
++-------------------------------+             +---------------------------------+
 ```
+
+---
+
+## 2-Minute Database Setup (Supabase)
+
+To make your portfolio dynamic so your edits in the Admin Portal reflect live for everyone worldwide:
+
+1. **Create a Free Supabase Project:**
+   - Go to [supabase.com](https://supabase.com) and create a free account.
+   - Click **New Project** and name it (e.g., `portfolio-db`).
+
+2. **Run the Database Schema:**
+   - In your Supabase dashboard, click **SQL Editor** on the left menu.
+   - Open [schema.sql](file:///c:/Users/adhit/OneDrive/Desktop/portfolio/schema.sql) from this repository, copy its content, paste it into the Supabase SQL editor, and click **Run**.
+   - This creates the `portfolio` and `messages` tables with secure Row Level Security (RLS) policies.
+
+3. **Connect in Admin Portal:**
+   - Go to **Project Settings > API** in your Supabase dashboard.
+   - Copy your **Project URL** and **anon public key**.
+   - Open `admin.html` on your browser, unlock the portal (default PIN: `admin123`), and click the **Database & Cloud** tab.
+   - Paste your Project URL and Anon Key, then click **Save & Test Connection**.
+   - Click **1-Click Initialize & Seed Database** to upload your current projects and profile directly into PostgreSQL.
+
+Your portfolio is now dynamic! Any edits in the Admin Portal update PostgreSQL within milliseconds, and every visitor on your live site sees your latest changes instantly.
 
 ---
 

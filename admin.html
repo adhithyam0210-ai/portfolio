@@ -58,9 +58,9 @@
       </div>
 
       <div class="header-actions">
-        <button id="cloud-sync-header-btn" class="btn-header" onclick="switchTab('cloud-sync')" title="Manage GitHub Cloud Sync for Vercel">
-          <span id="cloud-pill-dot" class="cloud-pill-status"></span>
-          <span id="cloud-sync-header-label">Cloud Sync</span>
+        <button id="db-header-btn" class="btn-header" onclick="switchTab('database')" title="Manage Cloud Database (Supabase PostgreSQL)">
+          <span id="db-pill-dot" class="cloud-pill-status"></span>
+          <span id="db-header-label">Database</span>
         </button>
         <button id="export-json-btn" class="btn-header" onclick="exportPortfolioJson()" title="Download updated portfolio.json file">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -128,11 +128,21 @@
         </svg>
         <span>Education</span>
       </button>
-      <button class="tab-btn" data-tab="cloud-sync">
+      <button class="tab-btn" data-tab="messages">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
         </svg>
-        <span>Cloud Sync</span>
+        <span>Inquiries</span>
+        <span id="inquiries-badge-count" class="badge-count" style="display: none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="database">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+        </svg>
+        <span>Database &amp; Cloud</span>
       </button>
       <button class="tab-btn" data-tab="backups">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -355,77 +365,176 @@
       </div>
     </section>
 
-    <!-- 7. CLOUD SYNC & VERCEL DEPLOYMENT TAB -->
-    <section id="tab-cloud-sync" class="tab-pane">
-      <div class="admin-pane-header">
+    <!-- 6. VISITOR INQUIRIES & MESSAGES TAB -->
+    <section id="tab-messages" class="tab-pane">
+      <div class="pane-head">
         <div>
-          <h2 class="pane-title">GitHub Cloud Sync &amp; Vercel Deployment</h2>
-          <p class="pane-subtitle">Publish edits directly to your GitHub repository so Vercel automatically deploys your updates live.</p>
+          <h2 class="pane-title">Visitor Inquiries &amp; Messages</h2>
+          <p class="pane-desc">Messages submitted by recruiters and clients through the contact form on your live portfolio.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary" onclick="renderInquiriesManager()" title="Refresh messages list">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
-      <div class="admin-card" style="max-width: 680px;">
-        <div id="sync-status-card" class="sync-status-banner disconnected">
+      <div id="inquiries-container" class="inquiries-grid">
+        <!-- Injected dynamically by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 7. CLOUD DATABASE & LIVE PREVIEW TAB -->
+    <section id="tab-database" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Cloud Database &amp; Live Preview</h2>
+          <p class="pane-desc">Connect your free Supabase PostgreSQL database so changes made in this admin portal reflect live immediately for all visitors worldwide.</p>
+        </div>
+      </div>
+
+      <div class="admin-card-box" style="max-width: 760px; margin: 0 auto;">
+        <div id="db-status-banner" class="sync-status-banner disconnected">
           <span class="cloud-pill-status"></span>
-          <span id="sync-status-text">Checking connection...</span>
+          <span id="db-status-text">Checking database connection...</span>
         </div>
 
-        <form id="github-sync-form" onsubmit="saveGitHubSyncSettings(event)">
+        <form id="database-config-form" onsubmit="saveDatabaseConfig(event)">
           <div class="form-group">
-            <label class="form-label" for="gh-repo-input">GitHub Repository</label>
-            <input type="text" id="gh-repo-input" class="form-input" placeholder="username/portfolio" value="adhithyam0210-ai/portfolio" required />
-            <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Format: <code>owner/repo</code></small>
+            <label class="form-label" for="sb-url-input">Supabase Project URL <span class="required-star">*</span></label>
+            <input type="url" id="sb-url-input" class="form-input" placeholder="https://xyzprojectid.supabase.co" required />
+            <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Found in your Supabase Dashboard &gt; Project Settings &gt; API</small>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="gh-branch-input">Branch</label>
-            <input type="text" id="gh-branch-input" class="form-input" placeholder="main" value="main" required />
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="gh-token-input">GitHub Personal Access Token (PAT)</label>
+            <label class="form-label" for="sb-key-input">Supabase Public Anon API Key <span class="required-star">*</span></label>
             <div class="password-input-wrap">
-              <input type="password" id="gh-token-input" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
-              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('gh-token-input', this)" aria-label="Show token" title="Show token">
+              <input type="password" id="sb-key-input" class="form-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." required autocomplete="off" />
+              <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('sb-key-input', this)" aria-label="Show key" title="Show key">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
-            <div style="margin-top: 8px; font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5;">
-              <span>Need a token? </span>
-              <a href="https://github.com/settings/tokens/new?scopes=repo&description=Portfolio+Admin+Publisher" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 600; text-decoration: underline;">
-                Click here to generate a token on GitHub
-              </a>
-              <span> with <strong>repo</strong> permissions.</span>
-            </div>
+            <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Safe for client-side use with Row Level Security (RLS) enabled.</small>
           </div>
 
-          <div id="gh-sync-alert" class="lock-error" style="display: none; margin-bottom: 16px;"></div>
+          <div id="db-config-alert" class="lock-error" style="display: none; margin-bottom: 16px;"></div>
 
           <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px;">
-            <button type="submit" class="btn-primary" id="btn-save-sync">
+            <button type="submit" class="btn-primary" id="btn-save-db">
               <span>Save &amp; Test Connection</span>
             </button>
-            <button type="button" class="btn-secondary" id="btn-publish-now" onclick="triggerManualCloudPublish()">
-              <span>Publish Current Portfolio Now</span>
+            <button type="button" class="btn-secondary" id="btn-seed-db" onclick="seedDatabaseInitialData()" title="Upload current portfolio data into Supabase">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+              </svg>
+              <span>1-Click Initialize &amp; Seed Database</span>
             </button>
-            <button type="button" class="btn-secondary" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="disconnectGitHubSync()">
+            <button type="button" class="btn-secondary" onclick="toggleSqlSchemaModal()">
+              <span>View SQL Schema</span>
+            </button>
+            <button type="button" class="btn-secondary" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.3);" onclick="disconnectDatabase()">
               <span>Disconnect</span>
             </button>
           </div>
         </form>
 
-        <div class="sync-info-box">
-          <strong style="color: var(--text-main);">How Live Updates Work:</strong>
-          <ol style="padding-left: 18px; margin-top: 8px; font-size: 0.84rem; color: var(--text-secondary); line-height: 1.6;">
-            <li>Your GitHub Token is stored safely in your personal browser storage (never visible to public visitors).</li>
-            <li>Whenever you save projects, update your bio, or edit skills from this Admin Portal, changes are automatically committed to GitHub.</li>
-            <li>Vercel detects the GitHub commit and redeploys your updated site within ~30 seconds for everyone!</li>
+        <div class="sync-info-box" style="margin-top: 24px;">
+          <strong style="color: var(--text-main);">Quick 2-Minute Database Setup:</strong>
+          <ol class="db-steps-list">
+            <li>Create a free account at <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" style="color: var(--accent-primary); text-decoration: underline; font-weight: 600;">supabase.com</a> and click <strong>New Project</strong>.</li>
+            <li>Go to <strong>Project Settings &gt; API</strong>, copy your <strong>Project URL</strong> and <strong>anon public key</strong>, and paste them above.</li>
+            <li>In Supabase, open the <strong>SQL Editor</strong>, paste the content from <code>schema.sql</code> (or click "View SQL Schema" above to copy), and click <strong>Run</strong>.</li>
+            <li>Click <strong>1-Click Initialize &amp; Seed Database</strong> above. Your live database is now active, and all updates reflect instantly for visitors!</li>
           </ol>
         </div>
+
+        <!-- Collapsible Legacy GitHub Sync -->
+        <details style="margin-top: 24px; border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 14px 18px; background: var(--bg-card);">
+          <summary style="font-size: 0.92rem; font-weight: 600; cursor: pointer; color: var(--text-secondary);">Optional: Legacy GitHub Commit Sync</summary>
+          <div style="margin-top: 16px;">
+            <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 12px;">You can also optionally sync changes directly to your GitHub repo as git commits:</p>
+            <form id="github-sync-form" onsubmit="saveGitHubSyncSettings(event)">
+              <div class="form-group">
+                <label class="form-label" for="gh-repo-input">GitHub Repository</label>
+                <input type="text" id="gh-repo-input" class="form-input" placeholder="username/portfolio" value="adhithyam0210-ai/portfolio" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gh-branch-input">Branch</label>
+                <input type="text" id="gh-branch-input" class="form-input" placeholder="main" value="main" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gh-token-input">Personal Access Token (PAT)</label>
+                <input type="password" id="gh-token-input" class="form-input" placeholder="ghp_xxxx" />
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn-secondary">Save GitHub Settings</button>
+                <button type="button" class="btn-secondary" onclick="triggerManualCloudPublish()">Commit to GitHub Now</button>
+              </div>
+            </form>
+          </div>
+        </details>
       </div>
     </section>
 
   </main>
+
+  <!-- SQL Schema Preview Modal -->
+  <div id="schema-modal" class="modal-overlay">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Supabase SQL Schema (schema.sql)</h3>
+        <button class="modal-close-btn" onclick="toggleSqlSchemaModal()" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div style="padding: 20px;">
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px;">
+          Copy and paste this script into your <strong>Supabase Dashboard &gt; SQL Editor</strong> and click <strong>Run</strong>:
+        </p>
+        <button class="btn-secondary" onclick="copySqlSchemaText()" style="margin-bottom: 10px;">
+          <span>Copy SQL to Clipboard</span>
+        </button>
+        <pre id="schema-sql-text" class="code-preview-box">CREATE TABLE IF NOT EXISTS public.portfolio (
+  id TEXT PRIMARY KEY DEFAULT 'main',
+  profile JSONB NOT NULL DEFAULT '{}'::jsonb,
+  categories JSONB NOT NULL DEFAULT '[]'::jsonb,
+  projects JSONB NOT NULL DEFAULT '[]'::jsonb,
+  skills JSONB NOT NULL DEFAULT '{}'::jsonb,
+  experience JSONB NOT NULL DEFAULT '[]'::jsonb,
+  education JSONB NOT NULL DEFAULT '[]'::jsonb,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.portfolio ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read portfolio" ON public.portfolio FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Public insert portfolio" ON public.portfolio FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Public update portfolio" ON public.portfolio FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);
+
+CREATE POLICY "Public insert messages" ON public.messages FOR INSERT TO anon, authenticated WITH CHECK (true);
+CREATE POLICY "Public read messages" ON public.messages FOR SELECT TO anon, authenticated USING (true);
+CREATE POLICY "Public delete messages" ON public.messages FOR DELETE TO anon, authenticated USING (true);
+CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, authenticated USING (true) WITH CHECK (true);</pre>
+      </div>
+    </div>
+  </div>
 
   <!-- Add/Edit Project Modal (With File Explorer Image Picker & Preview) -->
   <div id="project-modal" class="modal-overlay">
@@ -622,8 +731,9 @@
   <div id="admin-toast" class="admin-toast"></div>
 
   <!-- Scripts -->
-  <script src="js/config.js?v=3.0"></script>
-  <script src="js/api.js?v=3.0"></script>
-  <script src="js/admin.js?v=3.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js?v=3.1"></script>
+  <script src="js/api.js?v=3.1"></script>
+  <script src="js/admin.js?v=3.1"></script>
 </body>
 </html>

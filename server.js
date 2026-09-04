@@ -71,6 +71,28 @@ function writeData(data) {
   }
 }
 
+const MESSAGES_FILE = path.join(__dirname, 'data', 'messages.json');
+
+function readMessages() {
+  try {
+    if (!fs.existsSync(MESSAGES_FILE)) return [];
+    const raw = fs.readFileSync(MESSAGES_FILE, 'utf8');
+    return JSON.parse(raw);
+  } catch (err) {
+    return [];
+  }
+}
+
+function writeMessages(msgs) {
+  try {
+    fs.writeFileSync(MESSAGES_FILE, JSON.stringify(msgs, null, 2), 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error writing messages.json:', err);
+    return false;
+  }
+}
+
 // MIME Types for Static Files
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -264,12 +286,40 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ success: true, education: data.education }));
       }
 
-      // POST /api/contact
-      if (pathname === '/api/contact' && method === 'POST') {
-        const body = await parseBody(req);
-        console.log('[Contact Message Received]:', body);
+      // GET /api/messages
+      if (pathname === '/api/messages' && method === 'GET') {
+        const msgs = readMessages();
         res.writeHead(200);
-        return res.end(JSON.stringify({ success: true, message: 'Inquiry received' }));
+        return res.end(JSON.stringify(msgs));
+      }
+
+      // POST /api/messages or /api/contact
+      if ((pathname === '/api/messages' || pathname === '/api/contact') && method === 'POST') {
+        const body = await parseBody(req);
+        const msgs = readMessages();
+        const newMsg = {
+          id: body.id || 'msg-' + Date.now(),
+          name: body.name || 'Anonymous',
+          email: body.email || '',
+          message: body.message || '',
+          created_at: body.created_at || body.timestamp || new Date().toISOString(),
+          is_read: false
+        };
+        msgs.unshift(newMsg);
+        writeMessages(msgs);
+        console.log('[Inquiry Received & Saved]:', newMsg.name, newMsg.email);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, message: 'Inquiry received and saved', data: newMsg }));
+      }
+
+      // DELETE /api/messages/:id
+      if (pathname.startsWith('/api/messages/') && method === 'DELETE') {
+        const id = pathname.replace('/api/messages/', '');
+        const msgs = readMessages();
+        const filtered = msgs.filter(m => m.id !== id);
+        writeMessages(filtered);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, message: 'Message deleted' }));
       }
 
       // 404 API Not Found

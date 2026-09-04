@@ -114,7 +114,9 @@ function switchTab(target, updateHash = true) {
   if (target === 'projects') renderProjectsList();
   if (target === 'skills') renderSkillsManager();
   if (target === 'profile') renderProfileForm();
-  if (target === 'cloud-sync') renderCloudSyncTab();
+  if (target === 'messages') renderInquiriesManager();
+  if (target === 'database') renderDatabaseTab();
+  if (target === 'cloud-sync') renderDatabaseTab();
 }
 
 function initTabs() {
@@ -247,7 +249,8 @@ async function renderAll() {
   await renderSkillsManager();
   await renderExperienceManager();
   await renderEducationManager();
-  renderCloudSyncStatus();
+  await updateInquiriesBadge();
+  renderDatabaseStatus();
 }
 
 /* ==========================================================================
@@ -957,71 +960,77 @@ async function exportPortfolioJson() {
    Save & Publish Notification Helper
    ========================================================================== */
 function notifySaveResult(actionText, res) {
-  if (res?.publishedToGitHub) {
-    showToast(`${actionText} & published to GitHub! Vercel is redeploying (~30s).`);
-  } else if (res?.ghError) {
-    showToast(`${actionText} locally, but GitHub sync failed: ${res.ghError}`);
-  } else if (!PortfolioAPI.isServerActive && !GitHubSync.hasToken()) {
-    showToast(`${actionText} in browser! Connect GitHub in Cloud Sync to update Vercel.`);
+  if (res?.savedToDatabase) {
+    showToast(`${actionText} & updated live database! (Reflecting immediately for visitors)`);
+  } else if (res?.dbError) {
+    showToast(`${actionText} locally, but database save failed: ${res.dbError}`);
+  } else if (res?.publishedToGitHub) {
+    showToast(`${actionText} & published to GitHub!`);
+  } else if (!PortfolioAPI.isServerActive && !PortfolioAPI.isDatabaseConnected()) {
+    showToast(`${actionText} in browser! Connect Supabase in Database tab for live visitor updates.`);
   } else {
     showToast(`${actionText} successfully`);
   }
 }
 
 /* ==========================================================================
-   GitHub Cloud Sync & Vercel Auto-Deployment Controller
+   Cloud Database (Supabase PostgreSQL) Controller
    ========================================================================== */
-function renderCloudSyncStatus() {
-  const dot = document.getElementById('cloud-pill-dot');
-  const label = document.getElementById('cloud-sync-header-label');
-  const hasToken = GitHubSync.hasToken();
+function renderDatabaseStatus() {
+  const dot = document.getElementById('db-pill-dot');
+  const label = document.getElementById('db-header-label');
+  const isConnected = DatabaseManager.isConnected();
 
   if (dot) {
-    dot.className = hasToken ? 'cloud-pill-status online' : 'cloud-pill-status';
+    dot.className = isConnected ? 'cloud-pill-status online' : 'cloud-pill-status';
   }
   if (label) {
-    label.textContent = hasToken ? 'Cloud Active' : 'Cloud Sync';
+    label.textContent = isConnected ? 'Database Live' : 'Database';
   }
 
-  const card = document.getElementById('sync-status-card');
-  const text = document.getElementById('sync-status-text');
-  if (card && text) {
-    if (hasToken) {
-      card.className = 'sync-status-banner connected';
-      text.innerHTML = `<strong>Connected to GitHub:</strong> <code>${escapeHtml(GitHubSync.getRepo())}</code> (branch: <code>${escapeHtml(GitHubSync.getBranch())}</code>). Any updates you save will automatically commit and deploy to Vercel!`;
+  const banner = document.getElementById('db-status-banner');
+  const bannerText = document.getElementById('db-status-text');
+  if (banner && bannerText) {
+    if (isConnected) {
+      banner.className = 'sync-status-banner connected';
+      bannerText.innerHTML = `<strong>Connected to Supabase PostgreSQL:</strong> <code>${escapeHtml(DatabaseManager.getUrl())}</code>. Any updates you save in this Admin Portal write directly to the database and reflect live for all visitors worldwide!`;
     } else {
-      card.className = 'sync-status-banner disconnected';
-      text.innerHTML = `<strong>Cloud Sync Not Configured:</strong> Edits made on your live Vercel domain will stay in your personal browser only. Add your GitHub token below to enable instant auto-deployments to Vercel!`;
+      banner.className = 'sync-status-banner disconnected';
+      bannerText.innerHTML = `<strong>Database Not Connected:</strong> You are currently running in local storage mode. Connect your free Supabase database below so updates reflect for other people visiting your site!`;
     }
   }
 }
 
-function renderCloudSyncTab() {
-  renderCloudSyncStatus();
+function renderDatabaseTab() {
+  renderDatabaseStatus();
+
+  const urlInput = document.getElementById('sb-url-input');
+  const keyInput = document.getElementById('sb-key-input');
+  if (urlInput) urlInput.value = DatabaseManager.getUrl();
+  if (keyInput) keyInput.value = DatabaseManager.getKey();
 
   const repoInput = document.getElementById('gh-repo-input');
   const branchInput = document.getElementById('gh-branch-input');
   const tokenInput = document.getElementById('gh-token-input');
-
   if (repoInput) repoInput.value = GitHubSync.getRepo();
   if (branchInput) branchInput.value = GitHubSync.getBranch();
-  if (tokenInput && GitHubSync.hasToken()) {
-    tokenInput.value = GitHubSync.getToken();
-  }
+  if (tokenInput && GitHubSync.hasToken()) tokenInput.value = GitHubSync.getToken();
 }
 
-async function saveGitHubSyncSettings(e) {
+async function saveDatabaseConfig(e) {
   e.preventDefault();
 
-  const repo = document.getElementById('gh-repo-input').value.trim();
-  const branch = document.getElementById('gh-branch-input').value.trim();
-  const token = document.getElementById('gh-token-input').value.trim();
-  const alertBox = document.getElementById('gh-sync-alert');
-  const saveBtn = document.getElementById('btn-save-sync');
+  const urlInput = document.getElementById('sb-url-input');
+  const keyInput = document.getElementById('sb-key-input');
+  const alertBox = document.getElementById('db-config-alert');
+  const saveBtn = document.getElementById('btn-save-db');
 
-  if (!token) {
+  const url = urlInput.value.trim();
+  const key = keyInput.value.trim();
+
+  if (!url || !key) {
     if (alertBox) {
-      alertBox.textContent = 'Please enter a GitHub Personal Access Token.';
+      alertBox.textContent = 'Please enter both Supabase Project URL and Public Anon Key.';
       alertBox.style.display = 'block';
     }
     return;
@@ -1030,32 +1039,231 @@ async function saveGitHubSyncSettings(e) {
   try {
     if (saveBtn) {
       saveBtn.disabled = true;
-      saveBtn.innerHTML = '<span>Verifying connection...</span>';
+      saveBtn.innerHTML = '<span>Verifying database connection...</span>';
     }
     if (alertBox) alertBox.style.display = 'none';
 
-    // Test token and repository access
-    const test = await GitHubSync.testConnection(token, repo);
+    const test = await DatabaseManager.testConnection(url, key);
 
-    // Save settings
-    GitHubSync.setRepo(repo);
-    GitHubSync.setBranch(branch);
-    GitHubSync.setToken(token);
+    DatabaseManager.setUrl(url);
+    DatabaseManager.setKey(key);
 
-    renderCloudSyncStatus();
-    showToast(`Connected to ${test.repoName}! Cloud Sync is now active.`);
-    alert(`Connected to GitHub successfully!\n\nRepository: ${test.repoName}\nBranch: ${branch}\n\nAny updates you save in this Admin Portal will now be automatically committed to GitHub and deployed live to Vercel!`);
+    renderDatabaseStatus();
+    showToast('Connected to Supabase Database successfully!');
+
+    if (!test.tableExists) {
+      alert('Connected to Supabase successfully!\n\nNote: The "portfolio" table does not exist yet. Click "1-Click Initialize & Seed Database" or run schema.sql in Supabase SQL editor to create it.');
+    } else {
+      alert('Connected to Supabase successfully!\n\nYour portfolio is now dynamic. Any changes you save in this Admin Portal will immediately update PostgreSQL and show live for all visitors worldwide!');
+    }
   } catch (err) {
     if (alertBox) {
       alertBox.textContent = `Connection failed: ${err.message}`;
       alertBox.style.display = 'block';
     }
-    showToast('Failed to connect to GitHub');
+    showToast('Failed to connect to database');
   } finally {
     if (saveBtn) {
       saveBtn.disabled = false;
       saveBtn.innerHTML = '<span>Save &amp; Test Connection</span>';
     }
+  }
+}
+
+async function seedDatabaseInitialData() {
+  if (!DatabaseManager.isConnected()) {
+    alert('Please enter and save your Supabase URL and Anon Key first.');
+    return;
+  }
+
+  const seedBtn = document.getElementById('btn-seed-db');
+  try {
+    if (seedBtn) {
+      seedBtn.disabled = true;
+      seedBtn.innerHTML = '<span>Uploading data to database...</span>';
+    }
+
+    const localData = await PortfolioAPI.getPortfolio();
+    await DatabaseManager.seedDatabase(localData);
+
+    showToast('Database initialized & seeded with portfolio data!');
+    alert('Database successfully initialized!\n\nAll current projects, profile details, skills, experience, and education records have been uploaded to your Supabase PostgreSQL database.');
+  } catch (err) {
+    console.error('Seed error:', err);
+    alert('Failed to seed database: ' + err.message + '\n\nMake sure you have run schema.sql in your Supabase SQL Editor first!');
+  } finally {
+    if (seedBtn) {
+      seedBtn.disabled = false;
+      seedBtn.innerHTML = '<span>1-Click Initialize &amp; Seed Database</span>';
+    }
+  }
+}
+
+function disconnectDatabase() {
+  if (!confirm('Are you sure you want to disconnect the cloud database? (Site will revert to local storage mode)')) return;
+  DatabaseManager.setUrl('');
+  DatabaseManager.setKey('');
+  const urlInput = document.getElementById('sb-url-input');
+  const keyInput = document.getElementById('sb-key-input');
+  if (urlInput) urlInput.value = '';
+  if (keyInput) keyInput.value = '';
+  renderDatabaseStatus();
+  showToast('Database disconnected');
+}
+
+function toggleSqlSchemaModal() {
+  const modal = document.getElementById('schema-modal');
+  if (modal) {
+    modal.classList.toggle('active');
+  }
+}
+
+function copySqlSchemaText() {
+  const pre = document.getElementById('schema-sql-text');
+  if (pre) {
+    navigator.clipboard.writeText(pre.textContent).then(() => {
+      showToast('SQL schema copied to clipboard!');
+    }).catch(() => {
+      showToast('Please select and copy the SQL text manually.');
+    });
+  }
+}
+
+/* ==========================================================================
+   Visitor Inquiries & Messages Controller
+   ========================================================================== */
+async function updateInquiriesBadge() {
+  const badge = document.getElementById('inquiries-badge-count');
+  if (!badge) return;
+
+  try {
+    const messages = await PortfolioAPI.getMessages();
+    const unreadCount = messages.filter(m => !m.is_read).length;
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount;
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  } catch (e) {
+    badge.style.display = 'none';
+  }
+}
+
+async function renderInquiriesManager() {
+  const container = document.getElementById('inquiries-container');
+  if (!container) return;
+
+  container.innerHTML = `<div style="text-align:center; padding: 32px; color: var(--text-muted);">Loading inquiries...</div>`;
+
+  const messages = await PortfolioAPI.getMessages();
+  await updateInquiriesBadge();
+
+  if (!messages || messages.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 48px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+        <p style="color: var(--text-secondary); margin-bottom: 8px; font-weight: 600;">No inquiries received yet.</p>
+        <p style="color: var(--text-muted); font-size: 0.88rem;">When recruiters or clients send messages from your website contact form, they will appear here.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = messages.map(msg => {
+    const dateStr = msg.created_at ? new Date(msg.created_at).toLocaleString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    }) : 'Recent';
+
+    const isUnread = !msg.is_read;
+
+    return `
+      <div class="inquiry-card ${isUnread ? 'unread' : ''}">
+        <div class="inquiry-head">
+          <div>
+            <span class="inquiry-sender">${escapeHtml(msg.name || 'Anonymous Visitor')}</span>
+            <a href="mailto:${escapeHtml(msg.email)}?subject=Re:%20Portfolio%20Inquiry" class="inquiry-email">
+              &lt;${escapeHtml(msg.email)}&gt;
+            </a>
+          </div>
+          <div class="inquiry-meta">
+            <span class="inquiry-badge ${isUnread ? 'new' : 'read'}">${isUnread ? 'New' : 'Read'}</span>
+            <span class="inquiry-date">${dateStr}</span>
+          </div>
+        </div>
+
+        <div class="inquiry-body">${escapeHtml(msg.message || '')}</div>
+
+        <div class="inquiry-actions">
+          <a href="mailto:${escapeHtml(msg.email)}?subject=Re:%20Portfolio%20Inquiry&body=${encodeURIComponent('\n\n--- Original Inquiry ---\n' + (msg.message || ''))}" class="btn-inquiry-reply">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Reply via Email</span>
+          </a>
+
+          ${isUnread ? `
+            <button class="btn-inquiry-action" onclick="markInquiryAsRead('${msg.id}')">
+              ${ADMIN_ICONS.check}
+              <span>Mark as Read</span>
+            </button>
+          ` : ''}
+
+          <button class="btn-inquiry-action" style="color: var(--accent-danger);" onclick="deleteInquiryRecord('${msg.id}')" title="Delete Inquiry">
+            ${ADMIN_ICONS.trash}
+            <span>Delete</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function markInquiryAsRead(id) {
+  await PortfolioAPI.markMessageRead(id);
+  renderInquiriesManager();
+  showToast('Marked as read');
+}
+
+async function deleteInquiryRecord(id) {
+  if (!confirm('Are you sure you want to delete this message?')) return;
+  await PortfolioAPI.deleteMessage(id);
+  renderInquiriesManager();
+  showToast('Inquiry deleted');
+}
+
+/* ==========================================================================
+   Legacy GitHub Cloud Sync Controller
+   ========================================================================== */
+function renderCloudSyncStatus() {
+  renderDatabaseStatus();
+}
+
+function renderCloudSyncTab() {
+  renderDatabaseTab();
+}
+
+async function saveGitHubSyncSettings(e) {
+  e.preventDefault();
+
+  const repo = document.getElementById('gh-repo-input').value.trim();
+  const branch = document.getElementById('gh-branch-input').value.trim();
+  const token = document.getElementById('gh-token-input').value.trim();
+
+  if (!token) {
+    alert('Please enter a GitHub Personal Access Token.');
+    return;
+  }
+
+  try {
+    await GitHubSync.testConnection(token, repo);
+    GitHubSync.setRepo(repo);
+    GitHubSync.setBranch(branch);
+    GitHubSync.setToken(token);
+    showToast(`Connected to GitHub repository ${repo}!`);
+    alert(`Connected to GitHub successfully!\n\nRepository: ${repo}\nBranch: ${branch}`);
+  } catch (err) {
+    alert(`GitHub connection failed: ${err.message}`);
   }
 }
 
@@ -1065,35 +1273,21 @@ async function triggerManualCloudPublish() {
     return;
   }
 
-  const publishBtn = document.getElementById('btn-publish-now');
   try {
-    if (publishBtn) {
-      publishBtn.disabled = true;
-      publishBtn.innerHTML = '<span>Publishing to GitHub & Vercel...</span>';
-    }
-
     const data = await PortfolioAPI.getPortfolio();
     const result = await GitHubSync.publishPortfolio(data, 'Manual publish from Portfolio Admin Portal');
-
-    showToast('Published to GitHub! Vercel is now deploying (~30s).');
-    alert(`Published successfully to GitHub!\n\nCommit SHA: ${result.commit?.sha?.slice(0, 7) || 'latest'}\n\nVercel will detect this commit and automatically update your live site within 30 seconds.`);
+    showToast('Published commit to GitHub successfully!');
+    alert(`Published successfully to GitHub!\nCommit: ${result.commit?.sha?.slice(0, 7) || 'latest'}`);
   } catch (err) {
-    console.error('Publish error:', err);
     alert('Publish failed: ' + err.message);
-  } finally {
-    if (publishBtn) {
-      publishBtn.disabled = false;
-      publishBtn.innerHTML = '<span>Publish Current Portfolio Now</span>';
-    }
   }
 }
 
 function disconnectGitHubSync() {
-  if (!confirm('Are you sure you want to disconnect GitHub Cloud Sync?')) return;
+  if (!confirm('Are you sure you want to disconnect GitHub Sync?')) return;
   GitHubSync.setToken('');
   const tokenInput = document.getElementById('gh-token-input');
   if (tokenInput) tokenInput.value = '';
-  renderCloudSyncStatus();
-  showToast('GitHub Cloud Sync disconnected');
+  showToast('GitHub Sync disconnected');
 }
 
