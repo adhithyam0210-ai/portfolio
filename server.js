@@ -93,6 +93,73 @@ function writeMessages(msgs) {
   }
 }
 
+const DB_CONFIG_FILE = path.join(__dirname, 'js', 'db-config.js');
+
+function readDbConfig() {
+  try {
+    if (!fs.existsSync(DB_CONFIG_FILE)) return { url: '', anonKey: '' };
+    const content = fs.readFileSync(DB_CONFIG_FILE, 'utf8');
+    const urlMatch = content.match(/url\s*:\s*['"]([^'"]*)['"]/);
+    const keyMatch = content.match(/anonKey\s*:\s*['"]([^'"]*)['"]/);
+    return {
+      url: urlMatch ? urlMatch[1] : '',
+      anonKey: keyMatch ? keyMatch[1] : ''
+    };
+  } catch (err) {
+    console.error('Error reading db-config.js:', err);
+    return { url: '', anonKey: '' };
+  }
+}
+
+function writeDbConfig(config) {
+  try {
+    const url = (config && config.url) ? String(config.url).trim() : '';
+    const anonKey = (config && (config.anonKey || config.key)) ? String(config.anonKey || config.key).trim() : '';
+
+    const content = `/**
+ * Supabase Cloud Database Configuration
+ * Client-Safe Configuration (Uses public anon key)
+ * 
+ * Auto-persisted by Admin Portal & Server.
+ * Connect once, permanently active for all visitors and sessions.
+ */
+
+window.SUPABASE_CONFIG = {
+  // Public project URL (e.g., 'https://xyzproject.supabase.co')
+  url: '${url}',
+  
+  // Public anonymous key (starts with eyJhbGciOi...)
+  anonKey: '${anonKey}'
+};
+
+// Auto-sync into browser localStorage if not already present
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    const cachedUrl = localStorage.getItem('sb_portfolio_url');
+    const cachedKey = localStorage.getItem('sb_portfolio_key');
+    if (window.SUPABASE_CONFIG.url) {
+      localStorage.setItem('sb_portfolio_url', window.SUPABASE_CONFIG.url);
+    } else if (cachedUrl) {
+      window.SUPABASE_CONFIG.url = cachedUrl;
+    }
+    if (window.SUPABASE_CONFIG.anonKey) {
+      localStorage.setItem('sb_portfolio_key', window.SUPABASE_CONFIG.anonKey);
+    } else if (cachedKey) {
+      window.SUPABASE_CONFIG.anonKey = cachedKey;
+    }
+  } catch (e) {
+    // localStorage may be disabled or restricted
+  }
+}
+`;
+    fs.writeFileSync(DB_CONFIG_FILE, content, 'utf8');
+    return true;
+  } catch (err) {
+    console.error('Error writing db-config.js:', err);
+    return false;
+  }
+}
+
 // MIME Types for Static Files
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -152,6 +219,30 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
 
     try {
+      // GET /api/config/db (Get permanent database config)
+      if (pathname === '/api/config/db' && method === 'GET') {
+        const dbConf = readDbConfig();
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, ...dbConf }));
+      }
+
+      // POST or PUT /api/config/db (Save permanent database config)
+      if (pathname === '/api/config/db' && (method === 'POST' || method === 'PUT')) {
+        const body = await parseBody(req);
+        if (writeDbConfig(body)) {
+          console.log('[Database Config]: Permanently saved Supabase keys to js/db-config.js');
+          res.writeHead(200);
+          return res.end(JSON.stringify({
+            success: true,
+            message: 'Database configuration permanently saved to js/db-config.js',
+            config: readDbConfig()
+          }));
+        } else {
+          res.writeHead(500);
+          return res.end(JSON.stringify({ error: 'Failed to write js/db-config.js' }));
+        }
+      }
+
       // GET /api/portfolio
       if (pathname === '/api/portfolio' && method === 'GET') {
         const data = readData();

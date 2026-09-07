@@ -76,6 +76,18 @@ const bundled = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'portfol
 const elapsed = Date.now() - t0;
 console.log(`   [PERF] Synchronous render completed in ${elapsed}ms (Blazing fast!)`);
 
+// 5. Permanent database configuration check
+console.log('\n5. Verifying permanent Supabase cloud configuration...');
+const dbConfigContent = fs.readFileSync(path.join(__dirname, 'js', 'db-config.js'), 'utf8');
+const urlMatch = dbConfigContent.match(/url\s*:\s*['"]([^'"]*)['"]/);
+const keyMatch = dbConfigContent.match(/anonKey\s*:\s*['"]([^'"]*)['"]/);
+if (urlMatch && urlMatch[1] && keyMatch && keyMatch[1]) {
+  console.log(`   [OK] Permanent Supabase URL configured: ${urlMatch[1]}`);
+  console.log(`   [OK] Permanent Anon Key configured: ${keyMatch[1].slice(0, 10)}... (Permanent client-safe key)`);
+} else {
+  console.log('   [INFO] Supabase credentials not yet permanently set in js/db-config.js');
+}
+
 console.log('\n====================================================');
 console.log('✅ ALL CHECKS PASSED! EVERYTHING IS READY TO RUN.');
 console.log('   Run: npm start');

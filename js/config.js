@@ -74,7 +74,6 @@ const PORTFOLIO_DATA = {
     },
     "frontend": {
       "items": [
-        "Html",
         "Css",
         "react"
       ],
@@ -117,12 +116,12 @@ const PORTFOLIO_DATA = {
       "institution": "Sir Ramaswami Mudaliar Higher Secondary School"
     },
     {
-      "degree": "SSLC",
-      "institution": "Sir Ramaswami Mudaliar Higher Secondary School",
       "year": "2019 - 2020",
-      "period": "2019 - 2020",
       "score": "73%",
-      "location": "Chennai, TamilNadu"
+      "degree": "SSLC",
+      "period": "2019 - 2020",
+      "location": "Chennai, TamilNadu",
+      "institution": "Sir Ramaswami Mudaliar Higher Secondary School"
     }
   ]
 };

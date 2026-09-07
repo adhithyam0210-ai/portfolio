@@ -67,6 +67,67 @@ def write_data(data):
         print("Error writing data:", e)
         return False
 
+DB_CONFIG_FILE = os.path.join(BASE_DIR, 'js', 'db-config.js')
+
+def read_db_config():
+    if not os.path.exists(DB_CONFIG_FILE):
+        return {"url": "", "anonKey": ""}
+    try:
+        import re
+        with open(DB_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            content = f.read()
+        url_m = re.search(r"url\s*:\s*['\"]([^'\"]*)['\"]", content)
+        key_m = re.search(r"anonKey\s*:\s*['\"]([^'\"]*)['\"]", content)
+        return {
+            "url": url_m.group(1) if url_m else "",
+            "anonKey": key_m.group(1) if key_m else ""
+        }
+    except Exception as e:
+        print("Error reading db-config.js:", e)
+        return {"url": "", "anonKey": ""}
+
+def write_db_config(config):
+    try:
+        url = str(config.get('url', '')).strip() if config else ''
+        anon_key = str(config.get('anonKey', config.get('key', ''))).strip() if config else ''
+        content = f"""/**
+ * Supabase Cloud Database Configuration
+ * Client-Safe Configuration (Uses public anon key)
+ * 
+ * Auto-persisted configuration.
+ * Connected permanently: Active for all visitors and browser sessions.
+ */
+
+window.SUPABASE_CONFIG = {{
+  // Public project URL (e.g., 'https://xyzproject.supabase.co')
+  url: '{url}',
+  
+  // Public anonymous/publishable key
+  anonKey: '{anon_key}'
+}};
+
+// Auto-sync into browser localStorage if not already present
+if (typeof window !== 'undefined' && window.localStorage) {{
+  try {{
+    if (window.SUPABASE_CONFIG.url) {{
+      localStorage.setItem('sb_portfolio_url', window.SUPABASE_CONFIG.url);
+    }}
+    if (window.SUPABASE_CONFIG.anonKey) {{
+      localStorage.setItem('sb_portfolio_key', window.SUPABASE_CONFIG.anonKey);
+    }}
+  }} catch (e) {{
+    // localStorage may be disabled or restricted
+  }}
+}}
+"""
+        with open(DB_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        print("Error writing db-config.js:", e)
+        return False
+
+
 class PortfolioRequestHandler(BaseHTTPRequestHandler):
     def _send_cors_headers(self):
         self.send_header('Access-Control-Allow-Origin', '*')
@@ -100,6 +161,9 @@ class PortfolioRequestHandler(BaseHTTPRequestHandler):
         path = parsed.path
 
         # REST API Routes
+        if path == '/api/config/db':
+            return self._send_json(200, {"success": True, **read_db_config()})
+
         if path == '/api/portfolio':
             return self._send_json(200, read_data())
 
@@ -141,6 +205,12 @@ class PortfolioRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         path = urlparse(self.path).path
 
+        if path == '/api/config/db':
+            body = self._read_json_body()
+            if write_db_config(body):
+                return self._send_json(200, {"success": True, "message": "Database configuration permanently saved", "config": read_db_config()})
+            return self._send_json(500, {"error": "Failed to write js/db-config.js"})
+
         if path == '/api/projects':
             body = self._read_json_body()
             data = read_data()
@@ -170,6 +240,12 @@ class PortfolioRequestHandler(BaseHTTPRequestHandler):
 
     def do_PUT(self):
         path = urlparse(self.path).path
+
+        if path == '/api/config/db':
+            body = self._read_json_body()
+            if write_db_config(body):
+                return self._send_json(200, {"success": True, "message": "Database configuration permanently saved", "config": read_db_config()})
+            return self._send_json(500, {"error": "Failed to write js/db-config.js"})
 
         if path == '/api/portfolio':
             body = self._read_json_body()

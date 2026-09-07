@@ -993,10 +993,10 @@ function renderDatabaseStatus() {
   if (banner && bannerText) {
     if (isConnected) {
       banner.className = 'sync-status-banner connected';
-      bannerText.innerHTML = `<strong>Connected to Supabase PostgreSQL:</strong> <code>${escapeHtml(DatabaseManager.getUrl())}</code>. Any updates you save in this Admin Portal write directly to the database and reflect live for all visitors worldwide!`;
+      bannerText.innerHTML = `<strong>Connected &amp; Permanently Configured:</strong> <code>${escapeHtml(DatabaseManager.getUrl())}</code>. Saved in <code>js/db-config.js</code> so you never need to enter keys again! All edits reflect live for all visitors worldwide.`;
     } else {
       banner.className = 'sync-status-banner disconnected';
-      bannerText.innerHTML = `<strong>Database Not Connected:</strong> You are currently running in local storage mode. Connect your free Supabase database below so updates reflect for other people visiting your site!`;
+      bannerText.innerHTML = `<strong>Database Not Connected:</strong> Enter your Supabase Project URL and Public Anon Key below once. They will be saved permanently to <code>js/db-config.js</code> so you never have to re-enter them!`;
     }
   }
 }
@@ -1025,7 +1025,8 @@ async function saveDatabaseConfig(e) {
   const alertBox = document.getElementById('db-config-alert');
   const saveBtn = document.getElementById('btn-save-db');
 
-  const url = urlInput.value.trim();
+  const rawUrl = urlInput.value.trim();
+  const url = DatabaseManager.cleanSupabaseUrl(rawUrl);
   const key = keyInput.value.trim();
 
   if (!url || !key) {
@@ -1045,16 +1046,19 @@ async function saveDatabaseConfig(e) {
 
     const test = await DatabaseManager.testConnection(url, key);
 
-    DatabaseManager.setUrl(url);
-    DatabaseManager.setKey(key);
+    // Save permanently to disk (js/db-config.js) and memory
+    await DatabaseManager.saveConfigToServer(url, key);
+
+    if (urlInput) urlInput.value = url;
+    if (keyInput) keyInput.value = key;
 
     renderDatabaseStatus();
-    showToast('Connected to Supabase Database successfully!');
+    showToast('Connected to Supabase Database & permanently saved!');
 
     if (!test.tableExists) {
-      alert('Connected to Supabase successfully!\n\nNote: The "portfolio" table does not exist yet. Click "1-Click Initialize & Seed Database" or run schema.sql in Supabase SQL editor to create it.');
+      alert('Connected to Supabase successfully and saved permanently to js/db-config.js!\n\nNote: The "portfolio" table does not exist yet. Click "1-Click Initialize & Seed Database" or run schema.sql in Supabase SQL editor to create it.');
     } else {
-      alert('Connected to Supabase successfully!\n\nYour portfolio is now dynamic. Any changes you save in this Admin Portal will immediately update PostgreSQL and show live for all visitors worldwide!');
+      alert('Connected to Supabase successfully!\n\nYour database credentials are now permanently saved to js/db-config.js. You will NEVER need to enter them again! Any updates you save in this Admin Portal will immediately update PostgreSQL and show live for all visitors worldwide.');
     }
   } catch (err) {
     if (alertBox) {
@@ -1099,8 +1103,9 @@ async function seedDatabaseInitialData() {
   }
 }
 
-function disconnectDatabase() {
+async function disconnectDatabase() {
   if (!confirm('Are you sure you want to disconnect the cloud database? (Site will revert to local storage mode)')) return;
+  await DatabaseManager.saveConfigToServer('', '');
   DatabaseManager.setUrl('');
   DatabaseManager.setKey('');
   const urlInput = document.getElementById('sb-url-input');

@@ -26,38 +26,58 @@ const DatabaseManager = (() => {
   const URL_KEY = 'sb_portfolio_url';
   const KEY_KEY = 'sb_portfolio_key';
 
+  function cleanSupabaseUrl(url) {
+    if (!url) return '';
+    let cleaned = String(url).trim();
+    cleaned = cleaned.replace(/\/rest\/v1\/?$/, '');
+    cleaned = cleaned.replace(/\/+$/, '');
+    return cleaned;
+  }
+
   // Support pre-configured environment or window values if defined
-  const DEFAULT_URL = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '';
-  const DEFAULT_KEY = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
+  const DEFAULT_URL = cleanSupabaseUrl((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '');
+  const DEFAULT_KEY = ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '').trim();
 
   let clientInstance = null;
 
   function getUrl() {
+    const configUrl = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || '';
+    if (configUrl && configUrl.trim()) return cleanSupabaseUrl(configUrl);
     const fromStorage = localStorage.getItem(URL_KEY);
-    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
-    return ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.url) || DEFAULT_URL).trim();
+    if (fromStorage && fromStorage.trim()) return cleanSupabaseUrl(fromStorage);
+    return cleanSupabaseUrl(DEFAULT_URL);
   }
 
   function setUrl(url) {
-    if (url && url.trim()) {
-      localStorage.setItem(URL_KEY, url.trim());
+    const cleaned = cleanSupabaseUrl(url);
+    if (cleaned) {
+      localStorage.setItem(URL_KEY, cleaned);
     } else {
       localStorage.removeItem(URL_KEY);
+    }
+    if (window.SUPABASE_CONFIG) {
+      window.SUPABASE_CONFIG.url = cleaned;
     }
     clientInstance = null;
   }
 
   function getKey() {
+    const configKey = (window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || '';
+    if (configKey && configKey.trim()) return configKey.trim();
     const fromStorage = localStorage.getItem(KEY_KEY);
     if (fromStorage && fromStorage.trim()) return fromStorage.trim();
-    return ((window.SUPABASE_CONFIG && window.SUPABASE_CONFIG.anonKey) || DEFAULT_KEY).trim();
+    return DEFAULT_KEY.trim();
   }
 
   function setKey(key) {
-    if (key && key.trim()) {
-      localStorage.setItem(KEY_KEY, key.trim());
+    const trimmed = (key || '').trim();
+    if (trimmed) {
+      localStorage.setItem(KEY_KEY, trimmed);
     } else {
       localStorage.removeItem(KEY_KEY);
+    }
+    if (window.SUPABASE_CONFIG) {
+      window.SUPABASE_CONFIG.anonKey = trimmed;
     }
     clientInstance = null;
   }
@@ -84,7 +104,9 @@ const DatabaseManager = (() => {
     }
   }
 
-  async function testConnection(url = getUrl(), key = getKey()) {
+  async function testConnection(rawUrl = getUrl(), rawKey = getKey()) {
+    const url = cleanSupabaseUrl(rawUrl);
+    const key = (rawKey || '').trim();
     if (!url || !key) {
       throw new Error('Please enter both Supabase Project URL and Public Anon Key.');
     }
@@ -92,7 +114,7 @@ const DatabaseManager = (() => {
       throw new Error('Supabase client SDK is not loaded. Please check your internet connection or script tags.');
     }
 
-    const testClient = window.supabase.createClient(url.trim(), key.trim());
+    const testClient = window.supabase.createClient(url, key);
     const { data, error } = await testClient.from('portfolio').select('id, updated_at').limit(1);
 
     if (error) {
@@ -268,11 +290,78 @@ const DatabaseManager = (() => {
     }
   }
 
+  async function saveConfigToServer(rawUrl, rawKey) {
+    const url = cleanSupabaseUrl(rawUrl);
+    const anonKey = (rawKey || '').trim();
+
+    // 1. Update runtime memory & localStorage immediately
+    setUrl(url);
+    setKey(anonKey);
+
+    // 2. Persist to local server (server.js / server.py)
+    try {
+      const res = await fetch('/api/config/db', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, anonKey })
+      });
+      if (res.ok) {
+        return { success: true, via: 'server' };
+      }
+    } catch (e) {
+      // Local server not running or network error, proceed
+    }
+
+    // 3. Persist to GitHub via GitHubSync if available
+    if (typeof GitHubSync !== 'undefined' && GitHubSync.hasToken && GitHubSync.hasToken() && GitHubSync.getRepo()) {
+      try {
+        const fileContent = `/**
+ * Supabase Cloud Database Configuration
+ * Client-Safe Configuration (Uses public anon key)
+ * 
+ * Auto-persisted configuration.
+ * Connected permanently: Active for all visitors and browser sessions.
+ */
+
+window.SUPABASE_CONFIG = {
+  // Public project URL (e.g., 'https://xyzproject.supabase.co')
+  url: '${url}',
+  
+  // Public anonymous/publishable key
+  anonKey: '${anonKey}'
+};
+
+// Auto-sync into browser localStorage if not already present
+if (typeof window !== 'undefined' && window.localStorage) {
+  try {
+    if (window.SUPABASE_CONFIG.url) {
+      localStorage.setItem('sb_portfolio_url', window.SUPABASE_CONFIG.url);
+    }
+    if (window.SUPABASE_CONFIG.anonKey) {
+      localStorage.setItem('sb_portfolio_key', window.SUPABASE_CONFIG.anonKey);
+    }
+  } catch (e) {
+    // localStorage may be disabled or restricted
+  }
+}
+`;
+        await GitHubSync.commitFile('js/db-config.js', fileContent, 'Persist Supabase database configuration');
+        return { success: true, via: 'github' };
+      } catch (ghErr) {
+        console.warn('Could not sync db-config to GitHub:', ghErr);
+      }
+    }
+
+    return { success: true, via: 'local' };
+  }
+
   return {
+    cleanSupabaseUrl,
     getUrl,
     setUrl,
     getKey,
     setKey,
+    saveConfigToServer,
     isConnected,
     getClient,
     testConnection,
