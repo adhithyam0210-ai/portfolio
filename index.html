@@ -47,7 +47,7 @@
       </div>
       
       <div class="splash-status-row">
-        <span id="splash-status-text" class="splash-status-text">Loading cinematic city frames...</span>
+        <span id="splash-status-text" class="splash-status-text" style="display: none;"></span>
         <span id="splash-percent-text" class="splash-percent-text">0%</span>
       </div>
     </div>
@@ -62,7 +62,6 @@
           <span class="logo-text" id="hero-brand-name">ADHITHYA M</span>
         </a>
         <div class="hud-location-badge" title="Current Base">
-          <span class="live-pulse"></span>
           <span id="location-text">Chennai, India</span>
         </div>
       </div>
@@ -70,7 +69,6 @@
       <!-- Right Controls: Stage Indication Pill (Sound button removed as requested) -->
       <div class="hud-controls-group">
         <div class="hud-chapter-pill" id="hud-chapter-pill" title="Current Journey Milestone">
-          <span class="pill-dot"></span>
           <span class="pill-label" id="hud-chapter-label">About Me</span>
         </div>
       </div>
@@ -106,12 +104,11 @@
                 <img src="assets/profile_adhithya.jpg" id="hero-profile-avatar" class="hero-avatar-img" alt="Adhithya M" />
               </div>
               <div class="hero-header-text">
-                <div class="hero-eyebrow">PORTFOLIO &bull; SOFTWARE QUALITY ASSURANCE</div>
                 <h1 class="hero-card-name" id="c0-about-title">ADHITHYA M</h1>
                 <div class="hero-card-role" id="c0-hero-role">Software Tester &bull; QA Automation Engineer</div>
                 <div class="hero-meta-strip">
-                  <span class="meta-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Chennai, India</span>
-                  <span class="meta-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> B.Tech AI &amp; DS</span>
+                  <span class="meta-pill" id="c0-hero-loc"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> <span id="c0-loc-text">Chennai, India</span></span>
+                  <span class="meta-pill" id="c0-hero-dept"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> <span id="c0-dept-text">B.Tech AI &amp; DS</span></span>
                 </div>
               </div>
             </div>
@@ -144,13 +141,16 @@
         <!-- ==================== STAGE 1: SCHOOLING (SSLC & HSC) ==================== -->
         <article class="cinematic-chapter chapter-pos-right" id="chapter-1" data-index="1" data-tag="MY SCHOOLING">
           <div class="chapter-card-glass">
-            <div class="card-meta-bar">
-              <span class="era-badge">STAGE 01 &bull; SCHOOLING</span>
-              <span class="status-badge" id="c1-badge">SSLC &amp; HSC DISTINCTION</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c1-title">My Schooling Journey</h2>
+                <div class="chapter-institution" id="c1-school">Sir Ramaswami Mudaliar Higher Secondary School</div>
+                <div class="chapter-period-text" id="c1-period" style="display: none;">2019 &ndash; 2022</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge" id="c1-badge">SSLC &amp; HSC DISTINCTION</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title" id="c1-title">My Schooling Journey</h2>
-            <div class="chapter-institution" id="c1-school">Sir Ramaswami Mudaliar Higher Secondary School</div>
 
             <!-- Dynamic Qualifications List for Schooling (Both SSLC & HSC rendered) -->
             <div class="schooling-milestones-list" id="c1-school-list">
@@ -184,14 +184,16 @@
         <!-- ==================== STAGE 2: COLLEGE ==================== -->
         <article class="cinematic-chapter chapter-pos-left" id="chapter-2" data-index="2" data-tag="MY COLLEGE JOURNEY">
           <div class="chapter-card-glass">
-            <div class="card-meta-bar">
-              <span class="era-badge purple">STAGE 02 &bull; ENGINEERING</span>
-              <span class="status-badge purple" id="c2-badge">7.4 CGPA</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c2-title">My College Journey</h2>
+                <div class="chapter-institution" id="c2-school">S A Engineering College, Chennai</div>
+                <div class="chapter-period-text" id="c2-period">2022 &ndash; 2026 &bull; Anna University Affiliated</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge purple" id="c2-badge">7.4 CGPA</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title" id="c2-title">My College Journey</h2>
-            <div class="chapter-institution" id="c2-school">S A Engineering College, Chennai</div>
-            <div class="chapter-period-text" id="c2-period">2022 &ndash; 2026 &bull; Anna University Affiliated</div>
 
             <div class="chapter-score-pill purple">
               <span class="score-number" id="c2-score">B.Tech</span>
@@ -212,13 +214,15 @@
         <!-- ==================== STAGE 3: COURSES & CERTIFICATIONS ==================== -->
         <article class="cinematic-chapter chapter-pos-right" id="chapter-3" data-index="3" data-tag="COURSES &amp; CERTIFICATIONS">
           <div class="chapter-card-glass courses-container-card">
-            <div class="card-meta-bar">
-              <span class="era-badge green" id="c3-era-badge">STAGE 03 &bull; SPECIALIZED TRAINING</span>
-              <span class="status-badge green" id="c3-status-badge">CERTIFIED &bull; INDUSTRY-READY</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c3-title">What I Learned Along the Way</h2>
+                <div class="chapter-institution" id="c3-subtitle">Hands-on certifications &amp; rigorous testing frameworks.</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge green" id="c3-status-badge">CERTIFIED &bull; INDUSTRY-READY</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title" id="c3-title">What I Learned Along the Way</h2>
-            <div class="chapter-institution" id="c3-subtitle">Hands-on certifications &amp; rigorous testing frameworks.</div>
 
             <!-- Floating Course Cards Grid -->
             <div class="courses-cards-grid" id="c3-courses-list">
@@ -253,14 +257,16 @@
         <!-- ==================== STAGE 4: INTERNSHIP ==================== -->
         <article class="cinematic-chapter chapter-pos-left" id="chapter-4" data-index="4" data-tag="PROFESSIONAL EXPERIENCE">
           <div class="chapter-card-glass">
-            <div class="card-meta-bar">
-              <span class="era-badge cyan">STAGE 04 &bull; INDUSTRY IMPACT</span>
-              <span class="status-badge cyan" id="c4-badge">LIVE INTERNSHIP</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c4-title">My Internship</h2>
+                <div class="chapter-institution" id="c4-company">Softrate Tech Park, Chennai</div>
+                <div class="chapter-period-text" id="c4-period">Current &bull; QA Intern / Software Tester Intern</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge cyan" id="c4-badge">LIVE INTERNSHIP</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title" id="c4-title">My Internship</h2>
-            <div class="chapter-institution" id="c4-company">Softrate Tech Park, Chennai</div>
-            <div class="chapter-period-text" id="c4-period">Current &bull; QA Intern / Software Tester Intern</div>
 
             <div class="metrics-grid-duo">
               <div class="metric-item">
@@ -288,21 +294,43 @@
 
         <!-- ==================== STAGE 5: PROJECTS ==================== -->
         <article class="cinematic-chapter chapter-pos-right" id="chapter-5" data-index="5" data-tag="PROJECTS ZONE">
-          <div class="projects-dynamic-container" id="c5-projects-container">
-            <!-- Dynamic single, duo, or multi auto-adjusting layouts rendered by js/main.js -->
+          <div class="projects-dynamic-container projects-layout-duo" id="c5-projects-container">
+            <div class="project-card-glass">
+              <div class="project-card-header">
+                <div class="project-header-top-row">
+                  <h3 class="project-card-title">MOZHIBU</h3>
+                  <span class="project-cat-badge">SOFTWARE TESTING</span>
+                </div>
+                <div class="project-card-subtitle">Node-Based Pipeline &amp; Test Suite</div>
+              </div>
+              <div class="project-tags-cloud" style="margin-bottom: 8px;">
+                <span class="tech-pill">Selenium</span>
+                <span class="tech-pill">TestNG</span>
+                <span class="tech-pill">Java</span>
+                <span class="tech-pill">CI/CD</span>
+              </div>
+              <p class="project-card-desc">An interactive node-based canvas editor allowing teams to visually assemble, configure, and automate data transformation pipelines with rigorous test verification.</p>
+              <div class="project-actions-row">
+                <a href="https://mozhibu-wine.vercel.app/" target="_blank" rel="noopener" class="btn-project-cta secondary" style="padding: 7px 12px; font-size: 0.78rem;">
+                  <span>Live Demo Platform &rarr;</span>
+                </a>
+              </div>
+            </div>
           </div>
         </article>
 
         <!-- ==================== STAGE 6: SKILLS ==================== -->
         <article class="cinematic-chapter chapter-pos-left" id="chapter-6" data-index="6" data-tag="TECHNICAL SKILLS">
           <div class="chapter-card-glass skills-arsenal-card">
-            <div class="card-meta-bar">
-              <span class="era-badge green">STAGE 06 &bull; TECHNICAL SKILLS</span>
-              <span class="status-badge green">QUALITATIVE PROFICIENCY</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c6-title">Technical Skill Garden</h2>
+                <div class="chapter-institution" id="c6-subtitle">Honed through coursework, college engineering, and real internship delivery.</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge green" id="c6-badge">QUALITATIVE PROFICIENCY</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title">Technical Skill Garden</h2>
-            <div class="chapter-institution">Honed through coursework, college engineering, and real internship delivery.</div>
 
             <!-- Categorized Skills Grid with Elegant Qualitative Representations -->
             <div class="skills-garden-container" id="c6-skills-list">
@@ -365,13 +393,15 @@
         <!-- ==================== STAGE 7: QA VISION & CONTINUOUS GROWTH ==================== -->
         <article class="cinematic-chapter chapter-pos-right" id="chapter-7" data-index="7" data-tag="QA VISION &amp; CONTINUOUS GROWTH">
           <div class="chapter-card-glass about-reflection-card vision-card">
-            <div class="card-meta-bar">
-              <span class="era-badge amber">STAGE 07 &bull; QUALITY VISION</span>
-              <span class="status-badge amber">CONTINUOUS GROWTH</span>
+            <div class="chapter-card-header-row">
+              <div class="chapter-card-title-group">
+                <h2 class="chapter-title" id="c7-vision-title">QA Vision &amp; Philosophy</h2>
+                <div class="chapter-institution" id="c7-vision-quote">"Quality is not an act, it is a habit &mdash; automated, tested, and verified."</div>
+              </div>
+              <div class="chapter-card-side-info">
+                <span class="status-badge amber" id="c7-vision-badge">ENGINEERING EXCELLENCE</span>
+              </div>
             </div>
-
-            <h2 class="chapter-title" id="c7-vision-title">QA Vision &amp; Philosophy</h2>
-            <div class="chapter-institution" id="c7-vision-quote">"Quality is not an act, it is a habit &mdash; automated, tested, and verified."</div>
 
             <p class="chapter-narrative" id="c7-vision-narrative">
               Looking forward, my mission is to architect scalable automation frameworks, integrate continuous quality gates into DevOps CI/CD pipelines, and guarantee frictionless software for end users through proactive defect prevention.
@@ -380,25 +410,21 @@
             <!-- Focus Pillars (Rendered dynamically by js/main.js from data.vision) -->
             <div class="qualities-chips-grid" id="c7-vision-pillars">
               <div class="quality-chip">
-                <span class="quality-dot"></span>
                 <div class="quality-chip-text">
                   <strong>Automation Architecture:</strong> <span>Selenium WebDriver, TestNG, Page Object Model</span>
                 </div>
               </div>
               <div class="quality-chip">
-                <span class="quality-dot"></span>
                 <div class="quality-chip-text">
                   <strong>CI/CD Quality Gates:</strong> <span>Automated regression suites in agile deployment cycles</span>
                 </div>
               </div>
               <div class="quality-chip">
-                <span class="quality-dot"></span>
                 <div class="quality-chip-text">
                   <strong>API &amp; Contract Testing:</strong> <span>Postman collections &amp; REST service assertions</span>
                 </div>
               </div>
               <div class="quality-chip">
-                <span class="quality-dot"></span>
                 <div class="quality-chip-text">
                   <strong>Root Cause Analysis:</strong> <span>Preventive test case design &amp; Jira bug tracking</span>
                 </div>
@@ -412,12 +438,8 @@
           <div class="chapter-card-glass connect-terminal-card" id="contact">
             
             <div class="terminal-banner">
-              <div class="terminal-badge">
-                <span class="live-pulse"></span>
-                <span>STAGE 08 &bull; THE JOURNEY CONTINUES</span>
-              </div>
-              <h2 class="terminal-headline">Ready to Elevate Your Software Quality?</h2>
-              <p class="terminal-subtext">
+              <h2 class="terminal-headline" id="c8-headline">Ready to Elevate Your Software Quality?</h2>
+              <p class="terminal-subtext" id="c8-subtext">
                 My journey doesn't end here. I'm continuously learning, building and looking for opportunities to create better software. Let's connect and build something dependable together.
               </p>
             </div>

@@ -180,10 +180,13 @@ button {
   height: 28px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
-  box-shadow: none !important;
+  object-position: center 15% !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
   background: transparent !important;
   padding: 0 !important;
+  image-rendering: auto !important;
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -209,12 +212,16 @@ button {
   pointer-events: auto;
 }
 
+.hud-location-badge .live-pulse {
+  display: none !important;
+}
+
 .live-pulse {
   width: 7px;
   height: 7px;
-  background-color: var(--accent-green);
+  background-color: #38bdf8;
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--accent-green);
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
   animation: livePulseGlow 2s infinite;
 }
 
@@ -257,11 +264,7 @@ button {
 }
 
 .hud-chapter-pill .pill-dot {
-  width: 6px;
-  height: 6px;
-  background-color: var(--primary);
-  border-radius: 50%;
-  box-shadow: 0 0 8px var(--primary);
+  display: none !important;
 }
 
 .hud-action-btn {
@@ -1116,6 +1119,12 @@ body.mode-canvas .floating-landmarks-container {
   transform: translateY(-50%) translateX(0) scale(1);
 }
 
+/* Stage 5 (Projects): Wider container on desktop to comfortably accommodate duo/multi cards without cramped overlap */
+#chapter-5 {
+  max-width: 780px !important;
+  right: 4%;
+}
+
 .chapter-card-glass {
   position: relative;
   background: linear-gradient(145deg, rgba(10, 16, 30, 0.94) 0%, rgba(15, 23, 42, 0.90) 100%);
@@ -1128,7 +1137,7 @@ body.mode-canvas .floating-landmarks-container {
   overflow-y: auto;
   max-height: calc(100vh - 130px);
   scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.5) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
   transition: transform 0.3s ease, border-color 0.3s ease, background 0.3s ease;
 }
 
@@ -1146,56 +1155,166 @@ body.mode-canvas .floating-landmarks-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.terminal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+.card-meta-bar .terminal-badge {
+  margin-bottom: 0 !important;
 }
 
 .era-badge {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.74rem;
+  font-weight: 800;
   letter-spacing: 0.1em;
-  padding: 4px 10px;
-  background: rgba(249, 115, 22, 0.15);
-  color: var(--primary-light);
-  border: 1px solid rgba(249, 115, 22, 0.35);
-  border-radius: 9999px;
+  text-transform: uppercase;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: #f1f5f9 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.era-badge.purple {
-  background: rgba(139, 92, 246, 0.15);
-  color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.35);
-}
-
-.era-badge.green {
-  background: rgba(16, 185, 129, 0.15);
-  color: #6ee7b7;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.era-badge.cyan {
-  background: rgba(14, 165, 233, 0.15);
-  color: #7dd3fc;
-  border-color: rgba(14, 165, 233, 0.35);
-}
-
+.era-badge.purple,
+.era-badge.green,
+.era-badge.cyan,
 .era-badge.amber {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fde047;
-  border-color: rgba(245, 158, 11, 0.35);
+  background: transparent !important;
+  border: none !important;
+  color: #f1f5f9 !important;
 }
 
 .status-badge {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-secondary);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8 !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
 }
 
-.status-badge.purple { color: #c4b5fd; }
-.status-badge.green { color: #6ee7b7; }
-.status-badge.cyan { color: #7dd3fc; }
-.status-badge.amber { color: #fde047; }
+.status-badge.purple { color: #c4b5fd !important; }
+.status-badge.green { color: #6ee7b7 !important; }
+.status-badge.cyan { color: #7dd3fc !important; }
+.status-badge.amber { color: #fde047 !important; }
+
+/* Card Header Row: Title at top, Badges (CGPA, Live Internship, etc.) at the side */
+/* Card Header Row: Title at top, Badges (CGPA, Live Internship, etc.) at the side */
+.chapter-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  width: 100%;
+  flex-wrap: wrap; /* Prevents text and badge collision on any screen */
+}
+
+.chapter-card-title-group {
+  flex: 1 1 auto;
+  min-width: 180px;
+}
+
+.chapter-card-title-group .chapter-title {
+  margin-top: 0 !important;
+  margin-bottom: 4px !important;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.chapter-card-side-info {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.chapter-card-side-info .status-badge {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 5px 12px !important;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chapter-card-side-info .status-badge.purple {
+  background: rgba(168, 85, 247, 0.14) !important;
+  border-color: rgba(168, 85, 247, 0.32) !important;
+  color: #c4b5fd !important;
+}
+
+.chapter-card-side-info .status-badge.cyan {
+  background: rgba(56, 189, 248, 0.14) !important;
+  border-color: rgba(56, 189, 248, 0.32) !important;
+  color: #7dd3fc !important;
+}
+
+.chapter-card-side-info .status-badge.green {
+  background: rgba(52, 211, 153, 0.14) !important;
+  border-color: rgba(52, 211, 153, 0.32) !important;
+  color: #6ee7b7 !important;
+}
+
+.chapter-card-side-info .status-badge.amber {
+  background: rgba(251, 191, 36, 0.14) !important;
+  border-color: rgba(251, 191, 36, 0.32) !important;
+  color: #fde047 !important;
+}
+
+@media (max-width: 640px) {
+  .chapter-card-header-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .chapter-card-title-group {
+    flex: 1 1 150px;
+    min-width: 0;
+  }
+  .chapter-card-side-info {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+  .chapter-card-side-info .status-badge {
+    font-size: 0.65rem;
+    padding: 3px 8px !important;
+  }
+}
 
 /* ==========================================================================
    STAGE 0: STARTING BIG HERO CARD (PROFILE & ABOUT ME)
@@ -1214,11 +1333,11 @@ body.mode-canvas .floating-landmarks-container {
 
 .hero-avatar-wrapper {
   position: relative;
-  width: 90px;
-  height: 90px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   padding: 3px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.08));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
   display: flex;
@@ -1233,6 +1352,7 @@ body.mode-canvas .floating-landmarks-container {
   object-fit: cover;
   object-position: center 15%;
   display: block;
+  image-rendering: auto !important;
 }
 
 .hero-status-indicator {
@@ -1804,13 +1924,7 @@ body.mode-canvas .floating-landmarks-container {
 }
 
 .quality-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background-color: var(--accent-amber);
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
-  flex-shrink: 0;
-  margin-top: 6px;
+  display: none !important;
 }
 
 .about-hero-actions {
@@ -1840,14 +1954,7 @@ body.mode-canvas .floating-landmarks-container {
 }
 
 .terminal-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: var(--primary-light);
-  margin-bottom: 8px;
+  display: none !important;
 }
 
 .terminal-headline {
@@ -2155,16 +2262,24 @@ body.mode-canvas .floating-landmarks-container {
 
 .splash-status-row {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
   width: 100%;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-family: var(--font-mono);
   color: #cbd5e1;
 }
 
+#splash-status-text {
+  display: none !important;
+}
+
 .splash-percent-text {
-  color: var(--primary-light);
-  font-weight: 700;
+  color: #f1f5f9;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.08em;
+  text-align: center;
 }
 
 /* ==========================================================================
@@ -2226,37 +2341,75 @@ body.mode-canvas .floating-landmarks-container {
   overflow-y: auto;
   padding: 4px 6px 12px 2px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(249, 115, 22, 0.4) transparent;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
 }
 
 .projects-layout-multi::-webkit-scrollbar {
   width: 5px;
 }
 .projects-layout-multi::-webkit-scrollbar-thumb {
-  background: rgba(249, 115, 22, 0.4);
+  background: rgba(255, 255, 255, 0.28);
   border-radius: 9999px;
 }
 
 .project-card-glass .project-card-header {
   display: flex;
+  flex-direction: column;
+  margin-bottom: 6px;
+  width: 100%;
+}
+
+.project-header-top-row {
+  display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 4px;
+  flex-wrap: wrap; /* Prevents text and badge collision on any viewport */
 }
 
 .project-card-glass .project-card-title {
-  font-size: 1.2rem;
-  font-weight: 800;
+  font-size: 1.18rem !important;
+  font-weight: 800 !important;
   color: #ffffff !important;
-  line-height: 1.25;
-  margin-bottom: 4px;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+  flex: 1 1 auto;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.project-cat-pill,
+.project-card-header .project-cat-badge,
+.project-header-top-row .status-badge,
+.project-header-top-row .project-cat-badge {
+  font-family: var(--font-mono);
+  font-size: 0.66rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 3px 9px !important;
+  border-radius: 9999px !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  border: 1px solid rgba(56, 189, 248, 0.32) !important;
+  color: #7dd3fc !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
 .project-card-glass .project-card-subtitle {
-  font-size: 0.84rem;
+  font-size: 0.80rem !important;
   color: #38bdf8 !important;
-  margin-bottom: 10px;
-  font-weight: 600;
+  margin-bottom: 8px !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  width: 100% !important;
+  word-break: break-word !important;
 }
 
 .project-card-glass .project-card-desc {
@@ -2508,12 +2661,12 @@ body.mode-canvas .floating-landmarks-container {
 
   /* Cinematic Chapter Cards on Mobile: Anchored to lower half so the walking boy is 100% visible */
   .cinematic-chapter {
-    width: calc(100% - 20px) !important;
+    width: calc(100% - 24px) !important;
     max-width: 440px !important;
     left: 50% !important;
     right: auto !important;
     top: auto !important;
-    bottom: 54px !important;
+    bottom: 38px !important;
     transform: translateX(-50%) translateY(16px) scale(0.97) !important;
     opacity: 0;
     visibility: hidden;
@@ -2531,21 +2684,24 @@ body.mode-canvas .floating-landmarks-container {
   }
 
   .chapter-card-glass {
-    padding: 14px 16px !important;
-    border-radius: 16px !important;
-    max-height: 52vh !important;
-    max-height: 52dvh !important;
+    padding: 16px 18px !important;
+    border-radius: 18px !important;
+    max-height: 60vh !important;
+    max-height: 60dvh !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: rgba(249, 115, 22, 0.4) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.28) transparent !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
   }
 
   .chapter-card-glass::-webkit-scrollbar {
     width: 4px;
   }
   .chapter-card-glass::-webkit-scrollbar-thumb {
-    background: rgba(249, 115, 22, 0.4);
+    background: rgba(255, 255, 255, 0.28) !important;
     border-radius: 9999px;
   }
 

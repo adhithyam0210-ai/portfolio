@@ -214,6 +214,35 @@
             </div>
           </div>
 
+          <!-- Resume Document Upload (Device File for Get Resume) -->
+          <div class="profile-avatar-row resume-upload-box" style="margin-bottom: 24px; padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.18); border-radius: 12px;">
+            <input type="file" id="resume-doc-input" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt" />
+            <div class="resume-doc-badge" style="width: 44px; height: 44px; border-radius: 10px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div class="profile-avatar-controls" style="flex: 1;">
+              <div style="font-weight: 700; font-size: 0.88rem; color: #f8fafc; margin-bottom: 3px;">Resume Document (PDF / DOCX)</div>
+              <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">Upload your actual resume file from your device. Visitors clicking "Get Resume" will download this exact document.</div>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <button type="button" class="btn-browse-file" onclick="document.getElementById('resume-doc-input').click()">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
+                  <span>Choose Resume Document from Device</span>
+                </button>
+                <span id="resume-doc-name" class="file-name-label" style="font-size: 0.82rem;">No document uploaded yet</span>
+              </div>
+            </div>
+          </div>
+
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label" for="prof-name">Full Name</label>
@@ -231,14 +260,20 @@
               <input type="text" id="prof-location" class="form-input" required />
             </div>
             <div class="form-group">
-              <label class="form-label" for="prof-email">Email Address</label>
-              <input type="email" id="prof-email" class="form-input" required />
+              <label class="form-label" for="prof-degree">Academic Degree Tag (Card 0)</label>
+              <input type="text" id="prof-degree" class="form-input" placeholder="e.g. B.Tech AI &amp; DS" />
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="prof-tagline">Main Headline</label>
-            <input type="text" id="prof-tagline" class="form-input" required />
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label" for="prof-email">Email Address</label>
+              <input type="email" id="prof-email" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="prof-tagline">Main Headline</label>
+              <input type="text" id="prof-tagline" class="form-input" required />
+            </div>
           </div>
 
           <div class="form-group">
@@ -308,9 +343,15 @@
               Displayed on the Stage 7 Quality Vision glass card.
             </p>
 
-            <div class="form-group">
-              <label class="form-label" for="prof-vision-title">Vision Title</label>
-              <input type="text" id="prof-vision-title" class="form-input" placeholder="e.g. QA Vision & Philosophy" />
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label class="form-label" for="prof-vision-title">Vision Title</label>
+                <input type="text" id="prof-vision-title" class="form-input" placeholder="e.g. QA Vision &amp; Philosophy" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="prof-vision-badge">Status Badge</label>
+                <input type="text" id="prof-vision-badge" class="form-input" placeholder="e.g. CONTINUOUS GROWTH" />
+              </div>
             </div>
 
             <div class="form-group">
@@ -346,8 +387,26 @@
             </div>
           </div>
 
+          <!-- Stage 8: Final Destination / Contact Settings -->
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Stage 8 &bull; Contact / Final Destination Settings</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+              Displayed on the Stage 8 Final Destination card at the end of the journey.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-contact-headline">Contact Headline</label>
+              <input type="text" id="prof-contact-headline" class="form-input" placeholder="e.g. Ready to Elevate Your Software Quality?" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-contact-subtext">Contact Subtext / Invitation</label>
+              <textarea id="prof-contact-subtext" class="form-textarea" placeholder="Describe your invitation to connect, collaborate, and build..." rows="3"></textarea>
+            </div>
+          </div>
+
           <button type="submit" class="btn-primary" style="margin-top: 20px;">
-            <span>Save Profile, About Me &amp; Vision Changes</span>
+            <span>Save Profile, About Me, Vision &amp; Contact</span>
           </button>
         </form>
       </div>
@@ -360,6 +419,34 @@
           <h2 class="pane-title">Skills &amp; Capabilities</h2>
           <p class="pane-desc">Add or remove skills across your technical categories.</p>
         </div>
+      </div>
+
+      <!-- Stage 06 Display Settings Form -->
+      <div class="admin-card" style="margin-bottom: 24px; padding: 20px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-glass); border-radius: 16px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Stage 06 Display Settings</h3>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">Customize the title, subtitle, and status badge displayed on the Stage 06 Technical Skill Garden card.</p>
+        
+        <form id="skills-header-form" onsubmit="saveSkillsHeaderForm(event)">
+          <div class="form-grid-2" style="margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label" for="skill-hdr-title">Stage Title</label>
+              <input type="text" id="skill-hdr-title" class="form-input" placeholder="e.g. Technical Skill Garden" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="skill-hdr-status">Status Badge</label>
+              <input type="text" id="skill-hdr-status" class="form-input" placeholder="e.g. QUALITATIVE PROFICIENCY" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="skill-hdr-subtitle">Stage Subtitle / Description</label>
+            <input type="text" id="skill-hdr-subtitle" class="form-input" placeholder="e.g. Honed through coursework, college engineering, and real internship delivery." />
+          </div>
+
+          <button type="submit" class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+            <span>Save Stage 06 Settings</span>
+          </button>
+        </form>
       </div>
 
       <div id="admin-skills-container" class="skills-admin-grid">
@@ -703,6 +790,11 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
+          <label class="form-label" for="project-subtitle">Project Subtitle / Role</label>
+          <input type="text" id="project-subtitle" class="form-input" placeholder="e.g. Software Testing &bull; Automation Pipeline" />
+        </div>
+
+        <div class="form-group">
           <label class="form-label" for="project-category">Project Category</label>
           <select id="project-category" class="form-select" onchange="handleCategoryChange(this)" required>
             <option value="testing">Software Testing</option>
@@ -792,23 +884,34 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
       <form id="exp-form" onsubmit="saveExperienceForm(event)">
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label" for="exp-role">Role Title / Degree</label>
-            <input type="text" id="exp-role" class="form-input" placeholder="e.g. Software Engineer" required />
+            <label class="form-label" for="exp-card-title">Card Title (Stage 4)</label>
+            <input type="text" id="exp-card-title" class="form-input" placeholder="e.g. My Internship" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="exp-period">Active Period</label>
-            <input type="text" id="exp-period" class="form-input" placeholder="e.g. 2024 — Present" required />
+            <label class="form-label" for="exp-card-badge">Status Badge</label>
+            <input type="text" id="exp-card-badge" class="form-input" placeholder="e.g. LIVE INTERNSHIP" />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label" for="exp-company">Company / Institution</label>
-            <input type="text" id="exp-company" class="form-input" placeholder="e.g. Apex Tech" required />
+            <label class="form-label" for="exp-role">Role Title / Position</label>
+            <input type="text" id="exp-role" class="form-input" placeholder="e.g. Software Tester / QA Intern" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-period">Active Period</label>
+            <input type="text" id="exp-period" class="form-input" placeholder="e.g. Current &bull; QA Intern" required />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="exp-company">Company / Organization</label>
+            <input type="text" id="exp-company" class="form-input" placeholder="e.g. Softrate Tech Park, Chennai" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-location">Location</label>
-            <input type="text" id="exp-location" class="form-input" placeholder="e.g. Bengaluru, India" required />
+            <input type="text" id="exp-location" class="form-input" placeholder="e.g. Chennai, India" required />
           </div>
         </div>
 
@@ -837,6 +940,11 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         <div class="form-group">
           <label class="form-label" for="exp-narrative">Journey Story Narrative</label>
           <textarea id="exp-narrative" class="form-textarea" placeholder="Narrative text displayed on the Stage 4 card..." rows="2"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-takeaway">Core Deliverables &amp; Responsibilities (Takeaway Box)</label>
+          <textarea id="exp-takeaway" class="form-textarea" placeholder="e.g. Executed 450+ verified test cases, authored comprehensive STLC matrices..." rows="2"></textarea>
         </div>
 
         <div class="form-group">
@@ -870,24 +978,46 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
       <form id="education-form" onsubmit="saveEducationForm(event)">
         <input type="hidden" id="education-index" value="" />
 
-        <div class="form-group">
-          <label class="form-label" for="edu-degree">Degree / Subject <span class="required-star">*</span></label>
-          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. B.Tech in Artificial Intelligence & Data Science" required />
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="edu-card-title">Card Title (Stages 1 &amp; 2)</label>
+            <input type="text" id="edu-card-title" class="form-input" placeholder="e.g. My College Journey or My Schooling Journey" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edu-badge">Status Badge</label>
+            <input type="text" id="edu-badge" class="form-input" placeholder="e.g. 7.4 CGPA or SSLC &amp; HSC DISTINCTION" />
+          </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="edu-institution">University or College Name <span class="required-star">*</span></label>
-          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. Anna University Affiliated College" required />
+          <label class="form-label" for="edu-degree">Degree / Qualification Title <span class="required-star">*</span></label>
+          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. Artificial Intelligence &amp; Data Science or HSC/CS" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edu-institution">University or School Name <span class="required-star">*</span></label>
+          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. S A Engineering College or Sir Ramaswami Mudaliar HSS" required />
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label" for="edu-year">Year <span class="required-star">*</span></label>
-            <input type="text" id="edu-year" class="form-input" placeholder="e.g. 2020 — 2024" required />
+            <label class="form-label" for="edu-year">Year / Period <span class="required-star">*</span></label>
+            <input type="text" id="edu-year" class="form-input" placeholder="e.g. 2022 – 2026" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="edu-score">Marks / CGPA / Percentage <span class="required-star">*</span></label>
-            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 8.5 CGPA or 85%" required />
+            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 7.4 CGPA or 85.5%" required />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="edu-score-prefix">Degree Prefix / Level</label>
+            <input type="text" id="edu-score-prefix" class="form-input" placeholder="e.g. B.Tech" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edu-details">Specialization / Honors Details</label>
+            <input type="text" id="edu-details" class="form-input" placeholder="e.g. Distinction Honors in CS, Mathematics &amp; Physics" />
           </div>
         </div>
 
@@ -902,8 +1032,8 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="edu-takeaway">Key Learning / Highlights</label>
-          <input type="text" id="edu-takeaway" class="form-input" placeholder="e.g. Analytical thinking, programming logic, distinction" />
+          <label class="form-label" for="edu-takeaway">Key Learning / Highlights / Takeaway</label>
+          <input type="text" id="edu-takeaway" class="form-input" placeholder="e.g. Data Structures, DBMS, AI Data Pipelines..." />
         </div>
 
         <div class="modal-actions-row">

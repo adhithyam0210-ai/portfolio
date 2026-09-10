@@ -253,6 +253,21 @@ const server = http.createServer(async (req, res) => {
       // PUT /api/portfolio (replace full portfolio data)
       if (pathname === '/api/portfolio' && method === 'PUT') {
         const body = await parseBody(req);
+        if (body.profile && body.profile.resumeUrl && body.profile.resumeUrl.startsWith('data:')) {
+          try {
+            const matches = body.profile.resumeUrl.match(/^data:([A-Za-z0-9-+\/]+);base64,(.+)$/);
+            if (matches && matches[2]) {
+              const ext = (body.profile.resumeFilename && path.extname(body.profile.resumeFilename)) || '.pdf';
+              const filename = 'Adhithya_Resume' + ext;
+              const savePath = path.join(__dirname, 'assets', filename);
+              fs.writeFileSync(savePath, Buffer.from(matches[2], 'base64'));
+              body.profile.resumeUrl = 'assets/' + filename;
+              console.log(`[OK] Saved uploaded resume document to assets/${filename}`);
+            }
+          } catch (err) {
+            console.error('Error saving uploaded resume document:', err);
+          }
+        }
         if (writeData(body)) {
           res.writeHead(200);
           return res.end(JSON.stringify({ success: true, message: 'Portfolio data updated', data: body }));
@@ -341,6 +356,24 @@ const server = http.createServer(async (req, res) => {
       if (pathname === '/api/profile' && method === 'PUT') {
         const body = await parseBody(req);
         const data = readData();
+
+        // If resume document base64 data was uploaded, save to assets/
+        if (body.resumeUrl && body.resumeUrl.startsWith('data:')) {
+          try {
+            const matches = body.resumeUrl.match(/^data:([A-Za-z0-9-+\/]+);base64,(.+)$/);
+            if (matches && matches[2]) {
+              const ext = (body.resumeFilename && path.extname(body.resumeFilename)) || '.pdf';
+              const filename = 'Adhithya_Resume' + ext;
+              const savePath = path.join(__dirname, 'assets', filename);
+              fs.writeFileSync(savePath, Buffer.from(matches[2], 'base64'));
+              body.resumeUrl = 'assets/' + filename;
+              console.log(`[OK] Saved uploaded resume document to assets/${filename}`);
+            }
+          } catch (err) {
+            console.error('Error saving uploaded resume document:', err);
+          }
+        }
+
         data.profile = { ...(data.profile || {}), ...body };
         writeData(data);
         res.writeHead(200);

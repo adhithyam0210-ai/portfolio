@@ -174,6 +174,7 @@ const DatabaseManager = (() => {
           education: data.education || [],
           courses: data.courses || p.courses || [],
           coursesHeader: data.coursesHeader || p.coursesHeader || {},
+          skillsHeader: data.skillsHeader || p.skillsHeader || {},
           aboutMe: data.aboutMe || p.aboutMe || {},
           vision: data.vision || p.vision || {}
         };
@@ -192,6 +193,7 @@ const DatabaseManager = (() => {
       ...(portfolioData.profile || {}),
       courses: portfolioData.courses || [],
       coursesHeader: portfolioData.coursesHeader || {},
+      skillsHeader: portfolioData.skillsHeader || {},
       aboutMe: portfolioData.aboutMe || {},
       vision: portfolioData.vision || {}
     };
@@ -797,6 +799,13 @@ const PortfolioAPI = (() => {
       data.coursesHeader = { ...(data.coursesHeader || {}), ...coursesHeader };
       const res = await this.savePortfolio(data, 'Update courses stage header');
       return { ...res, coursesHeader: data.coursesHeader };
+    },
+
+    async updateSkillsHeader(skillsHeader) {
+      const data = await this.getPortfolio();
+      data.skillsHeader = { ...(data.skillsHeader || {}), ...skillsHeader };
+      const res = await this.savePortfolio(data, 'Update skills stage header');
+      return { ...res, skillsHeader: data.skillsHeader };
     },
 
     async updateAboutMe(aboutMe) {

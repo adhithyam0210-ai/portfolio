@@ -28,7 +28,24 @@ const STAGES = [
   { index: 8, id: 'contact', name: 'Contact', tag: 'THE JOURNEY CONTINUES', progress: 0.98, thought: "Destination reached! The journey continues... Let's connect and build rock-solid software!" }
 ];
 
+// Force browser to always start cleanly from the beginning (Stage 0) on page refresh/reload
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+window.scrollTo(0, 0);
+
+window.addEventListener('beforeunload', () => {
+  window.scrollTo(0, 0);
+});
+
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    window.scrollTo(0, 0);
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
+  window.scrollTo(0, 0);
   document.body.classList.add('mode-video');
 
   initCanvasFrameEngine();
@@ -62,9 +79,11 @@ function initCanvasFrameEngine() {
   frameCtx = frameCanvas.getContext('2d', { alpha: false });
 
   function resizeCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
     frameCanvas.width = Math.round(window.innerWidth * dpr);
     frameCanvas.height = Math.round(window.innerHeight * dpr);
+    frameCtx.imageSmoothingEnabled = true;
+    frameCtx.imageSmoothingQuality = 'high';
     if (lastRenderedImg) {
       drawImageCover(frameCtx, lastRenderedImg, frameCanvas.width, frameCanvas.height);
     }
@@ -113,7 +132,7 @@ function startCityFramesPreloader() {
     const pct = Math.min(100, Math.round((count / TOTAL_FRAMES) * 100));
     if (splashProgressBar) splashProgressBar.style.width = `${pct}%`;
     if (splashPercentText) splashPercentText.textContent = `${pct}%`;
-    if (splashStatusText) splashStatusText.textContent = `Optimizing 240 FPS city walk (${count}/${TOTAL_FRAMES})...`;
+    if (splashStatusText) splashStatusText.textContent = '';
 
     if (count >= TOTAL_FRAMES && !isSplashDismissed) {
       dismissSplash();
@@ -123,7 +142,8 @@ function startCityFramesPreloader() {
   function dismissSplash() {
     if (isSplashDismissed) return;
     isSplashDismissed = true;
-    if (splashStatusText) splashStatusText.textContent = 'Ready! Entering the Journey...';
+    window.scrollTo(0, 0);
+    if (splashStatusText) splashStatusText.textContent = '';
     if (splashProgressBar) splashProgressBar.style.width = '100%';
     if (splashPercentText) splashPercentText.textContent = '100%';
 
@@ -201,6 +221,8 @@ function preloadImage(url) {
  */
 function drawImageCover(ctx, img, cw, ch) {
   if (!img || !ctx) return;
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   const iw = img.naturalWidth || img.width;
   const ih = img.naturalHeight || img.height;
   if (!iw || !ih) return;
@@ -375,10 +397,18 @@ function initJourneyScrollEngine() {
       }
     }
 
-    // Activate corresponding story card strictly (Zero Bleed-Through)
+    // Activate corresponding story card strictly (Zero Bleed-Through) & Reset scroll to top
     const chapters = document.querySelectorAll('.cinematic-chapter');
     chapters.forEach((ch, idx) => {
-      ch.classList.toggle('active', idx === index);
+      const isActive = idx === index;
+      ch.classList.toggle('active', isActive);
+      if (isActive) {
+        ch.scrollTop = 0;
+        const scrollables = ch.querySelectorAll('.chapter-card-glass, .projects-dynamic-container, .skills-garden-container, .courses-container-card');
+        scrollables.forEach(s => {
+          s.scrollTop = 0;
+        });
+      }
     });
 
     // Activate bottom scrubber node
@@ -648,6 +678,20 @@ function initContactForm() {
 function downloadVerifiedResume() {
   const data = currentPortfolioData || {};
   const p = data.profile || {};
+
+  // If a custom resume document was added from device via Admin, download it!
+  const customResumeUrl = p.resumeUrl || localStorage.getItem('portfolio_resume_doc');
+  const customResumeName = p.resumeFilename || localStorage.getItem('portfolio_resume_filename') || 'Adhithya_M_Resume.pdf';
+
+  if (customResumeUrl) {
+    const a = document.createElement('a');
+    a.href = customResumeUrl;
+    a.download = customResumeName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
+  }
   const name = p.name || 'Adhithya M';
   const role = p.role || 'Software Tester | QA Engineer';
   const email = p.email || 'adhithyam0210@gmail.com';
@@ -732,13 +776,25 @@ function hydrateStory(data) {
     if (brandName && p.name) brandName.textContent = p.name;
 
     const hudAvatar = document.getElementById('hud-profile-avatar');
-    if (hudAvatar && p.avatar) hudAvatar.src = p.avatar;
+    if (hudAvatar) hudAvatar.src = (p.avatar && !p.avatar.startsWith('data:image')) ? p.avatar : 'assets/profile_adhithya.jpg';
 
     const heroAvatar = document.getElementById('hero-profile-avatar');
-    if (heroAvatar && p.avatar) heroAvatar.src = p.avatar;
+    if (heroAvatar) heroAvatar.src = (p.avatar && !p.avatar.startsWith('data:image')) ? p.avatar : 'assets/profile_adhithya.jpg';
+
+    const heroTitle = document.getElementById('c0-about-title');
+    if (heroTitle && p.name) heroTitle.textContent = p.name;
 
     const heroRole = document.getElementById('c0-hero-role');
     if (heroRole && p.role) heroRole.textContent = p.role;
+
+    const heroBio = document.getElementById('c0-about-bio');
+    if (heroBio && p.bio) heroBio.textContent = p.bio;
+
+    const c0LocText = document.getElementById('c0-loc-text');
+    if (c0LocText && p.location) c0LocText.textContent = p.location.replace(/\s*\/\s*Remote/gi, '').trim();
+
+    const c0DeptText = document.getElementById('c0-dept-text');
+    if (c0DeptText && (p.degreeTag || p.department)) c0DeptText.textContent = p.degreeTag || p.department;
 
     const footerCopy = document.getElementById('footer-copy-name');
     if (footerCopy && p.name) footerCopy.textContent = p.name;
@@ -761,6 +817,12 @@ function hydrateStory(data) {
 
     const liLink = document.getElementById('terminal-linkedin-link');
     if (liLink && p.linkedin) liLink.href = p.linkedin;
+
+    // Stage 8 Contact headline & subtext
+    const c8Headline = document.getElementById('c8-headline');
+    const c8Subtext = document.getElementById('c8-subtext');
+    if (c8Headline && p.contactHeadline) c8Headline.textContent = p.contactHeadline;
+    if (c8Subtext && p.contactSubtext) c8Subtext.textContent = p.contactSubtext;
   }
 
   // 2. Stages 1 & 2: Education Hydration (Schooling & College)
@@ -773,14 +835,21 @@ function hydrateStory(data) {
     });
 
     const c1Title = document.getElementById('c1-title');
+    const c1Badge = document.getElementById('c1-badge');
     const c1School = document.getElementById('c1-school');
     const c1Period = document.getElementById('c1-period');
     const c1SchoolList = document.getElementById('c1-school-list');
+    const c1Narrative = document.getElementById('c1-narrative');
+    const c1Takeaway = document.getElementById('c1-takeaway');
 
     if (schoolEd.length > 0) {
-      if (c1Title) c1Title.textContent = 'My Schooling Journey';
-      if (c1School) c1School.textContent = schoolEd[0].institution || 'Sir Ramaswami Mudaliar HSS';
-      if (c1Period) c1Period.style.display = 'none'; // Subtitle removed as requested
+      const primarySchool = schoolEd[0];
+      if (c1Title) c1Title.textContent = primarySchool.cardTitle || 'My Schooling Journey';
+      if (c1Badge) c1Badge.textContent = primarySchool.badge || 'SSLC & HSC DISTINCTION';
+      if (c1School) c1School.textContent = primarySchool.institution || 'Sir Ramaswami Mudaliar Higher Secondary School';
+      if (c1Period) c1Period.style.display = 'none';
+      if (c1Narrative && primarySchool.narrative) c1Narrative.textContent = primarySchool.narrative;
+      if (c1Takeaway && primarySchool.takeaway) c1Takeaway.textContent = primarySchool.takeaway;
 
       if (c1SchoolList) {
         c1SchoolList.innerHTML = schoolEd.map(ed => `
@@ -788,7 +857,7 @@ function hydrateStory(data) {
             <span class="score-number">${escapeHtml(ed.score || 'Pass')}</span>
             <div class="score-meta-group">
               <strong class="score-title">${escapeHtml(ed.degree || 'Secondary Education')}</strong>
-              <span class="score-desc">${escapeHtml(ed.period || '')} &bull; ${escapeHtml(ed.specialization || ed.details || 'Distinction Honors')}</span>
+              <span class="score-desc">${escapeHtml(ed.period || ed.year || '')} &bull; ${escapeHtml(ed.specialization || ed.details || 'Distinction Honors')}</span>
             </div>
           </div>
         `).join('');
@@ -809,13 +878,24 @@ function hydrateStory(data) {
       const c2Score = document.getElementById('c2-score');
       const c2Degree = document.getElementById('c2-degree');
       const c2Badge = document.getElementById('c2-badge');
+      const c2Narrative = document.getElementById('c2-narrative');
+      const c2Takeaway = document.getElementById('c2-takeaway');
 
-      if (c2Title) c2Title.textContent = 'My College Journey';
-      if (c2School) c2School.textContent = collegeEd.institution || 'S A Engineering College';
-      if (c2Period) c2Period.textContent = `${collegeEd.period || '2022 – 2026'} • Anna University Affiliated`;
-      if (c2Score) c2Score.textContent = collegeEd.score || '7.4 CGPA';
-      if (c2Degree) c2Degree.textContent = collegeEd.degree || 'B.Tech AI & Data Science';
-      if (c2Badge) c2Badge.textContent = collegeEd.score ? `${collegeEd.score} CGPA` : 'ENGINEERING';
+      if (c2Title) c2Title.textContent = collegeEd.cardTitle || 'My College Journey';
+      if (c2School) c2School.textContent = collegeEd.institution || 'S A Engineering College, Chennai';
+      if (c2Period) c2Period.textContent = collegeEd.period ? `${collegeEd.period} • Anna University Affiliated` : '2022 – 2026 • Anna University Affiliated';
+      if (c2Score) c2Score.textContent = collegeEd.scorePrefix || 'B.Tech';
+      if (c2Degree) c2Degree.textContent = collegeEd.degree || 'Artificial Intelligence and Data Science';
+      if (c2Badge) {
+        let collegeBadge = collegeEd.badge || collegeEd.score || '7.4 CGPA';
+        collegeBadge = String(collegeBadge).replace(/\bCGPA\s+CGPA\b/gi, 'CGPA').trim();
+        if (/^\d+(\.\d+)?$/.test(collegeBadge)) {
+          collegeBadge = `${collegeBadge} CGPA`;
+        }
+        c2Badge.textContent = collegeBadge;
+      }
+      if (c2Narrative && collegeEd.narrative) c2Narrative.textContent = collegeEd.narrative;
+      if (c2Takeaway && collegeEd.takeaway) c2Takeaway.textContent = collegeEd.takeaway;
     }
   }
 
@@ -890,12 +970,27 @@ function hydrateStory(data) {
 
   // 4. Stage 4: Internship Hydration (Softrate Tech Park)
   if (Array.isArray(data.experience) && data.experience.length > 0) {
+    const exp = data.experience[0];
+    const c4Title = document.getElementById('c4-title');
+    const c4Badge = document.getElementById('c4-badge');
+    const c4Company = document.getElementById('c4-company');
+    const c4Period = document.getElementById('c4-period');
+    const c4Desc = document.getElementById('c4-narrative');
+    const c4Takeaway = document.getElementById('c4-takeaway');
+
+    if (c4Title) c4Title.textContent = exp.cardTitle || exp.role || 'My Internship';
+    if (c4Badge) c4Badge.textContent = exp.badge || 'LIVE INTERNSHIP';
+    if (c4Company && exp.company) c4Company.textContent = exp.company;
+    if (c4Period && exp.period) c4Period.textContent = exp.period;
+    if (c4Desc && (exp.narrative || exp.description)) c4Desc.textContent = exp.narrative || exp.description;
+    if (c4Takeaway && exp.takeaway) c4Takeaway.textContent = exp.takeaway;
+
     const m1Val = document.getElementById('c4-metric-1');
     const m1Lbl = document.getElementById('c4-metric-lbl-1');
     const m2Val = document.getElementById('c4-metric-2');
     const m2Lbl = document.getElementById('c4-metric-lbl-2');
 
-    if (Array.isArray(exp.metrics)) {
+    if (exp && Array.isArray(exp.metrics)) {
       if (exp.metrics[0]) {
         if (m1Val && exp.metrics[0].value) m1Val.textContent = exp.metrics[0].value;
         if (m1Lbl && exp.metrics[0].label) m1Lbl.textContent = exp.metrics[0].label;
@@ -912,15 +1007,29 @@ function hydrateStory(data) {
   const projects = Array.isArray(data.projects) ? data.projects : [];
 
   if (projectsContainer && projects.length > 0) {
+    function getProjectSubtitle(proj) {
+      if (proj.subtitle && proj.subtitle.trim() && proj.subtitle.trim().toLowerCase() !== (proj.categoryLabel || '').trim().toLowerCase()) {
+        return proj.subtitle.trim();
+      }
+      const titleUpper = (proj.title || '').toUpperCase();
+      if (titleUpper.includes('MOZHIBU')) return 'Node-Based Pipeline & Test Suite';
+      if (titleUpper.includes('ZYTHA')) return 'E-Commerce Quality Assurance';
+      return proj.categoryLabel ? `${proj.categoryLabel} • Pipeline` : 'Automation Pipeline';
+    }
+
     if (projects.length === 1) {
-      // 1 Project: Featured Full Layout (Direct title, no badges over name, no glow rim)
       const proj = projects[0];
       const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
       projectsContainer.className = 'projects-dynamic-container projects-layout-single';
       projectsContainer.innerHTML = `
         <div class="chapter-card-glass project-highlight-card">
-          <h2 class="chapter-title">${escapeHtml(proj.title || 'Featured Project')}</h2>
-          <div class="chapter-institution">${escapeHtml(proj.subtitle || proj.categoryLabel || 'Full-Stack Testing & Automation')}</div>
+          <div class="project-card-header">
+            <div class="project-header-top-row">
+              <h2 class="chapter-title" style="margin: 0 !important;">${escapeHtml(proj.title || 'Featured Project')}</h2>
+              <span class="project-cat-badge">${escapeHtml(proj.categoryLabel || 'PROJECT')}</span>
+            </div>
+            <div class="project-card-subtitle">${escapeHtml(getProjectSubtitle(proj))}</div>
+          </div>
           <div class="project-tags-cloud">${tags}</div>
           <p class="chapter-narrative">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
           <div class="project-actions-row">
@@ -939,14 +1048,18 @@ function hydrateStory(data) {
         </div>
       `;
     } else if (projects.length === 2) {
-      // 2 Projects: Duo Side-by-Side Grid (Direct bold name, no circle badge over title, no glow rim)
       projectsContainer.className = 'projects-dynamic-container projects-layout-duo';
       projectsContainer.innerHTML = projects.map(proj => {
         const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).slice(0, 4).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
         return `
           <div class="project-card-glass">
-            <h3 class="project-card-title">${escapeHtml(proj.title)}</h3>
-            <div class="project-card-subtitle">${escapeHtml(proj.subtitle || proj.categoryLabel || '')}</div>
+            <div class="project-card-header">
+              <div class="project-header-top-row">
+                <h3 class="project-card-title">${escapeHtml(proj.title)}</h3>
+                <span class="project-cat-badge">${escapeHtml(proj.categoryLabel || 'PROJECT')}</span>
+              </div>
+              <div class="project-card-subtitle">${escapeHtml(getProjectSubtitle(proj))}</div>
+            </div>
             <div class="project-tags-cloud" style="margin-bottom: 8px;">${tags}</div>
             <p class="project-card-desc">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
             <div class="project-actions-row">
@@ -965,13 +1078,18 @@ function hydrateStory(data) {
         `;
       }).join('');
     } else {
-      // 3+ Projects: Multi Auto-Adjusting Grid with Scroll (Direct bold name, no glow rim)
       projectsContainer.className = 'projects-dynamic-container projects-layout-multi';
       projectsContainer.innerHTML = projects.map(proj => {
         const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).slice(0, 3).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
         return `
           <div class="project-card-glass">
-            <h3 class="project-card-title" style="font-size: 1.05rem;">${escapeHtml(proj.title)}</h3>
+            <div class="project-card-header">
+              <div class="project-header-top-row">
+                <h3 class="project-card-title" style="font-size: 1.05rem;">${escapeHtml(proj.title)}</h3>
+                <span class="project-cat-badge" style="font-size: 0.62rem; padding: 2px 6px !important;">${escapeHtml(proj.categoryLabel || 'PROJECT')}</span>
+              </div>
+              <div class="project-card-subtitle" style="font-size: 0.75rem; margin-bottom: 6px;">${escapeHtml(getProjectSubtitle(proj))}</div>
+            </div>
             <div class="project-tags-cloud" style="margin-bottom: 6px;">${tags}</div>
             <p class="project-card-desc" style="font-size: 0.78rem;">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
             <div class="project-actions-row" style="margin-top: auto;">
@@ -993,6 +1111,14 @@ function hydrateStory(data) {
   }
 
   // 6. Stage 6: Skills Garden Hydration (Distinct Colors for Strong, Proficient, Intermediate Levels)
+  const skillsHdr = data.skillsHeader || {};
+  const c6Title = document.getElementById('c6-title');
+  const c6Subtitle = document.getElementById('c6-subtitle');
+  const c6Badge = document.getElementById('c6-badge');
+  if (c6Title && skillsHdr.title) c6Title.textContent = skillsHdr.title;
+  if (c6Subtitle && skillsHdr.subtitle) c6Subtitle.textContent = skillsHdr.subtitle;
+  if (c6Badge && (skillsHdr.statusBadge || skillsHdr.badge)) c6Badge.textContent = skillsHdr.statusBadge || skillsHdr.badge;
+
   const skillsList = document.getElementById('c6-skills-list');
   const skillsSource = (data.skills && Object.keys(data.skills).length > 0) ? data.skills : ((typeof PORTFOLIO_DATA !== 'undefined' && PORTFOLIO_DATA.skills) ? PORTFOLIO_DATA.skills : null);
   if (skillsList && skillsSource) {
@@ -1044,16 +1170,20 @@ function hydrateStory(data) {
     const vTitle = document.getElementById('c7-vision-title');
     const vQuote = document.getElementById('c7-vision-quote');
     const vNar = document.getElementById('c7-vision-narrative');
+    const vBadge = document.getElementById('c7-vision-badge');
     const pillarsGrid = document.getElementById('c7-vision-pillars');
 
     if (vTitle && v.title) vTitle.textContent = v.title;
-    if (vQuote && v.quote) vQuote.textContent = `"${v.quote}"`;
+    if (vQuote && v.quote) {
+      const cleanQuote = v.quote.replace(/^["“”']+|["“”']+$/g, '').trim();
+      vQuote.textContent = `"${cleanQuote}"`;
+    }
+    if (vBadge && v.badge) vBadge.textContent = v.badge;
     if (vNar && v.narrative) vNar.textContent = v.narrative;
 
     if (pillarsGrid && Array.isArray(v.pillars) && v.pillars.length > 0) {
       pillarsGrid.innerHTML = v.pillars.map(pillar => `
         <div class="quality-chip">
-          <span class="quality-dot"></span>
           <div class="quality-chip-text">
             <strong>${escapeHtml(pillar.title)}:</strong> <span>${escapeHtml(pillar.description || '')}</span>
           </div>

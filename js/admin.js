@@ -29,12 +29,15 @@ let currentEditingExpIndex = null;
 let currentEditingEduIndex = null;
 let selectedImageData = null;
 let profileAvatarData = null;
+let resumeDocData = null;
+let resumeDocFilename = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initTabs();
   initImagePicker();
   initProfileAvatarPicker();
+  initResumeDocPicker();
   renderAll();
 });
 
@@ -231,6 +234,36 @@ function initProfileAvatarPicker() {
   });
 }
 
+function initResumeDocPicker() {
+  const docInput = document.getElementById('resume-doc-input');
+  const nameLabel = document.getElementById('resume-doc-name');
+
+  if (!docInput) return;
+
+  docInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    resumeDocFilename = file.name;
+    const sizeKb = (file.size / 1024).toFixed(1);
+    if (nameLabel) {
+      nameLabel.innerHTML = `Selected: <strong>${escapeHtml(file.name)}</strong> (${sizeKb} KB) &mdash; <span style="color: var(--accent-green);">Ready to save</span>`;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      resumeDocData = event.target.result;
+      try {
+        localStorage.setItem('portfolio_resume_doc', resumeDocData);
+        localStorage.setItem('portfolio_resume_filename', resumeDocFilename);
+      } catch (err) {
+        console.warn('Could not cache resume in localStorage:', err);
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 function handleCategoryChange(select) {
   const customGroup = document.getElementById('custom-category-group');
   const customInput = document.getElementById('custom-category-input');
@@ -317,6 +350,8 @@ function openProjectModal(isEdit = false) {
     selectedImageData = null;
     titleElem.textContent = 'Add New Project';
     form.reset();
+    const subInput = document.getElementById('project-subtitle');
+    if (subInput) subInput.value = '';
     document.getElementById('project-category').value = 'testing';
     if (customGroup) customGroup.style.display = 'none';
     if (customInput) customInput.value = '';
@@ -347,6 +382,8 @@ async function editProject(id) {
   selectedImageData = project.image || '';
 
   document.getElementById('project-title').value = project.title || '';
+  const subInput = document.getElementById('project-subtitle');
+  if (subInput) subInput.value = project.subtitle || '';
   
   const catSelect = document.getElementById('project-category');
   const customGroup = document.getElementById('custom-category-group');
@@ -388,6 +425,7 @@ async function saveProjectForm(e) {
   e.preventDefault();
 
   const title = document.getElementById('project-title').value.trim();
+  const subtitle = document.getElementById('project-subtitle')?.value.trim() || '';
   const rawCategory = document.getElementById('project-category').value;
   let category = rawCategory;
   let categoryLabel = 'Software Testing';
@@ -418,6 +456,7 @@ async function saveProjectForm(e) {
 
   const projectPayload = {
     title,
+    subtitle,
     category,
     categoryLabel,
     image,
@@ -463,6 +502,14 @@ async function renderProfileForm() {
   document.getElementById('prof-github').value = p.github || '';
   document.getElementById('prof-linkedin').value = p.linkedin || '';
 
+  const degInput = document.getElementById('prof-degree');
+  if (degInput) degInput.value = p.degreeTag || '';
+
+  const cHeadline = document.getElementById('prof-contact-headline');
+  const cSubtext = document.getElementById('prof-contact-subtext');
+  if (cHeadline) cHeadline.value = p.contactHeadline || '';
+  if (cSubtext) cSubtext.value = p.contactSubtext || '';
+
   const aboutQuoteInput = document.getElementById('prof-about-quote');
   const aboutNarrativeInput = document.getElementById('prof-about-narrative');
   if (aboutQuoteInput) aboutQuoteInput.value = data.aboutMe?.quote || '';
@@ -480,9 +527,11 @@ async function renderProfileForm() {
   // QA Vision & Philosophy (Stage 7)
   const vision = data.vision || {};
   const vTitle = document.getElementById('prof-vision-title');
+  const vBadge = document.getElementById('prof-vision-badge');
   const vQuote = document.getElementById('prof-vision-quote');
   const vNar = document.getElementById('prof-vision-narrative');
   if (vTitle) vTitle.value = vision.title || 'QA Vision & Philosophy';
+  if (vBadge) vBadge.value = vision.badge || 'ENGINEERING EXCELLENCE';
   if (vQuote) vQuote.value = vision.quote || '';
   if (vNar) vNar.value = vision.narrative || '';
 
@@ -503,6 +552,14 @@ async function renderProfileForm() {
     if (placeholder) placeholder.style.display = 'none';
     if (photoName) photoName.textContent = 'Custom photo set';
   }
+
+  // Resume Document Status
+  const resumeName = document.getElementById('resume-doc-name');
+  const existingResume = p.resumeUrl || localStorage.getItem('portfolio_resume_doc');
+  const existingFilename = p.resumeFilename || localStorage.getItem('portfolio_resume_filename');
+  if (existingResume && resumeName) {
+    resumeName.innerHTML = `Current: <strong>${escapeHtml(existingFilename || 'Uploaded Resume')}</strong> <a href="${existingResume}" download="${escapeHtml(existingFilename || 'Resume.pdf')}" style="margin-left: 8px; color: var(--accent-cyan, #38bdf8); text-decoration: underline;">(Download Preview)</a>`;
+  }
 }
 
 async function saveProfileForm(e) {
@@ -515,12 +572,17 @@ async function saveProfileForm(e) {
     name: document.getElementById('prof-name').value.trim(),
     role: document.getElementById('prof-role').value.trim(),
     location: document.getElementById('prof-location').value.trim(),
+    degreeTag: document.getElementById('prof-degree')?.value.trim() || '',
+    contactHeadline: document.getElementById('prof-contact-headline')?.value.trim() || '',
+    contactSubtext: document.getElementById('prof-contact-subtext')?.value.trim() || '',
     tagline: document.getElementById('prof-tagline').value.trim(),
     bio: document.getElementById('prof-bio').value.trim(),
     email: document.getElementById('prof-email').value.trim(),
     github: document.getElementById('prof-github').value.trim(),
     linkedin: document.getElementById('prof-linkedin').value.trim(),
-    avatar: profileAvatarData || existingAvatar
+    avatar: profileAvatarData || existingAvatar,
+    resumeUrl: resumeDocData || currentData.profile?.resumeUrl || localStorage.getItem('portfolio_resume_doc') || '',
+    resumeFilename: resumeDocFilename || currentData.profile?.resumeFilename || localStorage.getItem('portfolio_resume_filename') || ''
   };
 
   // 1. Save About Me (Quote, Narrative, 5 Qualities)
@@ -557,6 +619,7 @@ async function saveProfileForm(e) {
   const visionPayload = {
     title: document.getElementById('prof-vision-title')?.value.trim() || 'QA Vision & Philosophy',
     subtitle: 'CONTINUOUS GROWTH',
+    badge: document.getElementById('prof-vision-badge')?.value.trim() || 'ENGINEERING EXCELLENCE',
     quote: document.getElementById('prof-vision-quote')?.value.trim() || '',
     narrative: document.getElementById('prof-vision-narrative')?.value.trim() || '',
     pillars: pillars.length > 0 ? pillars : (currentData.vision?.pillars || [])
@@ -577,6 +640,15 @@ async function renderSkillsManager() {
 
   const data = await PortfolioAPI.getPortfolio();
   const skills = data.skills || {};
+
+  // Populate Stage 06 header settings
+  const hdr = data.skillsHeader || (data.profile && data.profile.skillsHeader) || {};
+  const sTitle = document.getElementById('skill-hdr-title');
+  const sStatus = document.getElementById('skill-hdr-status');
+  const sSubtitle = document.getElementById('skill-hdr-subtitle');
+  if (sTitle) sTitle.value = hdr.title || 'Technical Skill Garden';
+  if (sStatus) sStatus.value = hdr.statusBadge || 'QUALITATIVE PROFICIENCY';
+  if (sSubtitle) sSubtitle.value = hdr.subtitle || 'Honed through coursework, college engineering, and real internship delivery.';
 
   const categories = [
     { key: 'testing', title: 'Testing' },
@@ -651,6 +723,23 @@ async function deleteSkill(catKey, index) {
   }
 }
 
+async function saveSkillsHeaderForm(e) {
+  e.preventDefault();
+  const title = document.getElementById('skill-hdr-title')?.value.trim() || 'Technical Skill Garden';
+  const statusBadge = document.getElementById('skill-hdr-status')?.value.trim() || 'QUALITATIVE PROFICIENCY';
+  const subtitle = document.getElementById('skill-hdr-subtitle')?.value.trim() || 'Honed through coursework, college engineering, and real internship delivery.';
+
+  const headerPayload = {
+    title,
+    statusBadge,
+    subtitle
+  };
+
+  showToast('Saving Stage 06 settings...');
+  const res = await PortfolioAPI.updateSkillsHeader(headerPayload);
+  notifySaveResult('Stage 06 settings saved', res);
+}
+
 /* ==========================================================================
    Experience Manager (CRUD via REST API)
    ========================================================================== */
@@ -697,6 +786,12 @@ function openExpModal(isEdit = false) {
     currentEditingExpIndex = null;
     title.textContent = 'Add Career Milestone';
     form.reset();
+    const cTitle = document.getElementById('exp-card-title');
+    const cBadge = document.getElementById('exp-card-badge');
+    const cTakeaway = document.getElementById('exp-takeaway');
+    if (cTitle) cTitle.value = '';
+    if (cBadge) cBadge.value = '';
+    if (cTakeaway) cTakeaway.value = '';
     document.getElementById('exp-metric1-val').value = '';
     document.getElementById('exp-metric1-lbl').value = '';
     document.getElementById('exp-metric2-val').value = '';
@@ -720,6 +815,13 @@ async function editExperience(index) {
   if (!exp) return;
 
   currentEditingExpIndex = index;
+  const cTitle = document.getElementById('exp-card-title');
+  const cBadge = document.getElementById('exp-card-badge');
+  const cTakeaway = document.getElementById('exp-takeaway');
+  if (cTitle) cTitle.value = exp.cardTitle || '';
+  if (cBadge) cBadge.value = exp.badge || '';
+  if (cTakeaway) cTakeaway.value = exp.takeaway || '';
+
   document.getElementById('exp-role').value = exp.role || '';
   document.getElementById('exp-company').value = exp.company || '';
   document.getElementById('exp-location').value = exp.location || '';
@@ -745,6 +847,10 @@ async function saveExperienceForm(e) {
   const data = await PortfolioAPI.getPortfolio();
   data.experience = data.experience || [];
 
+  const cardTitle = document.getElementById('exp-card-title')?.value.trim() || '';
+  const badge = document.getElementById('exp-card-badge')?.value.trim() || '';
+  const takeaway = document.getElementById('exp-takeaway')?.value.trim() || '';
+
   const role = document.getElementById('exp-role').value.trim();
   const company = document.getElementById('exp-company').value.trim();
   const location = document.getElementById('exp-location').value.trim();
@@ -767,6 +873,9 @@ async function saveExperienceForm(e) {
   const existing = currentEditingExpIndex !== null ? data.experience[currentEditingExpIndex] : {};
   const entry = {
     ...existing,
+    cardTitle: cardTitle || existing.cardTitle || '',
+    badge: badge || existing.badge || '',
+    takeaway: takeaway || existing.takeaway || '',
     role,
     company,
     location,
@@ -858,6 +967,14 @@ function openEducationModal(isEdit = false) {
     form.reset();
     const idxInput = document.getElementById('education-index');
     if (idxInput) idxInput.value = '';
+    const cTitleInput = document.getElementById('edu-card-title');
+    if (cTitleInput) cTitleInput.value = '';
+    const badgeInput = document.getElementById('edu-badge');
+    if (badgeInput) badgeInput.value = '';
+    const prefixInput = document.getElementById('edu-score-prefix');
+    if (prefixInput) prefixInput.value = '';
+    const detailsInput = document.getElementById('edu-details');
+    if (detailsInput) detailsInput.value = '';
     const narrativeInput = document.getElementById('edu-narrative');
     if (narrativeInput) narrativeInput.value = '';
     const takeawayInput = document.getElementById('edu-takeaway');
@@ -881,6 +998,15 @@ async function editEducation(index) {
   if (!edu) return;
 
   currentEditingEduIndex = index;
+  const cTitleInput = document.getElementById('edu-card-title');
+  if (cTitleInput) cTitleInput.value = edu.cardTitle || '';
+  const badgeInput = document.getElementById('edu-badge');
+  if (badgeInput) badgeInput.value = edu.badge || '';
+  const prefixInput = document.getElementById('edu-score-prefix');
+  if (prefixInput) prefixInput.value = edu.scorePrefix || '';
+  const detailsInput = document.getElementById('edu-details');
+  if (detailsInput) detailsInput.value = edu.details || edu.specialization || '';
+
   document.getElementById('edu-degree').value = edu.degree || '';
   document.getElementById('edu-institution').value = edu.institution || '';
   document.getElementById('edu-year').value = edu.year || edu.period || '';
@@ -901,6 +1027,11 @@ async function saveEducationForm(e) {
   const data = await PortfolioAPI.getPortfolio();
   data.education = data.education || [];
 
+  const cardTitle = document.getElementById('edu-card-title')?.value.trim() || '';
+  const badge = document.getElementById('edu-badge')?.value.trim() || '';
+  const scorePrefix = document.getElementById('edu-score-prefix')?.value.trim() || '';
+  const details = document.getElementById('edu-details')?.value.trim() || '';
+
   const degree = document.getElementById('edu-degree').value.trim();
   const institution = document.getElementById('edu-institution').value.trim();
   const year = document.getElementById('edu-year').value.trim();
@@ -912,6 +1043,11 @@ async function saveEducationForm(e) {
   const takeaway = takeawayInput ? takeawayInput.value.trim() : '';
 
   const entry = {
+    cardTitle,
+    badge,
+    scorePrefix,
+    details,
+    specialization: details,
     degree,
     institution,
     year,
