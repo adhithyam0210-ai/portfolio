@@ -126,6 +126,13 @@
         </svg>
         <span>Education</span>
       </button>
+      <button class="tab-btn" data-tab="courses">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span>Courses</span>
+      </button>
       <button class="tab-btn" data-tab="messages">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -250,8 +257,97 @@
             </div>
           </div>
 
-          <button type="submit" class="btn-primary">
-            <span>Save Profile Changes</span>
+          <!-- About Me & Reflection (Stage 0) -->
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Stage 0 &bull; About Me &amp; Core Philosophy</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+              Displayed on the opening Stage 0 glass card in the cinematic journey.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-about-quote">Philosophical QA Quote</label>
+              <input type="text" id="prof-about-quote" class="form-input" placeholder="e.g. Every defect found early is a user saved from frustration." />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-about-narrative">Reflection Narrative</label>
+              <textarea id="prof-about-narrative" class="form-textarea" placeholder="Reflect on your growth, quality mindset, and problem-solving passion..." rows="3"></textarea>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 8px; display: block;">5 Core Qualities (Displayed on About Me card):</label>
+              <div id="prof-qualities-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="form-grid-2">
+                  <input type="text" id="prof-q-title-0" class="form-input" placeholder="Quality 1 Title (e.g. Adaptable)" />
+                  <input type="text" id="prof-q-desc-0" class="form-input" placeholder="Quality 1 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-q-title-1" class="form-input" placeholder="Quality 2 Title (e.g. Good Team Player)" />
+                  <input type="text" id="prof-q-desc-1" class="form-input" placeholder="Quality 2 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-q-title-2" class="form-input" placeholder="Quality 3 Title (e.g. Curious Learner)" />
+                  <input type="text" id="prof-q-desc-2" class="form-input" placeholder="Quality 3 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-q-title-3" class="form-input" placeholder="Quality 4 Title (e.g. Problem Solver)" />
+                  <input type="text" id="prof-q-desc-3" class="form-input" placeholder="Quality 4 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-q-title-4" class="form-input" placeholder="Quality 5 Title (e.g. Quality Champion)" />
+                  <input type="text" id="prof-q-desc-4" class="form-input" placeholder="Quality 5 Description" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- QA Vision & Strategy (Stage 7) -->
+          <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-light);">
+            <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">Stage 7 &bull; QA Vision &amp; Strategic Philosophy</h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px;">
+              Displayed on the Stage 7 Quality Vision glass card.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-vision-title">Vision Title</label>
+              <input type="text" id="prof-vision-title" class="form-input" placeholder="e.g. QA Vision & Philosophy" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-vision-quote">Vision Quote</label>
+              <input type="text" id="prof-vision-quote" class="form-input" placeholder='e.g. "Quality is not an act, it is a habit..."' />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="prof-vision-narrative">Strategic Narrative</label>
+              <textarea id="prof-vision-narrative" class="form-textarea" placeholder="Describe your forward-looking quality assurance mission..." rows="3"></textarea>
+            </div>
+
+            <div style="margin-top: 16px;">
+              <label class="form-label" style="font-weight: 700; margin-bottom: 8px; display: block;">4 Focus Pillars:</label>
+              <div id="prof-pillars-list" style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="form-grid-2">
+                  <input type="text" id="prof-p-title-0" class="form-input" placeholder="Pillar 1 Title (e.g. Automation Architecture)" />
+                  <input type="text" id="prof-p-desc-0" class="form-input" placeholder="Pillar 1 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-p-title-1" class="form-input" placeholder="Pillar 2 Title (e.g. CI/CD Quality Gates)" />
+                  <input type="text" id="prof-p-desc-1" class="form-input" placeholder="Pillar 2 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-p-title-2" class="form-input" placeholder="Pillar 3 Title (e.g. API & Contract Testing)" />
+                  <input type="text" id="prof-p-desc-2" class="form-input" placeholder="Pillar 3 Description" />
+                </div>
+                <div class="form-grid-2">
+                  <input type="text" id="prof-p-title-3" class="form-input" placeholder="Pillar 4 Title (e.g. Root Cause Analysis)" />
+                  <input type="text" id="prof-p-desc-3" class="form-input" placeholder="Pillar 4 Description" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 20px;">
+            <span>Save Profile, About Me &amp; Vision Changes</span>
           </button>
         </form>
       </div>
@@ -303,6 +399,62 @@
       </div>
 
       <div id="admin-education-container" class="exp-admin-list">
+        <!-- Rendered by js/admin.js -->
+      </div>
+    </section>
+
+    <!-- 6. COURSES & CERTIFICATIONS TAB -->
+    <section id="tab-courses" class="tab-pane">
+      <div class="pane-head">
+        <div>
+          <h2 class="pane-title">Courses &amp; Certifications (Stage 03)</h2>
+          <p class="pane-desc">Manage software testing courses, automation certifications, and technical training.</p>
+        </div>
+        <button class="btn-primary" onclick="openCourseModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Course / Certification</span>
+        </button>
+      </div>
+
+      <!-- Stage 03 Header & Badges Settings Form -->
+      <div class="admin-card" style="margin-bottom: 24px; padding: 20px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-glass); border-radius: 16px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Stage 03 Display Settings</h3>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">Customize the top era badge, status badge, title, and description displayed on the live Stage 03 story card.</p>
+        
+        <form id="courses-header-form" onsubmit="saveCoursesHeaderForm(event)">
+          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+            <div class="form-group">
+              <label class="form-label" for="course-hdr-era">Top Era Badge</label>
+              <input type="text" id="course-hdr-era" class="form-input" placeholder="e.g. STAGE 03 • SPECIALIZED TRAINING" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="course-hdr-status">Status Badge</label>
+              <input type="text" id="course-hdr-status" class="form-input" placeholder="e.g. CERTIFIED • INDUSTRY-READY" />
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="course-hdr-title">Stage Title</label>
+            <input type="text" id="course-hdr-title" class="form-input" placeholder="e.g. What I Learned Along the Way" />
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label class="form-label" for="course-hdr-subtitle">Stage Subtitle / Description</label>
+            <input type="text" id="course-hdr-subtitle" class="form-input" placeholder="e.g. Hands-on certifications & rigorous testing frameworks." />
+          </div>
+
+          <button type="submit" class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+            <span>Save Stage 03 Settings</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="pane-subhead" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main);">Course &amp; Certification Cards</h3>
+        <span style="font-size: 0.80rem; color: var(--text-secondary);">Cards auto-render dynamically in Stage 03</span>
+      </div>
+
+      <div id="admin-courses-container" class="exp-admin-list">
         <!-- Rendered by js/admin.js -->
       </div>
     </section>
@@ -660,6 +812,33 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
           </div>
         </div>
 
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="exp-metric1-val">Metric 1 Value (Stage 4)</label>
+            <input type="text" id="exp-metric1-val" class="form-input" placeholder="e.g. 99.8%" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-metric1-lbl">Metric 1 Label</label>
+            <input type="text" id="exp-metric1-lbl" class="form-input" placeholder="e.g. Release Pass Rate" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="exp-metric2-val">Metric 2 Value (Stage 4)</label>
+            <input type="text" id="exp-metric2-val" class="form-input" placeholder="e.g. 30%" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="exp-metric2-lbl">Metric 2 Label</label>
+            <input type="text" id="exp-metric2-lbl" class="form-input" placeholder="e.g. Cycle Reduction" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="exp-narrative">Journey Story Narrative</label>
+          <textarea id="exp-narrative" class="form-textarea" placeholder="Narrative text displayed on the Stage 4 card..." rows="2"></textarea>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="exp-desc">Summary Description</label>
           <textarea id="exp-desc" class="form-textarea" placeholder="Key responsibilities and technical focus..." required></textarea>
@@ -717,9 +896,72 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
           <input type="text" id="edu-location" class="form-input" placeholder="e.g. Chennai, Tamil Nadu" />
         </div>
 
+        <div class="form-group">
+          <label class="form-label" for="edu-narrative">Story Walk Narrative (Displayed on Story Card)</label>
+          <textarea id="edu-narrative" class="form-textarea" placeholder="Describe this milestone, your learning focus, and growth..." rows="3"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="edu-takeaway">Key Learning / Highlights</label>
+          <input type="text" id="edu-takeaway" class="form-input" placeholder="e.g. Analytical thinking, programming logic, distinction" />
+        </div>
+
         <div class="modal-actions-row">
           <button type="button" class="btn-secondary" onclick="closeEducationModal()">Cancel</button>
           <button type="submit" class="btn-primary">Save Education</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add/Edit Course & Certification Modal -->
+  <div id="course-modal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="modal-course-title" class="modal-title">Add Course / Certification</h3>
+        <button class="modal-close-btn" onclick="closeCourseModal()" aria-label="Close modal">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <form id="course-form" onsubmit="saveCourseForm(event)">
+        <input type="hidden" id="course-index" value="" />
+
+        <div class="form-group">
+          <label class="form-label" for="course-name">Course / Certification Title <span class="required-star">*</span></label>
+          <input type="text" id="course-name" class="form-input" placeholder="e.g. Software Testing & Selenium Automation" required />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="course-platform">Platform / Institute <span class="required-star">*</span></label>
+            <input type="text" id="course-platform" class="form-input" placeholder="e.g. SLA Institute" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="course-year">Completion Year <span class="required-star">*</span></label>
+            <input type="text" id="course-year" class="form-input" placeholder="e.g. 2026" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="course-category">Category</label>
+          <select id="course-category" class="form-input">
+            <option value="Automation">Automation Testing</option>
+            <option value="Testing">Manual Testing</option>
+            <option value="Database">SQL &amp; Database</option>
+            <option value="Tools">API Testing &amp; Tools</option>
+            <option value="Programming">Programming</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="course-desc">Short Description (Floating Card Summary)</label>
+          <textarea id="course-desc" class="form-textarea" placeholder="Key skills mastered, frameworks, and tools..." rows="3" required></textarea>
+        </div>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-secondary" onclick="closeCourseModal()">Cancel</button>
+          <button type="submit" class="btn-primary">Save Course</button>
         </div>
       </form>
     </div>
@@ -730,9 +972,9 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/db-config.js?v=3.2"></script>
-  <script src="js/config.js?v=3.2"></script>
-  <script src="js/api.js?v=3.2"></script>
-  <script src="js/admin.js?v=3.2"></script>
+  <script src="js/db-config.js?v=6.1"></script>
+  <script src="js/config.js?v=6.1"></script>
+  <script src="js/api.js?v=6.1"></script>
+  <script src="js/admin.js?v=6.1"></script>
 </body>
 </html>

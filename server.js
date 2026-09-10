@@ -377,6 +377,26 @@ const server = http.createServer(async (req, res) => {
         return res.end(JSON.stringify({ success: true, education: data.education }));
       }
 
+      // PUT /api/courses
+      if (pathname === '/api/courses' && method === 'PUT') {
+        const body = await parseBody(req);
+        const data = readData();
+        data.courses = Array.isArray(body) ? body : (body.courses || []);
+        writeData(data);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, courses: data.courses }));
+      }
+
+      // PUT /api/coursesHeader
+      if (pathname === '/api/coursesHeader' && method === 'PUT') {
+        const body = await parseBody(req);
+        const data = readData();
+        data.coursesHeader = { ...(data.coursesHeader || {}), ...body };
+        writeData(data);
+        res.writeHead(200);
+        return res.end(JSON.stringify({ success: true, coursesHeader: data.coursesHeader }));
+      }
+
       // GET /api/messages
       if (pathname === '/api/messages' && method === 'GET') {
         const msgs = readMessages();
@@ -458,12 +478,69 @@ const server = http.createServer(async (req, res) => {
       return res.end('404 Not Found');
     }
 
-    const ext = path.extname(filePath).toLowerCase();
-    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    const mimeTypes = {
+      '.html': 'text/html; charset=utf-8',
+      '.css': 'text/css; charset=utf-8',
+      '.js': 'application/javascript; charset=utf-8',
+      '.json': 'application/json; charset=utf-8',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.ico': 'image/x-icon',
+      '.mp4': 'video/mp4',
+      '.webm': 'video/webm',
+      '.ogg': 'video/ogg',
+      '.wav': 'audio/wav',
+      '.mp3': 'audio/mpeg',
+      '.woff2': 'font/woff2',
+      '.woff': 'font/woff',
+      '.ttf': 'font/ttf'
+    };
 
-    res.writeHead(200, { 'Content-Type': contentType });
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = mimeTypes[ext] || 'application/octet-stream';
+    const totalSize = stats.size;
+
+    // Handle HTTP Range Requests for instant Video Seeking & Scrubbing
+    const range = req.headers.range;
+    if (range && (ext === '.mp4' || ext === '.webm' || ext === '.ogg')) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : totalSize - 1;
+
+      if (start >= totalSize || end >= totalSize) {
+        res.writeHead(416, {
+          'Content-Range': `bytes */${totalSize}`
+        });
+        return res.end();
+      }
+
+      const chunkSize = (end - start) + 1;
+      const fileStream = fs.createReadStream(filePath, { start, end });
+      res.writeHead(206, {
+        'Content-Range': `bytes ${start}-${end}/${totalSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize,
+        'Content-Type': contentType
+      });
+      fileStream.pipe(res);
+    } else {
+      const isCodeAsset = ext === '.html' || ext === '.css' || ext === '.js' || ext === '.json';
+      const headers = {
+        'Content-Length': totalSize,
+        'Content-Type': contentType,
+        'Accept-Ranges': 'bytes'
+      };
+      if (isCodeAsset) {
+        headers['Cache-Control'] = 'no-cache, no-store, must-revalidate';
+        headers['Pragma'] = 'no-cache';
+        headers['Expires'] = '0';
+      }
+      res.writeHead(200, headers);
+      fs.createReadStream(filePath).pipe(res);
+    }
   });
 });
 

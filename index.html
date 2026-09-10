@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ADHITHYA | Software Tester Portfolio</title>
+  <title>ADHITHYA | Story-Driven Journey &amp; Software Quality Portfolio</title>
   <meta name="description"
-    content="Portfolio of ADHITHYA, a Software Tester specializing in SDLC, STLC, manual &amp; automated testing, and reliable software delivery.">
+    content="A continuous story-based personal portfolio following a young boy walking along a curved pathway through education, skills, and engineering milestones by Adhithya, Software Tester &amp; QA Engineer.">
   <meta name="author" content="ADHITHYA">
 
   <!-- Favicon ('A' Symbol) -->
@@ -17,287 +17,503 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website">
-  <meta property="og:title" content="ADHITHYA | Software Tester">
+  <meta property="og:title" content="ADHITHYA | Story-Driven Journey Portfolio">
   <meta property="og:description"
-    content="Explore software testing projects, automated frameworks, and technical proficiencies by ADHITHYA.">
-  <meta property="og:image" content="assets/projects/nexus_ai.jpg">
+    content="Experience a continuous story-driven journey through software testing frameworks, educational milestones, and engineering impact.">
+  <meta property="og:image" content="assets/avatar_cartoon.jpg">
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=8.0">
 </head>
 
-<body>
+<body class="journey-body">
 
-  <!-- Swiggy / Zomato Inspired Header -->
-  <header class="site-header">
-    <div class="container nav-wrap">
-      <div class="brand-section">
-        <a href="#top" class="brand-logo">
-          <span id="hero-brand-name">ADHITHYA</span>
+  <!-- Cinematic City Walk Splash Screen Preloader -->
+  <div id="splash-screen" class="splash-screen-overlay" aria-live="polite">
+    <div class="splash-content">
+      <div class="splash-logo-mark">A</div>
+      <h1 class="splash-title">ADHITHYA M</h1>
+      <p class="splash-subtitle">Interactive City Journey &bull; Software Quality &amp; Test Automation</p>
+      
+      <div class="splash-progress-track">
+        <div id="splash-progress-bar" class="splash-progress-bar"></div>
+      </div>
+      
+      <div class="splash-status-row">
+        <span id="splash-status-text" class="splash-status-text">Loading cinematic city frames...</span>
+        <span id="splash-percent-text" class="splash-percent-text">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating HUD Top Bar (Clean Frameless Bar - No Outer Capsule Pill) -->
+  <header class="cinematic-hud-header" id="hud-header">
+    <div class="hud-inner">
+      <div class="hud-brand-group">
+        <a href="#top" class="hud-logo" id="hud-logo-btn">
+          <img src="assets/profile_adhithya.jpg" id="hud-profile-avatar" class="logo-mark avatar-photo" alt="Adhithya M" />
+          <span class="logo-text" id="hero-brand-name">ADHITHYA M</span>
         </a>
-        <div class="location-pill" title="Current Location">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-            <circle cx="12" cy="10" r="3"></circle>
-          </svg>
-          <span id="location-text">Bengaluru / Remote</span>
+        <div class="hud-location-badge" title="Current Base">
+          <span class="live-pulse"></span>
+          <span id="location-text">Chennai, India</span>
         </div>
       </div>
 
-      <ul id="nav-links" class="nav-links">
-        <li class="nav-item"><a href="#education">Education</a></li>
-        <li class="nav-item"><a href="#projects">Projects</a></li>
-        <li class="nav-item"><a href="#skills">Skills</a></li>
-        <li class="nav-item"><a href="#experience">Experience</a></li>
-        <li class="nav-item"><a href="#contact">Contact</a></li>
-      </ul>
-
-      <div class="nav-actions">
-        <button id="theme-btn" class="theme-btn" aria-label="Toggle Theme" title="Toggle Light / Dark Mode">
-          <!-- Populated by JS with SVG icon -->
-        </button>
-        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Navigation Menu">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
+      <!-- Right Controls: Stage Indication Pill (Sound button removed as requested) -->
+      <div class="hud-controls-group">
+        <div class="hud-chapter-pill" id="hud-chapter-pill" title="Current Journey Milestone">
+          <span class="pill-dot"></span>
+          <span class="pill-label" id="hud-chapter-label">About Me</span>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Hero / About & Search Filter Section -->
-  <section id="about" class="hero-banner">
-    <div id="top"></div>
-    <div class="container hero-content">
-      <!-- Profile Avatar Display -->
-      <div id="hero-avatar-wrap" class="hero-avatar-wrap" style="display: none;">
-        <img id="hero-avatar-img" src="" alt="Profile Photo" class="hero-avatar-img" />
+  <!-- FULL-SCREEN CONTINUOUS SCROLL TRACK (900vh for 9 Story Stages) -->
+  <main class="journey-scroll-track" id="journey-scroll-track">
+
+    <!-- Pinned 100vh Viewport -->
+    <div class="journey-viewport" id="journey-viewport">
+
+      <!-- HIGH-PERFORMANCE 60FPS FRAME SEQUENCE CANVAS ENGINE (Zero Dropped Frames) -->
+      <div class="frame-canvas-viewport active" id="frame-canvas-viewport">
+        <canvas id="journey-frame-canvas" class="journey-frame-canvas"></canvas>
+        <!-- Cinematic Vignette & Readability Gradient Overlay -->
+        <div class="video-cinematic-overlay" id="video-cinematic-overlay"></div>
+        <div class="video-vignette"></div>
       </div>
 
-      <div id="hero-tagline" class="hero-tagline">
-        Software Engineer &amp; Full-Stack Developer
-      </div>
-      <h1 id="hero-title" class="hero-title">
-        Building reliable web apps &amp; scalable systems.
-      </h1>
-      <p id="hero-bio" class="hero-subtitle">
-        Specializing in clean user interfaces, modern JavaScript/TypeScript architectures, and high-performance backend
-        services.
-      </p>
-    </div>
-  </section>
+      <!-- Ambient Canvas for Floating Atmospheric Elements (Leaves, Sun Sparks) -->
+      <canvas id="ambient-particles-canvas" class="ambient-canvas"></canvas>
 
-  <!-- Education Section -->
-  <section id="education" class="section-wrapper"
-    style="background: var(--bg-card); border-bottom: 1px solid var(--border-light);">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 class="section-head-title">Academic Background &amp; Education</h2>
-          <p class="section-head-desc">Formal degree qualifications, technical foundations, and specialized testing
-            coursework.</p>
-        </div>
-      </div>
+      <!-- CINEMATIC STORY PANELS LAYER (All 9 Stages) -->
+      <div class="cinematic-chapters-layer" id="chapters-layer">
 
-      <!-- Injected dynamically by js/main.js -->
-      <div id="education-container" class="education-grid"></div>
-    </div>
-  </section>
-
-  <!-- Projects Section (Swiggy / Zomato Card Grid) -->
-  <section id="projects" class="section-wrapper">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 class="section-head-title">Featured Engineering Projects</h2>
-          <p class="section-head-desc">Production-ready software architectures, automated testing suites, and scalable
-            web solutions.</p>
-        </div>
-        <div id="results-count" class="results-count">4 Projects</div>
-      </div>
-
-      <!-- Cards Grid -->
-      <div id="cards-grid" class="cards-grid">
-        <!-- Injected dynamically by js/main.js -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Skills Section (Menu Style) -->
-  <section id="skills" class="section-wrapper"
-    style="background: var(--bg-card); border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-light);">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 class="section-head-title">Technical Expertise &amp; Core Competencies</h2>
-          <p class="section-head-desc">Industry-standard engineering frameworks, automated QA methodologies, and
-            developer tooling.</p>
-        </div>
-      </div>
-
-      <!-- Injected dynamically by js/main.js -->
-      <div id="skills-container" class="skills-container-grid"></div>
-    </div>
-  </section>
-
-  <!-- Experience Section -->
-  <section id="experience" class="section-wrapper">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 class="section-head-title">Professional Experience</h2>
-          <p class="section-head-desc">Career milestones, engineering deliverables, and quality assurance contributions.
-          </p>
-        </div>
-      </div>
-
-      <!-- Injected dynamically by js/main.js -->
-      <div id="experience-container" class="timeline-card-list"></div>
-    </div>
-  </section>
-
-  <!-- Contact Section -->
-  <section id="contact" class="section-wrapper"
-    style="background: var(--bg-card); border-top: 1px solid var(--border-light);">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <h2 class="section-head-title">Get in Touch</h2>
-          <p class="section-head-desc">Have an open opportunity or a project in mind? Reach out directly.</p>
-        </div>
-      </div>
-
-      <div class="contact-layout-grid">
-        <!-- Direct Info Card -->
-        <div class="contact-info-panel">
-          <h3 class="contact-panel-title">Let's Connect</h3>
-          <p class="contact-panel-desc">
-            I am currently open to full-time engineering roles, contracting opportunities, and open source
-            collaborations.
-          </p>
-
-          <!-- Direct Copy Card -->
-          <div id="copy-email-card" class="contact-direct-card" title="Click to copy email address">
-            <div class="direct-card-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
+        <!-- ==================== STAGE 0: ABOUT ME & PROFILE HERO (STARTING CARD) ==================== -->
+        <article class="cinematic-chapter chapter-pos-center active" id="chapter-0" data-index="0" data-tag="ABOUT ME &bull; PROFILE">
+          <div class="chapter-card-glass starting-hero-card">
+            
+            <div class="hero-card-header">
+              <div class="hero-avatar-wrapper">
+                <img src="assets/profile_adhithya.jpg" id="hero-profile-avatar" class="hero-avatar-img" alt="Adhithya M" />
+              </div>
+              <div class="hero-header-text">
+                <div class="hero-eyebrow">PORTFOLIO &bull; SOFTWARE QUALITY ASSURANCE</div>
+                <h1 class="hero-card-name" id="c0-about-title">ADHITHYA M</h1>
+                <div class="hero-card-role" id="c0-hero-role">Software Tester &bull; QA Automation Engineer</div>
+                <div class="hero-meta-strip">
+                  <span class="meta-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> Chennai, India</span>
+                  <span class="meta-pill"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg> B.Tech AI &amp; DS</span>
+                </div>
+              </div>
             </div>
-            <div>
-              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">
-                Direct Email</div>
-              <div id="contact-email-display" style="font-size: 1rem; font-weight: 700; color: var(--text-main);">
-                adhithyam0210@gmail.com</div>
+
+            <div class="hero-divider"></div>
+
+            <!-- Short Bio in Centre of Starting Hero Card -->
+            <div class="hero-center-bio-box">
+              <p class="hero-center-bio" id="c0-about-bio">
+                Dynamic Fresher Software Tester with a robust foundation in automated testing and agile methodologies. Proficient in Selenium and Java, ensuring 99% bug-free releases. Successfully led a team project that reduced testing cycle time by 30%.
+              </p>
+            </div>
+
+            <!-- Qualities Headings Only at Bottom (No long descriptions, No colored words) -->
+            <div class="hero-qualities-strip" id="c0-qualities-grid">
+              <span class="hero-quality-pill">Adaptable</span>
+              <span class="hero-quality-pill">Team Player</span>
+              <span class="hero-quality-pill">Curious Learner</span>
+              <span class="hero-quality-pill">Problem Solver</span>
+              <span class="hero-quality-pill">Quality Champion</span>
+            </div>
+
+            <div class="hero-scroll-hint">
+              <span class="hero-scroll-mouse"></span>
+              <span>Scroll down to walk the journey &rarr;</span>
             </div>
           </div>
+        </article>
 
-          <div style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 16px; font-weight: 600;">
-            Follow &amp; Connect Online:
+        <!-- ==================== STAGE 1: SCHOOLING (SSLC & HSC) ==================== -->
+        <article class="cinematic-chapter chapter-pos-right" id="chapter-1" data-index="1" data-tag="MY SCHOOLING">
+          <div class="chapter-card-glass">
+            <div class="card-meta-bar">
+              <span class="era-badge">STAGE 01 &bull; SCHOOLING</span>
+              <span class="status-badge" id="c1-badge">SSLC &amp; HSC DISTINCTION</span>
+            </div>
+
+            <h2 class="chapter-title" id="c1-title">My Schooling Journey</h2>
+            <div class="chapter-institution" id="c1-school">Sir Ramaswami Mudaliar Higher Secondary School</div>
+
+            <!-- Dynamic Qualifications List for Schooling (Both SSLC & HSC rendered) -->
+            <div class="schooling-milestones-list" id="c1-school-list">
+              <div class="chapter-score-pill">
+                <span class="score-number" id="c1-score">73%</span>
+                <div class="score-meta-group">
+                  <strong class="score-title">Secondary School Leaving Certificate (SSLC)</strong>
+                  <span class="score-desc" id="c1-achieve">2019 &ndash; 2020 &bull; Centile Honors in Mathematics &amp; Quantitative Logic</span>
+                </div>
+              </div>
+              <div class="chapter-score-pill">
+                <span class="score-number">85.5%</span>
+                <div class="score-meta-group">
+                  <strong class="score-title">Higher Secondary Certificate (HSC) &mdash; Computer Science</strong>
+                  <span class="score-desc">2020 &ndash; 2022 &bull; Distinction Honors in CS, Mathematics &amp; Physics</span>
+                </div>
+              </div>
+            </div>
+
+            <p class="chapter-narrative" id="c1-narrative">
+              This was where my journey began. My school years helped me develop curiosity, discipline and the confidence to explore new things and pursue mathematical problem-solving.
+            </p>
+
+            <div class="chapter-takeaway-box">
+              <div class="takeaway-label">Foundations Sparked:</div>
+              <div class="takeaway-text" id="c1-takeaway">Deductive reasoning, quantitative problem solving, C++ OOP, and computational logic.</div>
+            </div>
           </div>
+        </article>
 
-          <!-- Social Buttons (Clean SVGs) -->
-          <div class="social-links-row">
-            <a id="social-github" href="https://github.com/adhithyam0210-ai" target="_blank" rel="noopener noreferrer"
-              class="social-link-btn" title="GitHub">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path
-                  d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                </path>
-              </svg>
-            </a>
-            <a id="social-linkedin" href="https://www.linkedin.com/in/adhithya03" target="_blank"
-              rel="noopener noreferrer" class="social-link-btn" title="LinkedIn">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                <rect x="2" y="9" width="4" height="12"></rect>
-                <circle cx="4" cy="4" r="2"></circle>
-              </svg>
-            </a>
-            <a id="social-mail" href="https://mail.google.com/mail/?view=cm&fs=1&to=adhithyam0210@gmail.com"
-              target="_blank" rel="noopener noreferrer" class="social-link-btn" title="Open in Gmail">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                <polyline points="22,6 12,13 2,6"></polyline>
-              </svg>
-            </a>
+        <!-- ==================== STAGE 2: COLLEGE ==================== -->
+        <article class="cinematic-chapter chapter-pos-left" id="chapter-2" data-index="2" data-tag="MY COLLEGE JOURNEY">
+          <div class="chapter-card-glass">
+            <div class="card-meta-bar">
+              <span class="era-badge purple">STAGE 02 &bull; ENGINEERING</span>
+              <span class="status-badge purple" id="c2-badge">7.4 CGPA</span>
+            </div>
+
+            <h2 class="chapter-title" id="c2-title">My College Journey</h2>
+            <div class="chapter-institution" id="c2-school">S A Engineering College, Chennai</div>
+            <div class="chapter-period-text" id="c2-period">2022 &ndash; 2026 &bull; Anna University Affiliated</div>
+
+            <div class="chapter-score-pill purple">
+              <span class="score-number" id="c2-score">B.Tech</span>
+              <span class="score-desc" id="c2-degree">Artificial Intelligence and Data Science</span>
+            </div>
+
+            <p class="chapter-narrative" id="c2-narrative">
+              College opened a new chapter in my journey. I explored technology, programming, artificial intelligence and problem-solving while discovering my interest in software quality and testing.
+            </p>
+
+            <div class="chapter-takeaway-box">
+              <div class="takeaway-label">Key Subjects &amp; Focus:</div>
+              <div class="takeaway-text" id="c2-takeaway">Data Structures, DBMS, AI Data Pipelines, STLC Methodologies, Software Reliability.</div>
+            </div>
           </div>
-        </div>
+        </article>
 
-        <!-- Message Form -->
-        <div class="contact-form-panel">
-          <form id="contact-form">
-            <div class="form-field-group">
-              <label for="name" class="field-label">Your Name</label>
-              <input type="text" id="name" class="field-input" placeholder="e.g. Alex Rivera" required>
+        <!-- ==================== STAGE 3: COURSES & CERTIFICATIONS ==================== -->
+        <article class="cinematic-chapter chapter-pos-right" id="chapter-3" data-index="3" data-tag="COURSES &amp; CERTIFICATIONS">
+          <div class="chapter-card-glass courses-container-card">
+            <div class="card-meta-bar">
+              <span class="era-badge green" id="c3-era-badge">STAGE 03 &bull; SPECIALIZED TRAINING</span>
+              <span class="status-badge green" id="c3-status-badge">CERTIFIED &bull; INDUSTRY-READY</span>
             </div>
-            <div class="form-field-group">
-              <label for="email" class="field-label">Email Address</label>
-              <input type="email" id="email" class="field-input" placeholder="alex@example.com" required>
-            </div>
-            <div class="form-field-group">
-              <label for="message" class="field-label">Your Message</label>
-              <textarea id="message" class="field-textarea"
-                placeholder="Tell me about your project, team, or opportunity..." required></textarea>
-            </div>
-            <button type="submit" class="btn-submit">
-              <span>Send Message</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-              </svg>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <div>
-        <strong id="footer-brand-name">ADHITHYA.</strong> <span id="footer-role-text">Software Tester Portfolio.</span>
-      </div>
-      <div style="display: flex; align-items: center; gap: 20px;">
-        <span>&copy; <span id="year">2026</span> <span id="footer-copy-name">ADHITHYA</span>.</span>
-        <!-- Admin Link -->
-        <a href="admin.html"
-          style="display: inline-flex; align-items: center; gap: 5px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600;"
-          title="Open Admin Portal">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <span>Admin Portal</span>
-        </a>
-      </div>
-    </div>
-  </footer>
+            <h2 class="chapter-title" id="c3-title">What I Learned Along the Way</h2>
+            <div class="chapter-institution" id="c3-subtitle">Hands-on certifications &amp; rigorous testing frameworks.</div>
+
+            <!-- Floating Course Cards Grid -->
+            <div class="courses-cards-grid" id="c3-courses-list">
+              <div class="course-mini-card">
+                <div class="course-badge">AUTOMATION</div>
+                <h4 class="course-name">Software Testing &amp; Selenium</h4>
+                <div class="course-meta">SLA Institute &bull; 2026</div>
+                <p class="course-desc">Selenium WebDriver, TestNG, Page Object Model architecture.</p>
+              </div>
+              <div class="course-mini-card">
+                <div class="course-badge">MANUAL</div>
+                <h4 class="course-name">Manual Testing &amp; STLC</h4>
+                <div class="course-meta">SLA Institute &bull; 2026</div>
+                <p class="course-desc">Black-box design, boundary value analysis, Jira defect triage.</p>
+              </div>
+              <div class="course-mini-card">
+                <div class="course-badge">DATABASE</div>
+                <h4 class="course-name">SQL &amp; Relational Databases</h4>
+                <div class="course-meta">Tech Academy &bull; 2025</div>
+                <p class="course-desc">Complex joins, subqueries, schema validation, data integrity.</p>
+              </div>
+              <div class="course-mini-card">
+                <div class="course-badge">API</div>
+                <h4 class="course-name">API Testing with Postman</h4>
+                <div class="course-meta">Online Certified &bull; 2025</div>
+                <p class="course-desc">REST contract assertions, payload validation, Newman runs.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ==================== STAGE 4: INTERNSHIP ==================== -->
+        <article class="cinematic-chapter chapter-pos-left" id="chapter-4" data-index="4" data-tag="PROFESSIONAL EXPERIENCE">
+          <div class="chapter-card-glass">
+            <div class="card-meta-bar">
+              <span class="era-badge cyan">STAGE 04 &bull; INDUSTRY IMPACT</span>
+              <span class="status-badge cyan" id="c4-badge">LIVE INTERNSHIP</span>
+            </div>
+
+            <h2 class="chapter-title" id="c4-title">My Internship</h2>
+            <div class="chapter-institution" id="c4-company">Softrate Tech Park, Chennai</div>
+            <div class="chapter-period-text" id="c4-period">Current &bull; QA Intern / Software Tester Intern</div>
+
+            <div class="metrics-grid-duo">
+              <div class="metric-item">
+                <span class="metric-val" id="c4-metric-1">99.8%</span>
+                <span class="metric-lbl" id="c4-metric-lbl-1">Release Pass Rate</span>
+              </div>
+              <div class="metric-item">
+                <span class="metric-val" id="c4-metric-2">30%</span>
+                <span class="metric-lbl" id="c4-metric-lbl-2">Cycle Reduction</span>
+              </div>
+            </div>
+
+            <p class="chapter-narrative" id="c4-narrative">
+              This was the stage where learning became real experience. I started working with real-time projects and learned how software testing is performed in a professional environment.
+            </p>
+
+            <div class="chapter-takeaway-box">
+              <div class="takeaway-label">Core Deliverables &amp; Responsibilities:</div>
+              <div class="takeaway-text" id="c4-takeaway">
+                Executed 450+ verified test cases, authored comprehensive STLC matrices, documented defects with zero false positives in Agile sprints.
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ==================== STAGE 5: PROJECTS ==================== -->
+        <article class="cinematic-chapter chapter-pos-right" id="chapter-5" data-index="5" data-tag="PROJECTS ZONE">
+          <div class="projects-dynamic-container" id="c5-projects-container">
+            <!-- Dynamic single, duo, or multi auto-adjusting layouts rendered by js/main.js -->
+          </div>
+        </article>
+
+        <!-- ==================== STAGE 6: SKILLS ==================== -->
+        <article class="cinematic-chapter chapter-pos-left" id="chapter-6" data-index="6" data-tag="TECHNICAL SKILLS">
+          <div class="chapter-card-glass skills-arsenal-card">
+            <div class="card-meta-bar">
+              <span class="era-badge green">STAGE 06 &bull; TECHNICAL SKILLS</span>
+              <span class="status-badge green">QUALITATIVE PROFICIENCY</span>
+            </div>
+
+            <h2 class="chapter-title">Technical Skill Garden</h2>
+            <div class="chapter-institution">Honed through coursework, college engineering, and real internship delivery.</div>
+
+            <!-- Categorized Skills Grid with Elegant Qualitative Representations -->
+            <div class="skills-garden-container" id="c6-skills-list">
+              <div class="skill-garden-category">
+                <div class="skill-category-heading">TOOLS &amp; DEVOPS</div>
+                <div class="skill-items-wrap">
+                  <div class="skill-pill-node">
+                    <span>CI/CD Pipelines</span>
+                    <span class="level-tag lvl-strong">Strong</span>
+                  </div>
+                  <div class="skill-pill-node">
+                    <span>GIT</span>
+                    <span class="level-tag lvl-proficient">Proficient</span>
+                  </div>
+                  <div class="skill-pill-node">
+                    <span>Postman</span>
+                    <span class="level-tag lvl-intermediate">Intermediate</span>
+                  </div>
+                </div>
+              </div>
+              <div class="skill-garden-category">
+                <div class="skill-category-heading">BACKEND &amp; ARCHITECTURE</div>
+                <div class="skill-items-wrap">
+                  <div class="skill-pill-node">
+                    <span>java</span>
+                    <span class="level-tag lvl-strong">Strong</span>
+                  </div>
+                  <div class="skill-pill-node">
+                    <span>MySql</span>
+                    <span class="level-tag lvl-strong">Strong</span>
+                  </div>
+                </div>
+              </div>
+              <div class="skill-garden-category">
+                <div class="skill-category-heading">FRONTEND DEVELOPMENT</div>
+                <div class="skill-items-wrap">
+                  <div class="skill-pill-node">
+                    <span>Css</span>
+                    <span class="level-tag lvl-strong">Strong</span>
+                  </div>
+                  <div class="skill-pill-node">
+                    <span>react</span>
+                    <span class="level-tag lvl-strong">Strong</span>
+                  </div>
+                </div>
+              </div>
+              <div class="skill-garden-category">
+                <div class="skill-category-heading">PROGRAMMING</div>
+                <div class="skill-items-wrap">
+                  <div class="skill-pill-node">
+                    <span>JAVA</span>
+                    <span class="level-tag lvl-intermediate">Intermediate</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ==================== STAGE 7: QA VISION & CONTINUOUS GROWTH ==================== -->
+        <article class="cinematic-chapter chapter-pos-right" id="chapter-7" data-index="7" data-tag="QA VISION &amp; CONTINUOUS GROWTH">
+          <div class="chapter-card-glass about-reflection-card vision-card">
+            <div class="card-meta-bar">
+              <span class="era-badge amber">STAGE 07 &bull; QUALITY VISION</span>
+              <span class="status-badge amber">CONTINUOUS GROWTH</span>
+            </div>
+
+            <h2 class="chapter-title" id="c7-vision-title">QA Vision &amp; Philosophy</h2>
+            <div class="chapter-institution" id="c7-vision-quote">"Quality is not an act, it is a habit &mdash; automated, tested, and verified."</div>
+
+            <p class="chapter-narrative" id="c7-vision-narrative">
+              Looking forward, my mission is to architect scalable automation frameworks, integrate continuous quality gates into DevOps CI/CD pipelines, and guarantee frictionless software for end users through proactive defect prevention.
+            </p>
+
+            <!-- Focus Pillars (Rendered dynamically by js/main.js from data.vision) -->
+            <div class="qualities-chips-grid" id="c7-vision-pillars">
+              <div class="quality-chip">
+                <span class="quality-dot"></span>
+                <div class="quality-chip-text">
+                  <strong>Automation Architecture:</strong> <span>Selenium WebDriver, TestNG, Page Object Model</span>
+                </div>
+              </div>
+              <div class="quality-chip">
+                <span class="quality-dot"></span>
+                <div class="quality-chip-text">
+                  <strong>CI/CD Quality Gates:</strong> <span>Automated regression suites in agile deployment cycles</span>
+                </div>
+              </div>
+              <div class="quality-chip">
+                <span class="quality-dot"></span>
+                <div class="quality-chip-text">
+                  <strong>API &amp; Contract Testing:</strong> <span>Postman collections &amp; REST service assertions</span>
+                </div>
+              </div>
+              <div class="quality-chip">
+                <span class="quality-dot"></span>
+                <div class="quality-chip-text">
+                  <strong>Root Cause Analysis:</strong> <span>Preventive test case design &amp; Jira bug tracking</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- ==================== STAGE 8: FINAL DESTINATION (CONTACT) ==================== -->
+        <article class="cinematic-chapter chapter-pos-center" id="chapter-8" data-index="8" data-tag="THE JOURNEY CONTINUES">
+          <div class="chapter-card-glass connect-terminal-card" id="contact">
+            
+            <div class="terminal-banner">
+              <div class="terminal-badge">
+                <span class="live-pulse"></span>
+                <span>STAGE 08 &bull; THE JOURNEY CONTINUES</span>
+              </div>
+              <h2 class="terminal-headline">Ready to Elevate Your Software Quality?</h2>
+              <p class="terminal-subtext">
+                My journey doesn't end here. I'm continuously learning, building and looking for opportunities to create better software. Let's connect and build something dependable together.
+              </p>
+            </div>
+
+            <div class="terminal-split-grid">
+              <!-- Left Direct Contact Channel -->
+              <div class="terminal-direct-channel">
+                <div class="channel-headline">Direct Communication:</div>
+                
+                <a href="mailto:adhithyam0210@gmail.com" class="direct-contact-tile" id="terminal-email-link" title="Send Email">
+                  <div class="tile-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                      <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                  </div>
+                  <div class="tile-info">
+                    <span class="tile-label">Email Address</span>
+                    <span class="tile-value" id="terminal-email-text">adhithyam0210@gmail.com</span>
+                  </div>
+                </a>
+
+                <div class="terminal-socials-row">
+                  <a href="https://github.com/adhithyam0210-ai" target="_blank" rel="noopener" class="terminal-social-tile github" id="terminal-github-link" title="Visit GitHub Profile">
+                    <!-- Authentic GitHub Octocat SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"></path>
+                    </svg>
+                    <span>GitHub</span>
+                  </a>
+                  <a href="https://www.linkedin.com/in/adhithya03" target="_blank" rel="noopener" class="terminal-social-tile linkedin" id="terminal-linkedin-link" title="Visit LinkedIn Profile">
+                    <!-- Authentic LinkedIn In SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.45a1.64 1.64 0 1 0 0 3.28 1.64 1.64 0 0 0 0-3.28z"></path>
+                    </svg>
+                    <span>LinkedIn</span>
+                  </a>
+                  <button type="button" class="terminal-social-tile resume btn-resume-download" id="terminal-resume-btn" title="Download Verified Resume">
+                    <!-- Authentic Document Resume SVG -->
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                      <polyline points="14 2 14 8 20 8"></polyline>
+                      <line x1="12" y1="18" x2="12" y2="12"></line>
+                      <polyline points="9 15 12 18 15 15"></polyline>
+                    </svg>
+                    <span>Get Resume</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Right Instant Message Dispatcher -->
+              <div class="terminal-dispatcher-channel">
+                <div class="channel-headline">Send a Direct Message:</div>
+                <form id="contact-form" class="terminal-form">
+                  <div class="form-field-group">
+                    <label for="name" class="terminal-label">Your Name</label>
+                    <input type="text" id="name" class="terminal-input" placeholder="Your Name" required>
+                  </div>
+                  <div class="form-field-group">
+                    <label for="email" class="terminal-label">Email Address</label>
+                    <input type="email" id="email" class="terminal-input" placeholder="Your Email" required>
+                  </div>
+                  <div class="form-field-group">
+                    <label for="message" class="terminal-label">Opportunity / Message</label>
+                    <textarea id="message" class="terminal-textarea" placeholder="Your Message..." rows="3" required></textarea>
+                  </div>
+                  <button type="submit" class="terminal-submit-btn" id="terminal-send-btn">
+                    <span>Start a Conversation</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <line x1="22" y1="2" x2="11" y2="13"></line>
+                      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                  </button>
+                </form>
+              </div>
+            </div><!-- End terminal-split-grid -->
+
+            <div class="terminal-footer-meta">
+              <span>&copy; <span id="year">2026</span> <strong id="footer-copy-name">ADHITHYA M</strong> &bull; All Rights Reserved</span>
+            </div>
+          </div>
+        </article>
+
+      </div><!-- End chapters-layer -->
+
+
+
+    </div><!-- End journey-viewport -->
+  </main>
 
   <!-- Database & Application Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/db-config.js?v=3.2"></script>
-  <script src="js/config.js?v=3.2"></script>
-  <script src="js/api.js?v=3.2"></script>
-  <script src="js/main.js?v=3.2"></script>
+  <script src="js/db-config.js?v=8.0"></script>
+  <script src="js/config.js?v=8.0"></script>
+  <script src="js/api.js?v=8.0"></script>
+  <script src="js/main.js?v=8.0"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>

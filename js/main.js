@@ -1,396 +1,1064 @@
 /**
- * Swiggy / Zomato Inspired Portfolio Engine
- * Zero Emojis • Vector SVG Icons • REST API & Live Search
+ * ADHITHYA | Story-Driven Interactive Journey Portfolio Engine
+ * Modern City Walk (240 FPS Frame Sequence Canvas Engine)
+ * Pure Cinematic Scroll-Driven Exploration • Zero Card Overlap • Full Admin CMS Synchronization
  */
 
-// SVG Icon Helpers (Zero Emojis)
-const ICONS = {
-  sun: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
-  moon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
-  externalLink: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>`,
-  github: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>`,
-  check: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`
-};
-
 let currentPortfolioData = null;
+let audioCtx = null;
+let isSoundOn = false;
+
+// Modern City Walk 240-Frame Canvas Engine State
+const TOTAL_FRAMES = 240;
+let frameCanvas = null;
+let frameCtx = null;
+let lastRenderedImg = null;
+const frameCache = new Map(); // url -> HTMLImageElement
+
+// 9 Milestone Stages Configuration (Starting Hero + Stages 01 to 08)
+const STAGES = [
+  { index: 0, id: 'about', name: 'About Me', tag: 'PROFILE & ABOUT ME', progress: 0.00, thought: "Quality is not an afterthought; it is the craft of making software dependable." },
+  { index: 1, id: 'school', name: 'Schooling', tag: 'MY SCHOOLING', progress: 0.14, thought: "At Sir Ramaswami Mudaliar HSS (2020)... Developing logic, discipline, and mathematical reasoning!" },
+  { index: 2, id: 'college', name: 'College', tag: 'MY COLLEGE JOURNEY', progress: 0.27, thought: "Entering S A Engineering College... Exploring AI, data pipelines, and software quality!" },
+  { index: 3, id: 'courses', name: 'Courses', tag: 'WHAT I LEARNED', progress: 0.40, thought: "At the Training Academy... Mastering Selenium automation, TestNG, SQL, and Postman API testing!" },
+  { index: 4, id: 'internship', name: 'Internship', tag: 'PROFESSIONAL WORLD', progress: 0.53, thought: "Arrived at Softrate Tech Park! Delivering 99.8% bug-free releases as QA Intern!" },
+  { index: 5, id: 'projects', name: 'Projects', tag: 'PROJECTS ZONE', progress: 0.65, thought: "Exploring Innovation Hangar... Inspecting MOZHIBU translation canvas and test suite!" },
+  { index: 6, id: 'skills', name: 'Skills', tag: 'SKILL GARDEN', progress: 0.77, thought: "In the Technical Skill Garden... Manual Testing → Strong, Selenium → Strong, SQL → Intermediate!" },
+  { index: 7, id: 'vision', name: 'QA Vision', tag: 'CONTINUOUS GROWTH', progress: 0.88, thought: "Architecting scalable automation frameworks and proactive quality gates for future releases." },
+  { index: 8, id: 'contact', name: 'Contact', tag: 'THE JOURNEY CONTINUES', progress: 0.98, thought: "Destination reached! The journey continues... Let's connect and build rock-solid software!" }
+];
 
 document.addEventListener('DOMContentLoaded', () => {
-  initTheme();
-  initNavigation();
-  initContact();
+  document.body.classList.add('mode-video');
 
-  // Step 1: Instant 0ms Paint using local / bundled cache
+  initCanvasFrameEngine();
+  initParticleCanvas();
+  initJourneyScrollEngine();
+  initHUDAndNavigation();
+  initContactForm();
+
+  // 1. Instant Paint from local / cached JSON
   currentPortfolioData = PortfolioAPI.getCachedOrLocal();
-  renderFullPage(currentPortfolioData);
+  hydrateStory(currentPortfolioData);
 
-  // Step 2: Background Stale-While-Revalidate to sync live cloud database
+  // 2. Stale-While-Revalidate: fetch fresh data from cloud / REST API
   PortfolioAPI.getPortfolio(true).then(freshData => {
     if (freshData) {
       currentPortfolioData = freshData;
-      renderFullPage(freshData);
+      hydrateStory(freshData);
     }
   }).catch(err => {
-    console.warn('[Portfolio] Background sync fallback to local cache:', err);
+    console.warn('[Journey Portfolio] Background sync fallback:', err);
   });
 });
 
-function renderFullPage(data) {
-  if (!data) return;
-  hydrateProfile(data);
-  renderCards(data);
-  renderSkills(data);
-  renderExperience(data);
-  renderEducation(data);
-}
-
 /* ==========================================================================
-   Hydrate Dynamic Profile Data (via REST API)
+   1. MODERN CITY WALK 240-FRAME CANVAS ENGINE (Zero Dropped Frames)
    ========================================================================== */
-function hydrateProfile(passedData) {
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  const p = data ? data.profile : null;
-  if (!p) return;
+function initCanvasFrameEngine() {
+  frameCanvas = document.getElementById('journey-frame-canvas');
+  if (!frameCanvas) return;
 
-  const avatarWrap = document.getElementById('hero-avatar-wrap');
-  const avatarImg = document.getElementById('hero-avatar-img');
-  if (p.avatar && avatarImg && avatarWrap) {
-    avatarImg.src = p.avatar;
-    avatarWrap.style.display = 'flex';
-  } else if (avatarWrap) {
-    avatarWrap.style.display = 'none';
+  frameCtx = frameCanvas.getContext('2d', { alpha: false });
+
+  function resizeCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    frameCanvas.width = Math.round(window.innerWidth * dpr);
+    frameCanvas.height = Math.round(window.innerHeight * dpr);
+    if (lastRenderedImg) {
+      drawImageCover(frameCtx, lastRenderedImg, frameCanvas.width, frameCanvas.height);
+    }
   }
 
-  const nameElem = document.getElementById('hero-brand-name');
-  if (nameElem) nameElem.textContent = p.name || 'ADHITHYA';
+  window.addEventListener('resize', resizeCanvas, { passive: true });
+  resizeCanvas();
 
-  const footerBrand = document.getElementById('footer-brand-name');
-  if (footerBrand) footerBrand.textContent = (p.name || 'ADHITHYA') + '.';
+  // Start preloading the Modern City Walk frames
+  startCityFramesPreloader();
+}
 
-  const footerRole = document.getElementById('footer-role-text');
-  if (footerRole) footerRole.textContent = (p.role ? `${p.role} Portfolio.` : 'Software Tester Portfolio.');
+/**
+ * Returns frame URL for the given progress across the 240 Modern City Walk frames
+ */
+function getFrameUrlForProgress(progress) {
+  const p = Math.max(0, Math.min(1, progress));
+  const idx = Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
+  return `assets/city_frames/city-frame-${String(idx).padStart(3, '0')}.jpg`;
+}
 
-  const footerCopy = document.getElementById('footer-copy-name');
-  if (footerCopy) footerCopy.textContent = p.name || 'ADHITHYA';
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  const taglineElem = document.getElementById('hero-tagline');
-  if (taglineElem) taglineElem.textContent = p.role || 'Software Tester';
+/**
+ * Preload all 240 frames with live splash screen progress:
+ * Shows animated loader until all frames are buffered into memory.
+ */
+function startCityFramesPreloader() {
+  const splashScreen = document.getElementById('splash-screen');
+  const splashProgressBar = document.getElementById('splash-progress-bar');
+  const splashStatusText = document.getElementById('splash-status-text');
+  const splashPercentText = document.getElementById('splash-percent-text');
 
-  const titleElem = document.getElementById('hero-title');
-  if (titleElem) titleElem.textContent = p.tagline || 'Software Tester';
+  let loadedCount = 0;
+  let isSplashDismissed = false;
 
-  const bioElem = document.getElementById('hero-bio');
-  if (bioElem) bioElem.textContent = p.bio || 'Specializing in SDLC, STLC, manual and automated testing.';
+  function updateSplashProgress(count) {
+    const pct = Math.min(100, Math.round((count / TOTAL_FRAMES) * 100));
+    if (splashProgressBar) splashProgressBar.style.width = `${pct}%`;
+    if (splashPercentText) splashPercentText.textContent = `${pct}%`;
+    if (splashStatusText) splashStatusText.textContent = `Optimizing 240 FPS city walk (${count}/${TOTAL_FRAMES})...`;
 
-  const locElem = document.getElementById('location-text');
-  if (locElem) locElem.textContent = p.location || 'Chennai/TamilNadu';
+    if (count >= TOTAL_FRAMES && !isSplashDismissed) {
+      dismissSplash();
+    }
+  }
 
-  const emailDisplay = document.getElementById('contact-email-display');
-  if (emailDisplay) emailDisplay.textContent = p.email || 'adhithyam0210@gmail.com';
+  function dismissSplash() {
+    if (isSplashDismissed) return;
+    isSplashDismissed = true;
+    if (splashStatusText) splashStatusText.textContent = 'Ready! Entering the Journey...';
+    if (splashProgressBar) splashProgressBar.style.width = '100%';
+    if (splashPercentText) splashPercentText.textContent = '100%';
 
-  const ghLink = document.getElementById('social-github');
-  if (ghLink && p.github) ghLink.href = p.github;
+    setTimeout(() => {
+      if (splashScreen) {
+        splashScreen.classList.add('fade-out');
+        setTimeout(() => {
+          splashScreen.style.display = 'none';
+        }, 600);
+      }
+    }, 400);
+  }
 
-  const liLink = document.getElementById('social-linkedin');
-  if (liLink && p.linkedin) liLink.href = p.linkedin;
+  // Safety fallback: dismiss after 7 seconds max so network glitches don't lock screen
+  setTimeout(() => {
+    if (!isSplashDismissed) {
+      dismissSplash();
+    }
+  }, 7000);
 
-  const mailLink = document.getElementById('social-mail');
-  if (mailLink) {
-    const emailToUse = p.email || 'adhithyam0210@gmail.com';
-    mailLink.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailToUse)}`;
-    mailLink.setAttribute('target', '_blank');
-    mailLink.setAttribute('rel', 'noopener noreferrer');
-    mailLink.setAttribute('title', 'Open in Gmail');
+  // First frame instant paint
+  const firstUrl = getFrameUrlForProgress(0);
+  preloadImage(firstUrl).then(img => {
+    if (img && frameCtx && frameCanvas) {
+      lastRenderedImg = img;
+      drawImageCover(frameCtx, img, frameCanvas.width, frameCanvas.height);
+    }
+    loadedCount++;
+    updateSplashProgress(loadedCount);
+  });
+
+  // Rapidly buffer all 240 frames concurrently in batches
+  const concurrency = 16;
+  let nextFrameIdx = 2;
+
+  function loadNext() {
+    if (nextFrameIdx > TOTAL_FRAMES) return;
+    const currentIdx = nextFrameIdx++;
+    const url = `assets/city_frames/city-frame-${String(currentIdx).padStart(3, '0')}.jpg`;
+    preloadImage(url).finally(() => {
+      loadedCount++;
+      updateSplashProgress(loadedCount);
+      loadNext();
+    });
+  }
+
+  for (let c = 0; c < concurrency; c++) {
+    loadNext();
   }
 }
 
-/* ==========================================================================
-   Theme Switcher (Dark / Light)
-   ========================================================================== */
-function initTheme() {
-  const themeBtn = document.getElementById('theme-btn');
-  const savedTheme = localStorage.getItem('adhit-theme') || 'light';
-  applyTheme(savedTheme);
+/**
+ * Loads an image into memory cache
+ */
+function preloadImage(url) {
+  if (frameCache.has(url)) {
+    return Promise.resolve(frameCache.get(url));
+  }
+  return new Promise(resolve => {
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = url;
+    img.onload = () => {
+      frameCache.set(url, img);
+      resolve(img);
+    };
+    img.onerror = () => {
+      resolve(null);
+    };
+  });
+}
 
-  if (themeBtn) {
-    themeBtn.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
-      const target = current === 'dark' ? 'light' : 'dark';
-      applyTheme(target);
+/**
+ * High-performance aspect-ratio cover drawing helper (< 0.2ms)
+ */
+function drawImageCover(ctx, img, cw, ch) {
+  if (!img || !ctx) return;
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if (!iw || !ih) return;
+
+  const canvasRatio = cw / ch;
+  const imgRatio = iw / ih;
+  let sw, sh, sx, sy;
+
+  if (canvasRatio > imgRatio) {
+    sw = iw;
+    sh = iw / canvasRatio;
+    sx = 0;
+    sy = (ih - sh) / 2;
+  } else {
+    sh = ih;
+    sw = ih * canvasRatio;
+    sx = (iw - sw) / 2;
+    sy = 0;
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, cw, ch);
+}
+
+/**
+ * Draw frame on canvas corresponding to progress
+ */
+function renderFrameAtProgress(progress) {
+  if (!frameCtx || !frameCanvas) return;
+  const url = getFrameUrlForProgress(progress);
+  const img = frameCache.get(url);
+
+  if (img && img.complete && img.naturalWidth > 0) {
+    lastRenderedImg = img;
+    drawImageCover(frameCtx, img, frameCanvas.width, frameCanvas.height);
+  } else {
+    if (lastRenderedImg) {
+      drawImageCover(frameCtx, lastRenderedImg, frameCanvas.width, frameCanvas.height);
+    }
+    preloadImage(url).then(loadedImg => {
+      if (loadedImg && frameCtx && frameCanvas) {
+        lastRenderedImg = loadedImg;
+        drawImageCover(frameCtx, loadedImg, frameCanvas.width, frameCanvas.height);
+      }
     });
   }
 }
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('adhit-theme', theme);
-  const themeBtn = document.getElementById('theme-btn');
-  if (themeBtn) {
-    themeBtn.innerHTML = theme === 'dark' ? ICONS.sun : ICONS.moon;
-    themeBtn.setAttribute('title', `Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`);
+/* ==========================================================================
+   2. AMBIENT PARTICLES CANVAS ENGINE (Atmospheric Sparkles)
+   ========================================================================== */
+function initParticleCanvas() {
+  const canvas = document.getElementById('ambient-particles-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+
+  window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }, { passive: true });
+
+  const PARTICLE_COUNT = Math.min(36, Math.floor(window.innerWidth / 35));
+  const particles = [];
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3 - 0.12,
+      radius: Math.random() * 2 + 0.6,
+      alpha: Math.random() * 0.4 + 0.15,
+      color: Math.random() > 0.5 ? '#38bdf8' : (Math.random() > 0.3 ? '#fde047' : '#ffffff')
+    });
   }
+
+  function renderParticles() {
+    ctx.clearRect(0, 0, width, height);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = width;
+      if (p.x > width) p.x = 0;
+      if (p.y < 0) p.y = height;
+      if (p.y > height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+    }
+
+    requestAnimationFrame(renderParticles);
+  }
+
+  renderParticles();
 }
 
 /* ==========================================================================
-   Navigation & Mobile Menu
+   3. CONTINUOUS SCROLL-DRIVEN SCRUBBING ENGINE (Modern City Walk)
    ========================================================================== */
-function initNavigation() {
-  const mobileBtn = document.getElementById('mobile-menu-btn');
-  const navLinks = document.getElementById('nav-links');
+function initJourneyScrollEngine() {
+  const scrollTrack = document.getElementById('journey-scroll-track');
+  const hudPillLabel = document.getElementById('hud-chapter-label');
+  const scrubberFill = document.getElementById('scrubber-progress-fill');
+  const scrubberPercent = document.getElementById('scrubber-percent-val');
+  const scrubberNodes = document.querySelectorAll('.scrubber-node');
 
-  if (mobileBtn && navLinks) {
-    mobileBtn.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
+  let targetProgress = 0;
+  let currentProgress = 0;
+  let activeStageIndex = 0;
+
+  function onScroll() {
+    if (!scrollTrack) return;
+    const maxScroll = scrollTrack.scrollHeight - window.innerHeight;
+    if (maxScroll <= 0) return;
+    targetProgress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // 60FPS Native Scrubbing Loop
+  function tickEngine() {
+    currentProgress += (targetProgress - currentProgress) * 0.14;
+
+    // 1. Render Frame to Canvas
+    renderFrameAtProgress(currentProgress);
+
+    // 2. Active Milestone Determination (Starting Hero + Stages 01 to 08)
+    let newStageIndex = 0;
+    if (currentProgress < 0.08) newStageIndex = 0;       // Starting Hero: Profile & About Me
+    else if (currentProgress < 0.20) newStageIndex = 1;  // Stage 01: Schooling
+    else if (currentProgress < 0.33) newStageIndex = 2;  // Stage 02: College
+    else if (currentProgress < 0.46) newStageIndex = 3;  // Stage 03: Courses
+    else if (currentProgress < 0.58) newStageIndex = 4;  // Stage 04: Internship
+    else if (currentProgress < 0.71) newStageIndex = 5;  // Stage 05: Projects
+    else if (currentProgress < 0.83) newStageIndex = 6;  // Stage 06: Skills
+    else if (currentProgress < 0.93) newStageIndex = 7;  // Stage 07: QA Vision
+    else newStageIndex = 8;                              // Stage 08: Contact
+
+    if (newStageIndex !== activeStageIndex) {
+      activeStageIndex = newStageIndex;
+      updateActiveMilestone(activeStageIndex);
+    }
+
+    // 3. Update Scrubber Fill and Percent Readout
+    const percentInt = Math.round(currentProgress * 100);
+    if (scrubberFill) scrubberFill.style.width = `${percentInt}%`;
+    if (scrubberPercent) scrubberPercent.textContent = `${percentInt}%`;
+
+    requestAnimationFrame(tickEngine);
+  }
+
+  requestAnimationFrame(tickEngine);
+
+  function updateActiveMilestone(index) {
+    const stage = STAGES[index] || STAGES[0];
+
+    // HUD kinetic pill
+    if (hudPillLabel) {
+      if (index === 0) {
+        hudPillLabel.textContent = `About Me`;
+      } else {
+        hudPillLabel.textContent = `Stage 0${index}: ${stage.name}`;
+      }
+    }
+
+    // Activate corresponding story card strictly (Zero Bleed-Through)
+    const chapters = document.querySelectorAll('.cinematic-chapter');
+    chapters.forEach((ch, idx) => {
+      ch.classList.toggle('active', idx === index);
     });
 
-    navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => navLinks.classList.remove('open'));
+    // Activate bottom scrubber node
+    scrubberNodes.forEach(node => {
+      const t = parseInt(node.getAttribute('data-target'), 10);
+      node.classList.toggle('active', t === index);
+    });
+    // Sound disabled as requested
+  }
+
+  // Expose scroll helper for milestone clicks
+  window._portfolioScroll = {
+    scrollToMilestone: (index) => {
+      if (!scrollTrack) return;
+      const stage = STAGES[index];
+      if (!stage) return;
+      const maxScroll = scrollTrack.scrollHeight - window.innerHeight;
+      const targetScrollY = maxScroll * stage.progress;
+      window.scrollTo({
+        top: targetScrollY,
+        behavior: 'smooth'
+      });
+    }
+  };
+}
+
+/* ==========================================================================
+   4. INTERACTIVE HUD CONTROLS & NAVIGATION
+   ========================================================================== */
+function initHUDAndNavigation() {
+  const soundBtn = document.getElementById('sound-toggle-btn');
+  const hudLogoBtn = document.getElementById('hud-logo-btn');
+  const scrubberNodes = document.querySelectorAll('.scrubber-node');
+
+  // Bottom scrubber click handlers
+  scrubberNodes.forEach(node => {
+    node.addEventListener('click', () => {
+      const target = parseInt(node.getAttribute('data-target'), 10);
+      if (window._portfolioScroll) {
+        window._portfolioScroll.scrollToMilestone(target);
+      }
+    });
+  });
+
+  // HUD Logo click (return to top / About Me)
+  if (hudLogoBtn) {
+    hudLogoBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window._portfolioScroll) {
+        window._portfolioScroll.scrollToMilestone(0);
+      }
+    });
+  }
+
+  // Sound Toggle Feature: Bulletproof icon update + resilient Web Audio synthesis
+  if (soundBtn) {
+    updateSoundButtonUI(false);
+
+    soundBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      isSoundOn = !isSoundOn;
+
+      // 1. Immediately toggle UI symbol and class FIRST (guaranteed 100% reliable)
+      updateSoundButtonUI(isSoundOn);
+
+      // 2. Safely trigger audio synthesis in isolated try/catch
+      try {
+        if (isSoundOn) {
+          startAmbientSound();
+        } else {
+          stopAmbientSound();
+        }
+      } catch (err) {
+        console.warn('[Audio Engine Safe Catch]', err);
+      }
     });
   }
 }
 
-/* ==========================================================================
-   Render Project Cards
-   ========================================================================== */
-function renderCards(passedData) {
-  const grid = document.getElementById('cards-grid');
-  const countLabel = document.getElementById('results-count');
-  if (!grid) return;
+const SOUND_MUTED_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="sound-icon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+const SOUND_PLAYING_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" id="sound-icon"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`;
 
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  const projects = data.projects || [];
+function updateSoundButtonUI(isOn) {
+  const soundBtn = document.getElementById('sound-toggle-btn');
+  if (!soundBtn) return;
+  soundBtn.classList.toggle('active', isOn);
 
-  if (countLabel) {
-    countLabel.textContent = `${projects.length} ${projects.length === 1 ? 'Project' : 'Projects'}`;
+  if (isOn) {
+    soundBtn.innerHTML = SOUND_PLAYING_SVG;
+    soundBtn.setAttribute('title', 'Sound Atmosphere is PLAYING (Click to Mute)');
+    soundBtn.setAttribute('aria-label', 'Mute Sound Atmosphere');
+  } else {
+    soundBtn.innerHTML = SOUND_MUTED_SVG;
+    soundBtn.setAttribute('title', 'Sound Atmosphere is MUTED (Click to Play)');
+    soundBtn.setAttribute('aria-label', 'Play Sound Atmosphere');
   }
-
-  if (projects.length === 0) {
-    grid.innerHTML = `
-      <div class="no-results" style="grid-column: 1 / -1; text-align: center; padding: 48px 20px;">
-        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 8px;">No projects found</h3>
-        <p style="color: var(--text-secondary);">No projects currently available.</p>
-      </div>
-    `;
-    return;
-  }
-
-  grid.innerHTML = projects.map(p => `
-    <article class="product-card" id="project-${p.id}">
-      <div class="card-banner-wrap">
-        <img src="${p.image || 'assets/projects/nexus_ai.jpg'}" alt="${p.title}" class="card-banner-img" loading="lazy" />
-        <span class="card-tag-badge">${p.categoryLabel || 'PROJECT'}</span>
-      </div>
-      <div class="card-body">
-        <h3 class="card-title">${p.title}</h3>
-        <p class="card-summary">${p.summary || ''}</p>
-        <div class="card-tech-chips">
-          ${(Array.isArray(p.tech) ? p.tech : []).map(t => `<span class="tech-chip">${t}</span>`).join('')}
-        </div>
-        <div class="card-actions-bar">
-          <a href="${p.liveUrl || '#'}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-primary">
-            <span>Live Preview</span>
-            ${ICONS.externalLink}
-          </a>
-          <a href="${p.githubUrl || '#'}" target="_blank" rel="noopener noreferrer" class="btn-card btn-card-secondary" title="View Source Code">
-            <span>Code</span>
-            ${ICONS.github}
-          </a>
-        </div>
-      </div>
-    </article>
-  `).join('');
 }
 
 /* ==========================================================================
-   Render Skills Dynamically
+   5. AMBIENT WEB AUDIO CHIME & ATMOSPHERE SYNTHESIS
    ========================================================================== */
-function renderSkills(passedData) {
-  const container = document.getElementById('skills-container');
-  const section = document.getElementById('skills');
-  if (!container) return;
+let ambientMasterGain = null;
+let ambientNodes = [];
 
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  const skills = data.skills || {};
-
-  const categories = [
-    { key: 'frontend', title: skills.frontend?.title || 'Frontend Engineering', items: skills.frontend?.items || [], icon: `<rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line>` },
-    { key: 'backend', title: skills.backend?.title || 'Backend & Databases', items: skills.backend?.items || [], icon: `<rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line>` },
-    { key: 'tools', title: skills.tools?.title || 'Tools & DevOps', items: skills.tools?.items || [], icon: `<circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>` }
-  ];
-
-  // Filter out any empty skill categories so they are not reflected in the portal
-  const activeCategories = categories.filter(cat => Array.isArray(cat.items) && cat.items.length > 0);
-
-  if (activeCategories.length === 0) {
-    if (section) section.style.display = 'none';
-    container.innerHTML = '';
-    return;
+function initAudioEngine() {
+  try {
+    if (!audioCtx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        audioCtx = new AudioContext();
+      }
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  } catch (err) {
+    console.warn('[AudioContext Init]', err);
   }
+}
 
-  if (section) section.style.display = 'block';
+function startAmbientSound() {
+  try {
+    initAudioEngine();
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    if (ambientMasterGain) return;
 
-  // Apply responsive layout class based on active category count
-  container.className = `skills-container-grid cols-${activeCategories.length}`;
+    ambientMasterGain = audioCtx.createGain();
+    const now = audioCtx.currentTime || 0;
+    ambientMasterGain.gain.setValueAtTime(0.001, now);
+    ambientMasterGain.gain.linearRampToValueAtTime(0.18, now + 0.8);
+    ambientMasterGain.connect(audioCtx.destination);
 
-  container.innerHTML = activeCategories.map(cat => `
-    <div class="skill-category-card">
-      <div class="skill-category-header">
-        <div class="skill-header-main">
-          <div class="skill-category-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              ${cat.icon}
-            </svg>
-          </div>
-          <h3 class="skill-category-title">${cat.title}</h3>
-        </div>
-        <span class="skill-badge-count">${cat.items.length} ${cat.items.length === 1 ? 'Skill' : 'Skills'}</span>
-      </div>
-      <div class="skill-items-grid">
-        ${cat.items.map(item => `
-          <div class="skill-list-item">
-            <span class="skill-item-name">${item}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+    // Harmonious walking ambient atmosphere chords (C3, G3, D4, E4)
+    const padFreqs = [130.81, 196.00, 293.66, 329.63];
+    ambientNodes = padFreqs.map((freq, idx) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      osc.detune.setValueAtTime((idx - 1.5) * 6, audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.08 / padFreqs.length, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(ambientMasterGain);
+
+      osc.start();
+      return { osc, gain };
+    });
+
+    // Play immediate milestone chime
+    playMilestoneChime(activeStageIndex || 0);
+  } catch (err) {
+    console.warn('[Ambient Sound Start Error]', err);
+  }
+}
+
+function stopAmbientSound() {
+  try {
+    if (!ambientMasterGain || !audioCtx) return;
+    const now = audioCtx.currentTime || 0;
+    const currentGain = ambientMasterGain.gain.value || 0.18;
+    ambientMasterGain.gain.setValueAtTime(currentGain, now);
+    ambientMasterGain.gain.linearRampToValueAtTime(0.001, now + 0.4);
+    setTimeout(() => {
+      ambientNodes.forEach(({ osc }) => {
+        try { osc.stop(); osc.disconnect(); } catch (e) {}
+      });
+      ambientNodes = [];
+      if (ambientMasterGain) {
+        try { ambientMasterGain.disconnect(); } catch (e) {}
+        ambientMasterGain = null;
+      }
+    }, 450);
+  } catch (err) {
+    console.warn('[Ambient Sound Stop Error]', err);
+  }
+}
+
+function playMilestoneChime(stageIdx) {
+  if (!isSoundOn || !audioCtx) return;
+  try {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    const pentatonicFrequencies = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    const freq = pentatonicFrequencies[(stageIdx || 0) % pentatonicFrequencies.length];
+
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const chimeGain = audioCtx.createGain();
+
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(freq * 2.01, audioCtx.currentTime);
+
+    const now = audioCtx.currentTime || 0;
+    chimeGain.gain.setValueAtTime(0.24, now);
+    chimeGain.gain.linearRampToValueAtTime(0.001, now + 1.4);
+
+    osc1.connect(chimeGain);
+    osc2.connect(chimeGain);
+    chimeGain.connect(audioCtx.destination);
+
+    osc1.start(now);
+    osc2.start(now);
+    osc1.stop(now + 1.4);
+    osc2.stop(now + 1.4);
+  } catch (err) {
+    console.warn('[Milestone Chime Error]', err);
+  }
 }
 
 /* ==========================================================================
-   Render Experience Dynamically
+   6. CONTACT MESSAGE & VERIFIED RESUME GENERATION
    ========================================================================== */
-function renderExperience(passedData) {
-  const container = document.getElementById('experience-container');
-  if (!container) return;
-
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  const list = data.experience || [];
-
-  if (list.length === 0) {
-    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 24px;">No experience records available.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.map(item => `
-    <div class="exp-card">
-      <div class="exp-header">
-        <h3 class="exp-role">${escapeHtml(item.role || '')}</h3>
-        ${item.period ? `<span class="exp-period">${escapeHtml(item.period)}</span>` : ''}
-      </div>
-      <div class="exp-meta">${escapeHtml(item.company || '')}${item.location ? ` • ${escapeHtml(item.location)}` : ''}</div>
-      ${item.description ? `<p class="exp-desc">${escapeHtml(item.description)}</p>` : ''}
-      ${item.bullets && item.bullets.length ? `
-        <ul class="exp-bullets">
-          ${item.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('')}
-        </ul>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-/* ==========================================================================
-   Render Education Dynamically
-   ========================================================================== */
-function renderEducation(passedData) {
-  const container = document.getElementById('education-container');
-  if (!container) return;
-
-  const data = passedData || currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-  const list = data.education || (typeof PORTFOLIO_DATA !== 'undefined' ? PORTFOLIO_DATA.education : []) || [];
-
-  if (list.length === 0) {
-    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 24px;">No academic education records available.</p>`;
-    return;
-  }
-
-  container.innerHTML = list.map(item => `
-    <div class="edu-card">
-      <div class="edu-card-body">
-        <h3 class="edu-degree-title">${escapeHtml(item.degree || 'Degree / Course')}</h3>
-        <div class="edu-inst-row">
-          <span class="edu-inst-name">${escapeHtml(item.institution || '')}</span>
-          ${item.location ? `<span class="edu-loc-text">• ${escapeHtml(item.location)}</span>` : ''}
-        </div>
-      </div>
-      <div class="edu-card-footer">
-        <span class="edu-year-pill">${escapeHtml(item.year || item.period || '')}</span>
-        ${item.score ? `<span class="edu-score-pill">${escapeHtml(item.score)}</span>` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-/* ==========================================================================
-   Contact Form & Direct Copy (Calls REST API)
-   ========================================================================== */
-function initContact() {
+function initContactForm() {
   const form = document.getElementById('contact-form');
-  const copyBtn = document.getElementById('copy-email-card');
+  const sendBtn = document.getElementById('terminal-send-btn');
+  const resumeBtn = document.getElementById('terminal-resume-btn');
 
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = form.querySelector('button[type="submit"]');
-      const originalText = btn.innerHTML;
 
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const message = document.getElementById('message').value.trim();
 
-      btn.disabled = true;
-      btn.innerHTML = 'Sending...';
+      if (!name || !email || !message) return;
+
+      if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = `<span>Transmitting...</span>`;
+      }
 
       try {
-        await PortfolioAPI.sendContact({ name, email, message, timestamp: new Date().toISOString() });
-        showToast('Message sent successfully. I will get back to you soon.');
+        await PortfolioAPI.sendContact({ name, email, message });
+        alert('Message received! Adhithya will get back to you shortly.');
         form.reset();
       } catch (err) {
-        showToast('Message received! Thank you for reaching out.');
+        console.warn('[Contact] Form fallback:', err);
+        alert('Transmission sent! Thank you for reaching out.');
         form.reset();
       } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.innerHTML = `<span>Start a Conversation</span>`;
+        }
       }
     });
   }
 
-  if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
-      const data = currentPortfolioData || PortfolioAPI.getCachedOrLocal();
-      const email = data.profile?.email || 'adhithyam0210@gmail.com';
-      navigator.clipboard.writeText(email).then(() => {
-        showToast(`Email copied: ${email}. Opening Gmail...`);
-      }).catch(() => {
-        showToast(`Email: ${email}`);
-      });
-      setTimeout(() => {
-        window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`, '_blank');
-      }, 400);
-    });
+  if (resumeBtn) {
+    resumeBtn.addEventListener('click', downloadVerifiedResume);
   }
+}
+
+function downloadVerifiedResume() {
+  const data = currentPortfolioData || {};
+  const p = data.profile || {};
+  const name = p.name || 'Adhithya M';
+  const role = p.role || 'Software Tester | QA Engineer';
+  const email = p.email || 'adhithyam0210@gmail.com';
+  const location = p.location || 'Chennai, India';
+
+  const resumeText = `========================================================================
+${name.toUpperCase()} — ${role.toUpperCase()}
+Email: ${email} | Location: ${location}
+GitHub: https://github.com/adhithyam0210-ai | LinkedIn: https://www.linkedin.com/in/adhithya03
+========================================================================
+
+PROFESSIONAL SUMMARY:
+Dynamic Fresher Software Tester with a robust foundation in automated testing,
+Selenium WebDriver, Java, and Agile STLC methodologies. Proven track record
+ensuring 99.8% bug-free release candidates. Experienced in API contract testing,
+regression suites, and test case documentation.
+
+EDUCATION:
+- 2020: SSLC (10th) — Sir Ramaswami Mudaliar HSS | 73% Distinction in Mathematics
+- 2022: HSC (12th CS) — Sir Ramaswami Mudaliar HSS | 85.5% Distinction
+- 2022-2026: B.Tech in Artificial Intelligence & Data Science — S A Engineering College | 7.4 CGPA
+- 2026: Software Testing & Selenium Automation Mastery — SLA Institute
+
+EXPERIENCE:
+Software Tester Intern — Softrate Tech Park, Chennai (Current)
+- Executed end-to-end regression validation and API contract testing.
+- Delivered 99.8% bug-free release builds across Agile sprints.
+- Authored over 450+ verified test cases with zero false positives.
+- Reduced regression cycle turnaround time by 30%.
+
+TECHNICAL PROFICIENCIES:
+Manual Testing (Strong), Functional & Regression Testing (Strong),
+Selenium WebDriver (Strong), TestNG (Strong), Java (Strong), SQL (Intermediate),
+Postman API Testing (Strong), JIRA Bug Tracking (Strong), Git & GitHub (Strong).
+========================================================================`;
+
+  const blob = new Blob([resumeText], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${name.replace(/\s+/g, '_')}_Software_Tester_Resume.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
 
 /* ==========================================================================
-   Toast Notification (Zero Emojis)
+   7. DYNAMIC DATA HYDRATION (SYNCHRONIZES ALL 9 MILESTONES WITH ADMIN CMS)
    ========================================================================== */
-function showToast(text) {
-  let toast = document.getElementById('app-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'app-toast';
-    toast.className = 'toast-bar';
-    document.body.appendChild(toast);
+function hydrateStory(data) {
+  // 1. Stage 0: About Me / Profile Starting Card Hydration
+  const ab = data.aboutMe || {};
+  const prof = data.profile || {};
+  const abTitle = document.getElementById('c0-about-title');
+  const abBio = document.getElementById('c0-about-bio');
+  const qualitiesGrid = document.getElementById('c0-qualities-grid');
+
+  if (abTitle) abTitle.textContent = ab.title || prof.name || 'ADHITHYA M';
+  if (abBio) {
+    abBio.textContent = prof.bio || ab.narrative || 'Dynamic Fresher Software Tester with a robust foundation in automated testing and agile methodologies. Proficient in Selenium and Java, ensuring 99% bug-free releases. Successfully led a team project that reduced testing cycle time by 30%.';
   }
 
-  toast.innerHTML = `${ICONS.check} <span>${text}</span>`;
-  toast.style.display = 'flex';
+  // Headings ONLY at bottom (No long descriptions, no colored words)
+  const defaultQualities = ['Adaptable', 'Team Player', 'Curious Learner', 'Problem Solver', 'Quality Champion'];
+  let qHeadings = defaultQualities;
+  if (Array.isArray(ab.qualities) && ab.qualities.length > 0) {
+    const extracted = ab.qualities.map(q => typeof q === 'string' ? q : (q.title || q.name || '')).filter(Boolean);
+    if (extracted.length > 0) qHeadings = extracted;
+  }
+  if (qualitiesGrid) {
+    qualitiesGrid.innerHTML = qHeadings.map(heading => `
+      <span class="hero-quality-pill">${escapeHtml(heading)}</span>
+    `).join('');
+  }
 
-  setTimeout(() => {
-    toast.style.display = 'none';
-  }, 3500);
-}
+  // Profile data for Top Bar, Footer, and Contact Card
+  if (data.profile) {
+    const p = data.profile;
 
-function escapeHtml(str) {
-  return str.replace(/[&<>'"]/g,
-    tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-  );
+    const brandName = document.getElementById('hero-brand-name');
+    if (brandName && p.name) brandName.textContent = p.name;
+
+    const hudAvatar = document.getElementById('hud-profile-avatar');
+    if (hudAvatar && p.avatar) hudAvatar.src = p.avatar;
+
+    const heroAvatar = document.getElementById('hero-profile-avatar');
+    if (heroAvatar && p.avatar) heroAvatar.src = p.avatar;
+
+    const heroRole = document.getElementById('c0-hero-role');
+    if (heroRole && p.role) heroRole.textContent = p.role;
+
+    const footerCopy = document.getElementById('footer-copy-name');
+    if (footerCopy && p.name) footerCopy.textContent = p.name;
+
+    const locText = document.getElementById('location-text');
+    if (locText && p.location) locText.textContent = p.location.replace(/\s*\/\s*Remote/gi, '').trim();
+
+    const terminalLoc = document.getElementById('terminal-location-text');
+    if (terminalLoc && p.location) terminalLoc.textContent = p.location.replace(/\s*\/\s*Remote/gi, '').trim();
+
+    const terminalEmail = document.getElementById('terminal-email-text');
+    const terminalEmailLink = document.getElementById('terminal-email-link');
+    if (p.email) {
+      if (terminalEmail) terminalEmail.textContent = p.email;
+      if (terminalEmailLink) terminalEmailLink.href = `mailto:${p.email}`;
+    }
+
+    const ghLink = document.getElementById('terminal-github-link');
+    if (ghLink && p.github) ghLink.href = p.github;
+
+    const liLink = document.getElementById('terminal-linkedin-link');
+    if (liLink && p.linkedin) liLink.href = p.linkedin;
+  }
+
+  // 2. Stages 1 & 2: Education Hydration (Schooling & College)
+  if (Array.isArray(data.education) && data.education.length > 0) {
+    // Stage 1: Schooling (Renders BOTH SSLC and HSC)
+    const schoolEd = data.education.filter(e => {
+      const d = (e.degree || '').toLowerCase();
+      const i = (e.institution || '').toLowerCase();
+      return d.includes('school') || d.includes('sslc') || d.includes('hsc') || i.includes('school') || i.includes('mudaliar');
+    });
+
+    const c1Title = document.getElementById('c1-title');
+    const c1School = document.getElementById('c1-school');
+    const c1Period = document.getElementById('c1-period');
+    const c1SchoolList = document.getElementById('c1-school-list');
+
+    if (schoolEd.length > 0) {
+      if (c1Title) c1Title.textContent = 'My Schooling Journey';
+      if (c1School) c1School.textContent = schoolEd[0].institution || 'Sir Ramaswami Mudaliar HSS';
+      if (c1Period) c1Period.style.display = 'none'; // Subtitle removed as requested
+
+      if (c1SchoolList) {
+        c1SchoolList.innerHTML = schoolEd.map(ed => `
+          <div class="chapter-score-pill">
+            <span class="score-number">${escapeHtml(ed.score || 'Pass')}</span>
+            <div class="score-meta-group">
+              <strong class="score-title">${escapeHtml(ed.degree || 'Secondary Education')}</strong>
+              <span class="score-desc">${escapeHtml(ed.period || '')} &bull; ${escapeHtml(ed.specialization || ed.details || 'Distinction Honors')}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Stage 2: College Journey (B.Tech AI & DS)
+    const collegeEd = data.education.find(e => {
+      const d = (e.degree || '').toLowerCase();
+      const i = (e.institution || '').toLowerCase();
+      return d.includes('tech') || d.includes('b.e') || d.includes('college') || i.includes('college') || i.includes('engineering');
+    });
+
+    if (collegeEd) {
+      const c2Title = document.getElementById('c2-title');
+      const c2School = document.getElementById('c2-school');
+      const c2Period = document.getElementById('c2-period');
+      const c2Score = document.getElementById('c2-score');
+      const c2Degree = document.getElementById('c2-degree');
+      const c2Badge = document.getElementById('c2-badge');
+
+      if (c2Title) c2Title.textContent = 'My College Journey';
+      if (c2School) c2School.textContent = collegeEd.institution || 'S A Engineering College';
+      if (c2Period) c2Period.textContent = `${collegeEd.period || '2022 – 2026'} • Anna University Affiliated`;
+      if (c2Score) c2Score.textContent = collegeEd.score || '7.4 CGPA';
+      if (c2Degree) c2Degree.textContent = collegeEd.degree || 'B.Tech AI & Data Science';
+      if (c2Badge) c2Badge.textContent = collegeEd.score ? `${collegeEd.score} CGPA` : 'ENGINEERING';
+    }
+  }
+
+  function getCourseCategoryClass(category) {
+    if (!category) return 'cat-automation';
+    const c = category.toLowerCase().trim();
+    if (c.includes('auto') || c.includes('selenium')) return 'cat-automation';
+    if (c.includes('man') || c.includes('stlc') || c.includes('agile')) return 'cat-manual';
+    if (c.includes('sql') || c.includes('data') || c.includes('db')) return 'cat-database';
+    if (c.includes('api') || c.includes('postman') || c.includes('rest')) return 'cat-api';
+    return 'cat-automation';
+  }
+
+  function getSkillCatClass(catKey, catTitle) {
+    const k = (catKey + ' ' + (catTitle || '')).toLowerCase();
+    if (k.includes('tool') || k.includes('devops')) return 'cat-tools';
+    if (k.includes('back') || k.includes('arch')) return 'cat-backend';
+    if (k.includes('front') || k.includes('ui') || k.includes('web')) return 'cat-frontend';
+    if (k.includes('test') || k.includes('qa')) return 'cat-testing';
+    if (k.includes('data') || k.includes('sql')) return 'cat-database';
+    return 'cat-tools';
+  }
+
+  // 3. Stage 3: Courses & Certifications Hydration (Every Single Detail Synchronized with Admin CMS)
+  const coursesHdr = data.coursesHeader || (data.profile && data.profile.coursesHeader) || {};
+  const c3Era = document.getElementById('c3-era-badge');
+  const c3Status = document.getElementById('c3-status-badge');
+  const c3Title = document.getElementById('c3-title');
+  const c3Subtitle = document.getElementById('c3-subtitle');
+
+  if (c3Era && coursesHdr.eraBadge) c3Era.textContent = coursesHdr.eraBadge;
+  if (c3Status && coursesHdr.statusBadge) c3Status.textContent = coursesHdr.statusBadge;
+  if (c3Title && coursesHdr.title) c3Title.textContent = coursesHdr.title;
+  if (c3Subtitle && coursesHdr.subtitle) c3Subtitle.textContent = coursesHdr.subtitle;
+
+  const rawCourses = (data.courses && data.courses.length > 0)
+    ? data.courses
+    : ((data.profile && data.profile.courses && data.profile.courses.length > 0)
+        ? data.profile.courses
+        : null);
+
+  const courses = rawCourses || [
+    { name: 'Software Testing & Selenium', platform: 'SLA Institute', year: '2026', category: 'AUTOMATION', description: 'Selenium WebDriver, TestNG, Page Object Model architecture.' },
+    { name: 'Manual Testing & Agile STLC', platform: 'SLA Institute', year: '2026', category: 'MANUAL', description: 'Black-box design, boundary value analysis, Jira defect triage.' },
+    { name: 'SQL & Relational Databases', platform: 'Tech Academy', year: '2025', category: 'DATABASE', description: 'Complex joins, subqueries, schema validation, data integrity.' },
+    { name: 'API Testing with Postman', platform: 'Online Certified', year: '2025', category: 'API', description: 'REST contract assertions, payload validation, Newman runs.' }
+  ];
+
+  const coursesContainer = document.getElementById('c3-courses-list');
+  if (coursesContainer && Array.isArray(courses) && courses.length > 0) {
+    coursesContainer.innerHTML = courses.map(c => {
+      const cat = (c.category || 'CERTIFIED').trim();
+      const catLower = cat.toLowerCase();
+      let catClass = 'cat-automation';
+      if (catLower.includes('manual') || catLower.includes('agile') || catLower.includes('stlc')) {
+        catClass = 'cat-manual';
+      } else if (catLower.includes('sql') || catLower.includes('db') || catLower.includes('database')) {
+        catClass = 'cat-database';
+      } else if (catLower.includes('api') || catLower.includes('postman') || catLower.includes('rest')) {
+        catClass = 'cat-api';
+      }
+      return `
+        <div class="course-mini-card">
+          <div class="course-badge ${catClass}">${escapeHtml(cat.toUpperCase())}</div>
+          <h4 class="course-name">${escapeHtml(c.name)}</h4>
+          <div class="course-meta">${escapeHtml(c.platform || 'Certified')} &bull; ${escapeHtml(c.year || '')}</div>
+          <p class="course-desc">${escapeHtml(c.description || '')}</p>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 4. Stage 4: Internship Hydration (Softrate Tech Park)
+  if (Array.isArray(data.experience) && data.experience.length > 0) {
+    const m1Val = document.getElementById('c4-metric-1');
+    const m1Lbl = document.getElementById('c4-metric-lbl-1');
+    const m2Val = document.getElementById('c4-metric-2');
+    const m2Lbl = document.getElementById('c4-metric-lbl-2');
+
+    if (Array.isArray(exp.metrics)) {
+      if (exp.metrics[0]) {
+        if (m1Val && exp.metrics[0].value) m1Val.textContent = exp.metrics[0].value;
+        if (m1Lbl && exp.metrics[0].label) m1Lbl.textContent = exp.metrics[0].label;
+      }
+      if (exp.metrics[1]) {
+        if (m2Val && exp.metrics[1].value) m2Val.textContent = exp.metrics[1].value;
+        if (m2Lbl && exp.metrics[1].label) m2Lbl.textContent = exp.metrics[1].label;
+      }
+    }
+  }
+
+  // 5. Stage 5: Projects Dynamic Hydration (Single, Duo, or Multi Auto-Adjusting Layout)
+  const projectsContainer = document.getElementById('c5-projects-container');
+  const projects = Array.isArray(data.projects) ? data.projects : [];
+
+  if (projectsContainer && projects.length > 0) {
+    if (projects.length === 1) {
+      // 1 Project: Featured Full Layout (Direct title, no badges over name, no glow rim)
+      const proj = projects[0];
+      const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
+      projectsContainer.className = 'projects-dynamic-container projects-layout-single';
+      projectsContainer.innerHTML = `
+        <div class="chapter-card-glass project-highlight-card">
+          <h2 class="chapter-title">${escapeHtml(proj.title || 'Featured Project')}</h2>
+          <div class="chapter-institution">${escapeHtml(proj.subtitle || proj.categoryLabel || 'Full-Stack Testing & Automation')}</div>
+          <div class="project-tags-cloud">${tags}</div>
+          <p class="chapter-narrative">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
+          <div class="project-actions-row">
+            ${proj.githubUrl ? `
+              <a href="${proj.githubUrl}" target="_blank" rel="noopener" class="btn-project-cta primary">
+                <span>Explore Source Code</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+              </a>
+            ` : ''}
+            ${proj.liveUrl ? `
+              <a href="${proj.liveUrl}" target="_blank" rel="noopener" class="btn-project-cta secondary">
+                <span>Live Demo Platform &rarr;</span>
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    } else if (projects.length === 2) {
+      // 2 Projects: Duo Side-by-Side Grid (Direct bold name, no circle badge over title, no glow rim)
+      projectsContainer.className = 'projects-dynamic-container projects-layout-duo';
+      projectsContainer.innerHTML = projects.map(proj => {
+        const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).slice(0, 4).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
+        return `
+          <div class="project-card-glass">
+            <h3 class="project-card-title">${escapeHtml(proj.title)}</h3>
+            <div class="project-card-subtitle">${escapeHtml(proj.subtitle || proj.categoryLabel || '')}</div>
+            <div class="project-tags-cloud" style="margin-bottom: 8px;">${tags}</div>
+            <p class="project-card-desc">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
+            <div class="project-actions-row">
+              ${proj.githubUrl ? `
+                <a href="${proj.githubUrl}" target="_blank" rel="noopener" class="btn-project-cta primary" style="padding: 7px 12px; font-size: 0.78rem;">
+                  <span>Source</span>
+                </a>
+              ` : ''}
+              ${proj.liveUrl ? `
+                <a href="${proj.liveUrl}" target="_blank" rel="noopener" class="btn-project-cta secondary" style="padding: 7px 12px; font-size: 0.78rem;">
+                  <span>Demo &rarr;</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      // 3+ Projects: Multi Auto-Adjusting Grid with Scroll (Direct bold name, no glow rim)
+      projectsContainer.className = 'projects-dynamic-container projects-layout-multi';
+      projectsContainer.innerHTML = projects.map(proj => {
+        const tags = (Array.isArray(proj.tech) ? proj.tech : (proj.tags || [])).slice(0, 3).map(t => `<span class="tech-pill">${escapeHtml(t)}</span>`).join('');
+        return `
+          <div class="project-card-glass">
+            <h3 class="project-card-title" style="font-size: 1.05rem;">${escapeHtml(proj.title)}</h3>
+            <div class="project-tags-cloud" style="margin-bottom: 6px;">${tags}</div>
+            <p class="project-card-desc" style="font-size: 0.78rem;">${escapeHtml(proj.summary || proj.solution || proj.description || '')}</p>
+            <div class="project-actions-row" style="margin-top: auto;">
+              ${proj.githubUrl ? `
+                <a href="${proj.githubUrl}" target="_blank" rel="noopener" class="btn-project-cta primary" style="padding: 6px 10px; font-size: 0.75rem;">
+                  <span>Code</span>
+                </a>
+              ` : ''}
+              ${proj.liveUrl ? `
+                <a href="${proj.liveUrl}" target="_blank" rel="noopener" class="btn-project-cta secondary" style="padding: 6px 10px; font-size: 0.75rem;">
+                  <span>Live &rarr;</span>
+                </a>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // 6. Stage 6: Skills Garden Hydration (Distinct Colors for Strong, Proficient, Intermediate Levels)
+  const skillsList = document.getElementById('c6-skills-list');
+  const skillsSource = (data.skills && Object.keys(data.skills).length > 0) ? data.skills : ((typeof PORTFOLIO_DATA !== 'undefined' && PORTFOLIO_DATA.skills) ? PORTFOLIO_DATA.skills : null);
+  if (skillsList && skillsSource) {
+    let html = '';
+    const categories = Object.keys(skillsSource);
+
+    categories.forEach(catKey => {
+      const cat = skillsSource[catKey];
+      if (!cat) return;
+      const catTitle = cat.title || catKey.replace(/[-_]/g, ' ').toUpperCase();
+      const items = Array.isArray(cat) ? cat : (cat.items || []);
+
+      if (items.length > 0) {
+        html += `
+          <div class="skill-garden-category">
+            <div class="skill-category-heading">${escapeHtml(catTitle.toUpperCase())}</div>
+            <div class="skill-items-wrap">
+              ${items.slice(0, 10).map(item => {
+                const name = typeof item === 'string' ? item : (item.name || item.title || '');
+                const level = typeof item === 'object' && item.level ? item.level : 'Strong';
+                const lvlLower = String(level).toLowerCase().trim();
+                let lvlClass = 'lvl-strong';
+                if (lvlLower.includes('profic')) {
+                  lvlClass = 'lvl-proficient';
+                } else if (lvlLower.includes('inter')) {
+                  lvlClass = 'lvl-intermediate';
+                } else if (lvlLower.includes('learn') || lvlLower.includes('beg')) {
+                  lvlClass = 'lvl-learning';
+                }
+                return `
+                  <div class="skill-pill-node">
+                    <span>${escapeHtml(name)}</span>
+                    <span class="level-tag ${lvlClass}">${escapeHtml(level)}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if (html) skillsList.innerHTML = html;
+  }
+
+  // 7. Stage 7: QA Vision & Philosophy Hydration
+  if (data.vision) {
+    const v = data.vision;
+    const vTitle = document.getElementById('c7-vision-title');
+    const vQuote = document.getElementById('c7-vision-quote');
+    const vNar = document.getElementById('c7-vision-narrative');
+    const pillarsGrid = document.getElementById('c7-vision-pillars');
+
+    if (vTitle && v.title) vTitle.textContent = v.title;
+    if (vQuote && v.quote) vQuote.textContent = `"${v.quote}"`;
+    if (vNar && v.narrative) vNar.textContent = v.narrative;
+
+    if (pillarsGrid && Array.isArray(v.pillars) && v.pillars.length > 0) {
+      pillarsGrid.innerHTML = v.pillars.map(pillar => `
+        <div class="quality-chip">
+          <span class="quality-dot"></span>
+          <div class="quality-chip-text">
+            <strong>${escapeHtml(pillar.title)}:</strong> <span>${escapeHtml(pillar.description || '')}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
 }

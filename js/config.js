@@ -14,7 +14,7 @@ const PORTFOLIO_DATA = {
     "tagline": "Identifying Bugs and making software in Good Quality",
     "twitter": "https://twitter.com",
     "linkedin": "https://linkedin.www.linkedin.com/in/adhithya03com",
-    "location": "CHENNAI/TAMILNADU"
+    "location": "Chennai/TamilNadu"
   },
   "categories": [
     {
@@ -40,6 +40,22 @@ const PORTFOLIO_DATA = {
   ],
   "projects": [
     {
+      "title": "ZYTHA",
+      "category": "testing",
+      "categoryLabel": "Software Testing",
+      "image": "assets/projects/nexus_ai.jpg",
+      "summary": "ONLINE E_COMMERCE WEBSITE FOR FOODS",
+      "tech": [
+        "Eclipse IDE",
+        "Selenium",
+        "Java",
+        "Postman"
+      ],
+      "liveUrl": "https://zythafoods.com/",
+      "githubUrl": "",
+      "id": "proj-1789029705389"
+    },
+    {
       "id": "genkraft-studio",
       "tech": [
         "Selenium",
@@ -51,17 +67,22 @@ const PORTFOLIO_DATA = {
       "liveUrl": "https://mozhibu-wine.vercel.app/",
       "summary": "An interactive node-based canvas editor allowing teams to visually assemble, configure, and automate data transformation pipelines.",
       "category": "cat-softwaretesting",
-      "githubUrl": "https://github.com/example/genkraft-studio",
+      "githubUrl": "",
       "categoryLabel": "Software Testing"
     }
   ],
   "skills": {
     "tools": {
       "items": [
-        "Git & GitHub",
         "CI/CD Pipelines",
-        "Postman",
-        "vercel"
+        {
+          "name": "GIT",
+          "level": "Proficient"
+        },
+        {
+          "name": "Postman",
+          "level": "Intermediate"
+        }
       ],
       "title": "Tools & DevOps"
     },
@@ -78,6 +99,15 @@ const PORTFOLIO_DATA = {
         "react"
       ],
       "title": "Frontend Development"
+    },
+    "programming": {
+      "title": "programming",
+      "items": [
+        {
+          "name": "JAVA",
+          "level": "Intermediate"
+        }
+      ]
     }
   },
   "experience": [
@@ -100,14 +130,6 @@ const PORTFOLIO_DATA = {
       "institution": "S A Engineering College"
     },
     {
-      "year": "2026",
-      "score": "",
-      "degree": "Software Testing with Selenium",
-      "period": "2026",
-      "location": "Chennai, TamilNadu",
-      "institution": "SLA Institute"
-    },
-    {
       "year": "2021 - 2022",
       "score": "85.5%",
       "degree": "HSC/Computer Science",
@@ -123,5 +145,29 @@ const PORTFOLIO_DATA = {
       "location": "Chennai, TamilNadu",
       "institution": "Sir Ramaswami Mudaliar Higher Secondary School"
     }
-  ]
+  ],
+  "courses": [
+    {
+      "id": "course-1789030379611",
+      "name": "Software Testing With Selenium",
+      "platform": "SLA institute",
+      "year": "2026",
+      "category": "Automation",
+      "description": "JAVA, SELENIUM, SQL"
+    }
+  ],
+  "aboutMe": {
+    "title": "About Me",
+    "subtitle": "Reflection & Professional Philosophy",
+    "quote": "Every Defect found early is a user saved from frustration.",
+    "narrative": "Reflect on your Growth, Quality Mindset, and Problem-Solving Skills.",
+    "qualities": []
+  },
+  "vision": {
+    "title": "QA Vision & Philosophy",
+    "subtitle": "CONTINUOUS GROWTH",
+    "quote": "Quality is not an Act, It's an Habit.",
+    "narrative": "Commitment to Quality.\nContinuous  Improvement.",
+    "pillars": []
+  }
 };

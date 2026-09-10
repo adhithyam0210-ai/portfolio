@@ -164,13 +164,18 @@ const DatabaseManager = (() => {
       }
 
       if (data) {
+        const p = data.profile || {};
         return {
-          profile: data.profile || {},
+          profile: p,
           categories: data.categories || [],
           projects: data.projects || [],
           skills: data.skills || {},
           experience: data.experience || [],
-          education: data.education || []
+          education: data.education || [],
+          courses: data.courses || p.courses || [],
+          coursesHeader: data.coursesHeader || p.coursesHeader || {},
+          aboutMe: data.aboutMe || p.aboutMe || {},
+          vision: data.vision || p.vision || {}
         };
       }
     } catch (e) {
@@ -183,9 +188,17 @@ const DatabaseManager = (() => {
     const client = getClient();
     if (!client) throw new Error('Database is not configured.');
 
+    const p = {
+      ...(portfolioData.profile || {}),
+      courses: portfolioData.courses || [],
+      coursesHeader: portfolioData.coursesHeader || {},
+      aboutMe: portfolioData.aboutMe || {},
+      vision: portfolioData.vision || {}
+    };
+
     const payload = {
       id: 'main',
-      profile: portfolioData.profile || {},
+      profile: p,
       categories: portfolioData.categories || [],
       projects: portfolioData.projects || [],
       skills: portfolioData.skills || {},
@@ -770,6 +783,34 @@ const PortfolioAPI = (() => {
       data.education = education;
       const res = await this.savePortfolio(data, 'Update education details');
       return { ...res, education };
+    },
+
+    async updateCourses(courses) {
+      const data = await this.getPortfolio();
+      data.courses = courses;
+      const res = await this.savePortfolio(data, 'Update courses and certifications');
+      return { ...res, courses };
+    },
+
+    async updateCoursesHeader(coursesHeader) {
+      const data = await this.getPortfolio();
+      data.coursesHeader = { ...(data.coursesHeader || {}), ...coursesHeader };
+      const res = await this.savePortfolio(data, 'Update courses stage header');
+      return { ...res, coursesHeader: data.coursesHeader };
+    },
+
+    async updateAboutMe(aboutMe) {
+      const data = await this.getPortfolio();
+      data.aboutMe = { ...(data.aboutMe || {}), ...aboutMe };
+      const res = await this.savePortfolio(data, 'Update about me reflection');
+      return { ...res, aboutMe: data.aboutMe };
+    },
+
+    async updateVision(vision) {
+      const data = await this.getPortfolio();
+      data.vision = { ...(data.vision || {}), ...vision };
+      const res = await this.savePortfolio(data, 'Update QA vision & philosophy');
+      return { ...res, vision: data.vision };
     },
 
     /* -------------------------------------------------------------

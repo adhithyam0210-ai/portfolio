@@ -110,6 +110,7 @@ function switchTab(target, updateHash = true) {
   }
 
   if (target === 'education') renderEducationManager();
+  if (target === 'courses') renderCoursesManager();
   if (target === 'experience') renderExperienceManager();
   if (target === 'projects') renderProjectsList();
   if (target === 'skills') renderSkillsManager();
@@ -462,6 +463,37 @@ async function renderProfileForm() {
   document.getElementById('prof-github').value = p.github || '';
   document.getElementById('prof-linkedin').value = p.linkedin || '';
 
+  const aboutQuoteInput = document.getElementById('prof-about-quote');
+  const aboutNarrativeInput = document.getElementById('prof-about-narrative');
+  if (aboutQuoteInput) aboutQuoteInput.value = data.aboutMe?.quote || '';
+  if (aboutNarrativeInput) aboutNarrativeInput.value = data.aboutMe?.narrative || '';
+
+  // About Me 5 Qualities
+  const qualities = data.aboutMe?.qualities || [];
+  for (let i = 0; i < 5; i++) {
+    const qTitle = document.getElementById(`prof-q-title-${i}`);
+    const qDesc = document.getElementById(`prof-q-desc-${i}`);
+    if (qTitle) qTitle.value = qualities[i]?.title || '';
+    if (qDesc) qDesc.value = qualities[i]?.description || '';
+  }
+
+  // QA Vision & Philosophy (Stage 7)
+  const vision = data.vision || {};
+  const vTitle = document.getElementById('prof-vision-title');
+  const vQuote = document.getElementById('prof-vision-quote');
+  const vNar = document.getElementById('prof-vision-narrative');
+  if (vTitle) vTitle.value = vision.title || 'QA Vision & Philosophy';
+  if (vQuote) vQuote.value = vision.quote || '';
+  if (vNar) vNar.value = vision.narrative || '';
+
+  const pillars = vision.pillars || [];
+  for (let i = 0; i < 4; i++) {
+    const pTitle = document.getElementById(`prof-p-title-${i}`);
+    const pDesc = document.getElementById(`prof-p-desc-${i}`);
+    if (pTitle) pTitle.value = pillars[i]?.title || '';
+    if (pDesc) pDesc.value = pillars[i]?.description || '';
+  }
+
   const avatarImg = document.getElementById('profile-avatar-preview-img');
   const placeholder = document.getElementById('profile-avatar-placeholder');
   const photoName = document.getElementById('profile-photo-name');
@@ -491,8 +523,49 @@ async function saveProfileForm(e) {
     avatar: profileAvatarData || existingAvatar
   };
 
+  // 1. Save About Me (Quote, Narrative, 5 Qualities)
+  const aboutQuoteInput = document.getElementById('prof-about-quote');
+  const aboutNarrativeInput = document.getElementById('prof-about-narrative');
+  const qualities = [];
+  for (let i = 0; i < 5; i++) {
+    const t = document.getElementById(`prof-q-title-${i}`)?.value.trim();
+    const d = document.getElementById(`prof-q-desc-${i}`)?.value.trim();
+    if (t || d) {
+      qualities.push({ title: t || '', description: d || '' });
+    }
+  }
+
+  const aboutMePayload = {
+    title: 'About Me',
+    subtitle: 'Reflection & Professional Philosophy',
+    quote: aboutQuoteInput ? aboutQuoteInput.value.trim() : '',
+    narrative: aboutNarrativeInput ? aboutNarrativeInput.value.trim() : '',
+    qualities: qualities.length > 0 ? qualities : (currentData.aboutMe?.qualities || [])
+  };
+  await PortfolioAPI.updateAboutMe(aboutMePayload);
+
+  // 2. Save QA Vision & Philosophy (Stage 7)
+  const pillars = [];
+  for (let i = 0; i < 4; i++) {
+    const t = document.getElementById(`prof-p-title-${i}`)?.value.trim();
+    const d = document.getElementById(`prof-p-desc-${i}`)?.value.trim();
+    if (t || d) {
+      pillars.push({ title: t || '', description: d || '' });
+    }
+  }
+
+  const visionPayload = {
+    title: document.getElementById('prof-vision-title')?.value.trim() || 'QA Vision & Philosophy',
+    subtitle: 'CONTINUOUS GROWTH',
+    quote: document.getElementById('prof-vision-quote')?.value.trim() || '',
+    narrative: document.getElementById('prof-vision-narrative')?.value.trim() || '',
+    pillars: pillars.length > 0 ? pillars : (currentData.vision?.pillars || [])
+  };
+  await PortfolioAPI.updateVision(visionPayload);
+
+  // 3. Save Profile
   const res = await PortfolioAPI.updateProfile(profilePayload);
-  notifySaveResult('Profile updated', res);
+  notifySaveResult('Profile, About Me & QA Vision updated', res);
 }
 
 /* ==========================================================================
@@ -506,9 +579,11 @@ async function renderSkillsManager() {
   const skills = data.skills || {};
 
   const categories = [
-    { key: 'frontend', title: 'Frontend Engineering' },
-    { key: 'backend', title: 'Backend & Databases' },
-    { key: 'tools', title: 'Tools & DevOps' }
+    { key: 'testing', title: 'Testing' },
+    { key: 'automation', title: 'Automation' },
+    { key: 'database', title: 'Database' },
+    { key: 'tools', title: 'Tools' },
+    { key: 'programming', title: 'Programming' }
   ];
 
   container.innerHTML = categories.map(cat => {
@@ -516,19 +591,29 @@ async function renderSkillsManager() {
     return `
       <div class="skill-category-box">
         <h4 class="skill-box-title">${cat.title} (${items.length})</h4>
-        <div class="skill-add-row">
-          <input type="text" id="add-skill-input-${cat.key}" class="form-input" placeholder="Add skill (e.g. Next.js)..." />
+        <div class="skill-add-row" style="display: flex; gap: 8px;">
+          <input type="text" id="add-skill-input-${cat.key}" class="form-input" style="flex: 1;" placeholder="Skill name (e.g. Selenium WebDriver)..." />
+          <select id="add-skill-level-${cat.key}" class="form-input" style="width: 130px;">
+            <option value="Strong">Strong</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Proficient">Proficient</option>
+          </select>
           <button class="btn-primary" onclick="addSkill('${cat.key}')">Add</button>
         </div>
-        <div class="skill-tag-list">
-          ${items.map((item, index) => `
-            <div class="skill-tag-item">
-              <span>${item}</span>
-              <button class="skill-delete-btn" onclick="deleteSkill('${cat.key}', ${index})" title="Delete Skill">
-                ${ADMIN_ICONS.trash}
-              </button>
-            </div>
-          `).join('')}
+        <div class="skill-tag-list" style="margin-top: 12px;">
+          ${items.map((item, index) => {
+            const name = typeof item === 'string' ? item : (item.name || item.title || '');
+            const level = typeof item === 'object' && item.level ? item.level : 'Strong';
+            return `
+              <div class="skill-tag-item" style="display: inline-flex; align-items: center; gap: 8px;">
+                <span><strong>${escapeHtml(name)}</strong></span>
+                <span class="skill-level-pill" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; background: rgba(56,189,248,0.15); color: #0284c7; font-weight: 700;">${escapeHtml(level)}</span>
+                <button class="skill-delete-btn" onclick="deleteSkill('${cat.key}', ${index})" title="Delete Skill">
+                  ${ADMIN_ICONS.trash}
+                </button>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
@@ -537,20 +622,22 @@ async function renderSkillsManager() {
 
 async function addSkill(catKey) {
   const input = document.getElementById(`add-skill-input-${catKey}`);
+  const levelSelect = document.getElementById(`add-skill-level-${catKey}`);
   if (!input) return;
 
   const text = input.value.trim();
   if (!text) return;
+  const level = levelSelect ? levelSelect.value : 'Strong';
 
   const data = await PortfolioAPI.getPortfolio();
   data.skills = data.skills || {};
   data.skills[catKey] = data.skills[catKey] || { title: catKey, items: [] };
   data.skills[catKey].items = data.skills[catKey].items || [];
 
-  data.skills[catKey].items.push(text);
+  data.skills[catKey].items.push({ name: text, level: level });
   await PortfolioAPI.updateSkills(data.skills);
   renderSkillsManager();
-  showToast(`Added ${text}`);
+  showToast(`Added ${text} (${level})`);
 }
 
 async function deleteSkill(catKey, index) {
@@ -559,7 +646,8 @@ async function deleteSkill(catKey, index) {
     const removed = data.skills[catKey].items.splice(index, 1);
     await PortfolioAPI.updateSkills(data.skills);
     renderSkillsManager();
-    showToast(`Removed ${removed[0]}`);
+    const removedName = typeof removed[0] === 'string' ? removed[0] : (removed[0].name || 'Skill');
+    showToast(`Removed ${removedName}`);
   }
 }
 
@@ -609,6 +697,11 @@ function openExpModal(isEdit = false) {
     currentEditingExpIndex = null;
     title.textContent = 'Add Career Milestone';
     form.reset();
+    document.getElementById('exp-metric1-val').value = '';
+    document.getElementById('exp-metric1-lbl').value = '';
+    document.getElementById('exp-metric2-val').value = '';
+    document.getElementById('exp-metric2-lbl').value = '';
+    document.getElementById('exp-narrative').value = '';
   } else {
     title.textContent = 'Edit Career Milestone';
   }
@@ -634,6 +727,15 @@ async function editExperience(index) {
   document.getElementById('exp-desc').value = exp.description || '';
   document.getElementById('exp-bullets').value = (exp.bullets || []).join('\n');
 
+  // Load metrics & narrative
+  const m1 = exp.metrics?.[0] || {};
+  const m2 = exp.metrics?.[1] || {};
+  document.getElementById('exp-metric1-val').value = m1.value || '';
+  document.getElementById('exp-metric1-lbl').value = m1.label || '';
+  document.getElementById('exp-metric2-val').value = m2.value || '';
+  document.getElementById('exp-metric2-lbl').value = m2.label || '';
+  document.getElementById('exp-narrative').value = exp.narrative || '';
+
   openExpModal(true);
 }
 
@@ -649,9 +751,31 @@ async function saveExperienceForm(e) {
   const period = document.getElementById('exp-period').value.trim();
   const description = document.getElementById('exp-desc').value.trim();
   const bulletsStr = document.getElementById('exp-bullets').value.trim();
+  const narrative = document.getElementById('exp-narrative')?.value.trim() || '';
+
+  const m1Val = document.getElementById('exp-metric1-val')?.value.trim() || '';
+  const m1Lbl = document.getElementById('exp-metric1-lbl')?.value.trim() || '';
+  const m2Val = document.getElementById('exp-metric2-val')?.value.trim() || '';
+  const m2Lbl = document.getElementById('exp-metric2-lbl')?.value.trim() || '';
+
+  const metrics = [];
+  if (m1Val || m1Lbl) metrics.push({ label: m1Lbl || 'Pass Rate', value: m1Val || '99.8%' });
+  if (m2Val || m2Lbl) metrics.push({ label: m2Lbl || 'Cycle Reduction', value: m2Val || '30%' });
 
   const bullets = bulletsStr ? bulletsStr.split('\n').map(s => s.trim()).filter(Boolean) : [];
-  const entry = { role, company, location, period, description, bullets };
+  
+  const existing = currentEditingExpIndex !== null ? data.experience[currentEditingExpIndex] : {};
+  const entry = {
+    ...existing,
+    role,
+    company,
+    location,
+    period,
+    description,
+    narrative: narrative || existing.narrative || '',
+    bullets,
+    metrics: metrics.length > 0 ? metrics : (existing.metrics || [])
+  };
 
   if (currentEditingExpIndex !== null) {
     data.experience[currentEditingExpIndex] = entry;
@@ -734,6 +858,10 @@ function openEducationModal(isEdit = false) {
     form.reset();
     const idxInput = document.getElementById('education-index');
     if (idxInput) idxInput.value = '';
+    const narrativeInput = document.getElementById('edu-narrative');
+    if (narrativeInput) narrativeInput.value = '';
+    const takeawayInput = document.getElementById('edu-takeaway');
+    if (takeawayInput) takeawayInput.value = '';
   } else {
     title.textContent = 'Edit Education';
   }
@@ -758,6 +886,11 @@ async function editEducation(index) {
   document.getElementById('edu-year').value = edu.year || edu.period || '';
   document.getElementById('edu-score').value = edu.score || '';
   document.getElementById('edu-location').value = edu.location || '';
+  
+  const narrativeInput = document.getElementById('edu-narrative');
+  if (narrativeInput) narrativeInput.value = edu.narrative || edu.description || '';
+  const takeawayInput = document.getElementById('edu-takeaway');
+  if (takeawayInput) takeawayInput.value = edu.takeaway || edu.keyLearning || '';
 
   openEducationModal(true);
 }
@@ -773,11 +906,26 @@ async function saveEducationForm(e) {
   const year = document.getElementById('edu-year').value.trim();
   const score = document.getElementById('edu-score').value.trim();
   const location = document.getElementById('edu-location').value.trim();
+  const narrativeInput = document.getElementById('edu-narrative');
+  const takeawayInput = document.getElementById('edu-takeaway');
+  const narrative = narrativeInput ? narrativeInput.value.trim() : '';
+  const takeaway = takeawayInput ? takeawayInput.value.trim() : '';
 
-  const entry = { degree, institution, year, period: year, score, location };
+  const entry = {
+    degree,
+    institution,
+    year,
+    period: year,
+    score,
+    location,
+    narrative,
+    takeaway,
+    description: narrative,
+    keyLearning: takeaway
+  };
 
   if (currentEditingEduIndex !== null && currentEditingEduIndex !== undefined) {
-    data.education[currentEditingEduIndex] = entry;
+    data.education[currentEditingEduIndex] = { ...data.education[currentEditingEduIndex], ...entry };
     showToast('Education entry updated');
   } else {
     data.education.push(entry);
@@ -800,6 +948,163 @@ async function deleteEducation(index) {
   await PortfolioAPI.updateEducation(data.education);
   renderEducationManager();
   showToast('Education record deleted');
+}
+
+/* ==========================================================================
+   Courses & Certifications Manager (Milestone 4 CRUD)
+   ========================================================================== */
+let currentEditingCourseIndex = null;
+
+async function renderCoursesManager() {
+  const container = document.getElementById('admin-courses-container');
+  if (!container) return;
+
+  const data = await PortfolioAPI.getPortfolio();
+  const list = data.courses || [];
+
+  // Populate Stage 03 header form inputs
+  const hdr = data.coursesHeader || (data.profile && data.profile.coursesHeader) || {};
+  const eraEl = document.getElementById('course-hdr-era');
+  const statusEl = document.getElementById('course-hdr-status');
+  const titleEl = document.getElementById('course-hdr-title');
+  const subEl = document.getElementById('course-hdr-subtitle');
+
+  if (eraEl) eraEl.value = hdr.eraBadge || 'STAGE 03 • SPECIALIZED TRAINING';
+  if (statusEl) statusEl.value = hdr.statusBadge || 'CERTIFIED • INDUSTRY-READY';
+  if (titleEl) titleEl.value = hdr.title || 'What I Learned Along the Way';
+  if (subEl) subEl.value = hdr.subtitle || 'Hands-on certifications & rigorous testing frameworks.';
+
+  if (list.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 48px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+        <p style="color: var(--text-secondary); margin-bottom: 14px;">No courses or certifications added yet.</p>
+        <button class="btn-primary" onclick="openCourseModal()">+ Add Course / Certification</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = list.map((item, index) => `
+    <div class="exp-admin-card">
+      <div class="exp-admin-info">
+        <div class="exp-admin-role">${escapeHtml(item.name || 'Course Title')}</div>
+        <div class="exp-admin-company">${escapeHtml(item.platform || '')} • ${escapeHtml(item.category || 'General')}</div>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+          <span class="exp-admin-period">${escapeHtml(item.year || '')}</span>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 8px;">${escapeHtml(item.description || '')}</p>
+      </div>
+      <div class="exp-admin-actions">
+        <button class="btn-card-edit" onclick="editCourse(${index})" title="Edit">
+          ${ADMIN_ICONS.edit}
+          <span>Edit</span>
+        </button>
+        <button class="btn-card-delete" onclick="deleteCourse(${index})" title="Delete">
+          ${ADMIN_ICONS.trash}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openCourseModal(isEdit = false) {
+  const modal = document.getElementById('course-modal');
+  const title = document.getElementById('modal-course-title');
+  const form = document.getElementById('course-form');
+  if (!modal || !form) return;
+
+  if (!isEdit) {
+    currentEditingCourseIndex = null;
+    title.textContent = 'Add Course / Certification';
+    form.reset();
+  } else {
+    title.textContent = 'Edit Course / Certification';
+  }
+  modal.classList.add('active');
+}
+
+function closeCourseModal() {
+  const modal = document.getElementById('course-modal');
+  if (modal) modal.classList.remove('active');
+  currentEditingCourseIndex = null;
+}
+
+async function editCourse(index) {
+  const data = await PortfolioAPI.getPortfolio();
+  const c = (data.courses || [])[index];
+  if (!c) return;
+
+  currentEditingCourseIndex = index;
+  document.getElementById('course-name').value = c.name || '';
+  document.getElementById('course-platform').value = c.platform || '';
+  document.getElementById('course-year').value = c.year || '';
+  document.getElementById('course-category').value = c.category || 'Automation';
+  document.getElementById('course-desc').value = c.description || '';
+  openCourseModal(true);
+}
+
+async function saveCourseForm(e) {
+  e.preventDefault();
+  const data = await PortfolioAPI.getPortfolio();
+  data.courses = data.courses || [];
+
+  const name = document.getElementById('course-name').value.trim();
+  const platform = document.getElementById('course-platform').value.trim();
+  const year = document.getElementById('course-year').value.trim();
+  const category = document.getElementById('course-category').value.trim();
+  const description = document.getElementById('course-desc').value.trim();
+
+  const entry = {
+    id: `course-${Date.now()}`,
+    name,
+    platform,
+    year,
+    category,
+    description
+  };
+
+  if (currentEditingCourseIndex !== null && currentEditingCourseIndex !== undefined) {
+    data.courses[currentEditingCourseIndex] = { ...data.courses[currentEditingCourseIndex], ...entry };
+    showToast('Course updated');
+  } else {
+    data.courses.push(entry);
+    showToast('Course added');
+  }
+
+  currentEditingCourseIndex = null;
+  const res = await PortfolioAPI.updateCourses(data.courses);
+  closeCourseModal();
+  renderCoursesManager();
+  notifySaveResult('Course saved', res);
+}
+
+async function deleteCourse(index) {
+  if (!confirm('Are you sure you want to delete this course?')) return;
+  const data = await PortfolioAPI.getPortfolio();
+  data.courses = data.courses || [];
+  data.courses.splice(index, 1);
+  await PortfolioAPI.updateCourses(data.courses);
+  renderCoursesManager();
+  showToast('Course deleted');
+}
+
+async function saveCoursesHeaderForm(e) {
+  e.preventDefault();
+  const eraBadge = document.getElementById('course-hdr-era').value.trim();
+  const statusBadge = document.getElementById('course-hdr-status').value.trim();
+  const title = document.getElementById('course-hdr-title').value.trim();
+  const subtitle = document.getElementById('course-hdr-subtitle').value.trim();
+
+  const headerPayload = {
+    eraBadge: eraBadge || 'STAGE 03 • SPECIALIZED TRAINING',
+    statusBadge: statusBadge || 'CERTIFIED • INDUSTRY-READY',
+    title: title || 'What I Learned Along the Way',
+    subtitle: subtitle || 'Hands-on certifications & rigorous testing frameworks.'
+  };
+
+  showToast('Saving Stage 03 settings...');
+  const res = await PortfolioAPI.updateCoursesHeader(headerPayload);
+  notifySaveResult('Stage 03 settings saved', res);
 }
 
 /* ==========================================================================
