@@ -18,7 +18,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
   <!-- Admin Stylesheet -->
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css?v=15.0">
 </head>
 <body>
 
@@ -36,7 +36,7 @@
       
       <div style="margin-bottom: 16px;">
         <div class="password-input-wrap">
-          <input type="password" id="pin-input" class="form-input" placeholder="Enter password" autofocus autocomplete="off" />
+          <input type="password" id="pin-input" class="form-input" placeholder="Enter admin password" autofocus autocomplete="off" />
           <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('pin-input', this)" aria-label="Show password" title="Show password">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
           </button>
@@ -190,7 +190,7 @@
       </div>
 
       <div class="admin-card-box">
-        <form id="profile-form" onsubmit="saveProfileForm(event)">
+        <form id="profile-form" onsubmit="saveProfileForm(event)" novalidate>
           <!-- Profile Photo Upload -->
           <div class="profile-avatar-row">
             <input type="file" id="profile-photo-input" class="file-input-hidden" accept="image/*" />
@@ -215,10 +215,10 @@
           </div>
 
           <!-- Resume Document Upload (Device File for Get Resume) -->
-          <div class="profile-avatar-row resume-upload-box" style="margin-bottom: 24px; padding: 14px 16px; background: rgba(255, 255, 255, 0.03); border: 1px dashed rgba(255, 255, 255, 0.18); border-radius: 12px;">
+          <div class="profile-avatar-row resume-upload-box" style="margin-bottom: 24px; padding: 16px 20px; background: var(--bg-card); border: 1.5px dashed var(--border-medium); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
             <input type="file" id="resume-doc-input" class="file-input-hidden" accept=".pdf,.doc,.docx,.txt" />
-            <div class="resume-doc-badge" style="width: 44px; height: 44px; border-radius: 10px; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="resume-doc-badge" style="width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--bg-subtle); border: 1.5px solid var(--border-medium); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-main);">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                 <polyline points="14 2 14 8 20 8"></polyline>
                 <line x1="16" y1="13" x2="8" y2="13"></line>
@@ -227,8 +227,8 @@
               </svg>
             </div>
             <div class="profile-avatar-controls" style="flex: 1;">
-              <div style="font-weight: 700; font-size: 0.88rem; color: #f8fafc; margin-bottom: 3px;">Resume Document (PDF / DOCX)</div>
-              <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 8px;">Upload your actual resume file from your device. Visitors clicking "Get Resume" will download this exact document.</div>
+              <div style="font-weight: 700; font-size: 0.92rem; color: var(--text-main); margin-bottom: 3px;">Resume Document (PDF / DOCX)</div>
+              <div style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 10px; line-height: 1.4;">Upload your actual resume file from your device. Visitors clicking "Get Resume" will download this exact document.</div>
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <button type="button" class="btn-browse-file" onclick="document.getElementById('resume-doc-input').click()">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -238,7 +238,7 @@
                   </svg>
                   <span>Choose Resume Document from Device</span>
                 </button>
-                <span id="resume-doc-name" class="file-name-label" style="font-size: 0.82rem;">No document uploaded yet</span>
+                <span id="resume-doc-name" class="file-name-label" style="font-size: 0.82rem; color: var(--text-muted);">No document uploaded yet</span>
               </div>
             </div>
           </div>
@@ -246,49 +246,49 @@
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label" for="prof-name">Full Name</label>
-              <input type="text" id="prof-name" class="form-input" required />
+              <input type="text" id="prof-name" class="form-input" placeholder="e.g. Adhithya M" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="prof-role">Primary Role / Specialization</label>
-              <input type="text" id="prof-role" class="form-input" required />
+              <input type="text" id="prof-role" class="form-input" placeholder="e.g. QA Automation Engineer &amp; SDET" required />
             </div>
           </div>
 
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label" for="prof-location">Location</label>
-              <input type="text" id="prof-location" class="form-input" required />
+              <input type="text" id="prof-location" class="form-input" placeholder="e.g. Chennai, India" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="prof-degree">Academic Degree Tag (Card 0)</label>
-              <input type="text" id="prof-degree" class="form-input" placeholder="e.g. B.Tech AI &amp; DS" />
+              <input type="text" id="prof-degree" class="form-input" placeholder="e.g. B.Tech AI &amp; Data Science" />
             </div>
           </div>
 
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label" for="prof-email">Email Address</label>
-              <input type="email" id="prof-email" class="form-input" required />
+              <input type="email" id="prof-email" class="form-input" placeholder="e.g. adhithyam0210@gmail.com" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="prof-tagline">Main Headline</label>
-              <input type="text" id="prof-tagline" class="form-input" required />
+              <input type="text" id="prof-tagline" class="form-input" placeholder="e.g. Building Resilient QA Automation &amp; Full-Stack Systems" required />
             </div>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="prof-bio">Short Bio / Elevator Pitch</label>
-            <textarea id="prof-bio" class="form-textarea" required></textarea>
+            <textarea id="prof-bio" class="form-textarea" placeholder="e.g. Detail-oriented QA Engineer specializing in automated regression frameworks, test architecture, and scalable full-stack delivery..." required></textarea>
           </div>
 
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label" for="prof-github">GitHub Profile URL</label>
-              <input type="url" id="prof-github" class="form-input" />
+              <input type="url" id="prof-github" class="form-input" placeholder="https://github.com/adhithyam0210" />
             </div>
             <div class="form-group">
               <label class="form-label" for="prof-linkedin">LinkedIn Profile URL</label>
-              <input type="url" id="prof-linkedin" class="form-input" />
+              <input type="url" id="prof-linkedin" class="form-input" placeholder="https://linkedin.com/in/adhithyam-m" />
             </div>
           </div>
 
@@ -301,36 +301,36 @@
 
             <div class="form-group">
               <label class="form-label" for="prof-about-quote">Philosophical QA Quote</label>
-              <input type="text" id="prof-about-quote" class="form-input" placeholder="e.g. Every defect found early is a user saved from frustration." />
+              <input type="text" id="prof-about-quote" class="form-input" placeholder="e.g. Quality is never an accident; it is always the result of intelligent effort." />
             </div>
 
             <div class="form-group">
               <label class="form-label" for="prof-about-narrative">Reflection Narrative</label>
-              <textarea id="prof-about-narrative" class="form-textarea" placeholder="Reflect on your growth, quality mindset, and problem-solving passion..." rows="3"></textarea>
+              <textarea id="prof-about-narrative" class="form-textarea" placeholder="e.g. Detail-oriented QA Engineer with expertise in building robust test automation frameworks, ensuring zero-defect software releases, and optimizing CI/CD pipelines..." rows="3"></textarea>
             </div>
 
             <div style="margin-top: 16px;">
               <label class="form-label" style="font-weight: 700; margin-bottom: 8px; display: block;">5 Core Qualities (Displayed on About Me card):</label>
               <div id="prof-qualities-list" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="form-grid-2">
-                  <input type="text" id="prof-q-title-0" class="form-input" placeholder="Quality 1 Title (e.g. Adaptable)" />
-                  <input type="text" id="prof-q-desc-0" class="form-input" placeholder="Quality 1 Description" />
+                  <input type="text" id="prof-q-title-0" class="form-input" placeholder="e.g. Zero-Defect Architecture" />
+                  <input type="text" id="prof-q-desc-0" class="form-input" placeholder="e.g. Proactive exploratory and regression testing across distributed services." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-q-title-1" class="form-input" placeholder="Quality 2 Title (e.g. Good Team Player)" />
-                  <input type="text" id="prof-q-desc-1" class="form-input" placeholder="Quality 2 Description" />
+                  <input type="text" id="prof-q-title-1" class="form-input" placeholder="e.g. Automation First" />
+                  <input type="text" id="prof-q-desc-1" class="form-input" placeholder="e.g. High-coverage automated test suites reducing manual validation time by 75%." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-q-title-2" class="form-input" placeholder="Quality 3 Title (e.g. Curious Learner)" />
-                  <input type="text" id="prof-q-desc-2" class="form-input" placeholder="Quality 3 Description" />
+                  <input type="text" id="prof-q-title-2" class="form-input" placeholder="e.g. API &amp; Integration Testing" />
+                  <input type="text" id="prof-q-desc-2" class="form-input" placeholder="e.g. Rigorous contract and schema verification using Postman, Newman, and RestAssured." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-q-title-3" class="form-input" placeholder="Quality 4 Title (e.g. Problem Solver)" />
-                  <input type="text" id="prof-q-desc-3" class="form-input" placeholder="Quality 4 Description" />
+                  <input type="text" id="prof-q-title-3" class="form-input" placeholder="e.g. CI/CD Quality Gates" />
+                  <input type="text" id="prof-q-desc-3" class="form-input" placeholder="e.g. Automated test triggers on pull requests ensuring release reliability." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-q-title-4" class="form-input" placeholder="Quality 5 Title (e.g. Quality Champion)" />
-                  <input type="text" id="prof-q-desc-4" class="form-input" placeholder="Quality 5 Description" />
+                  <input type="text" id="prof-q-title-4" class="form-input" placeholder="e.g. Continuous Learning" />
+                  <input type="text" id="prof-q-desc-4" class="form-input" placeholder="e.g. Constantly expanding domain expertise across modern automation tools." />
                 </div>
               </div>
             </div>
@@ -346,42 +346,42 @@
             <div class="form-grid-2">
               <div class="form-group">
                 <label class="form-label" for="prof-vision-title">Vision Title</label>
-                <input type="text" id="prof-vision-title" class="form-input" placeholder="e.g. QA Vision &amp; Philosophy" />
+                <input type="text" id="prof-vision-title" class="form-input" placeholder="e.g. QA Engineering &amp; Quality Leadership Vision" />
               </div>
               <div class="form-group">
                 <label class="form-label" for="prof-vision-badge">Status Badge</label>
-                <input type="text" id="prof-vision-badge" class="form-input" placeholder="e.g. CONTINUOUS GROWTH" />
+                <input type="text" id="prof-vision-badge" class="form-input" placeholder="e.g. MISSION &amp; QUALITY PRINCIPLES" />
               </div>
             </div>
 
             <div class="form-group">
               <label class="form-label" for="prof-vision-quote">Vision Quote</label>
-              <input type="text" id="prof-vision-quote" class="form-input" placeholder='e.g. "Quality is not an act, it is a habit..."' />
+              <input type="text" id="prof-vision-quote" class="form-input" placeholder="e.g. Building software you can trust through relentless automated testing and craftsmanship." />
             </div>
 
             <div class="form-group">
               <label class="form-label" for="prof-vision-narrative">Strategic Narrative</label>
-              <textarea id="prof-vision-narrative" class="form-textarea" placeholder="Describe your forward-looking quality assurance mission..." rows="3"></textarea>
+              <textarea id="prof-vision-narrative" class="form-textarea" placeholder="e.g. My mission is to champion software excellence from design to deployment, integrating automated testing at every step of the development cycle..." rows="3"></textarea>
             </div>
 
             <div style="margin-top: 16px;">
               <label class="form-label" style="font-weight: 700; margin-bottom: 8px; display: block;">4 Focus Pillars:</label>
               <div id="prof-pillars-list" style="display: flex; flex-direction: column; gap: 8px;">
                 <div class="form-grid-2">
-                  <input type="text" id="prof-p-title-0" class="form-input" placeholder="Pillar 1 Title (e.g. Automation Architecture)" />
-                  <input type="text" id="prof-p-desc-0" class="form-input" placeholder="Pillar 1 Description" />
+                  <input type="text" id="prof-p-title-0" class="form-input" placeholder="e.g. Comprehensive Test Coverage" />
+                  <input type="text" id="prof-p-desc-0" class="form-input" placeholder="e.g. Writing unit, integration, and UI end-to-end tests for complete system assurance." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-p-title-1" class="form-input" placeholder="Pillar 2 Title (e.g. CI/CD Quality Gates)" />
-                  <input type="text" id="prof-p-desc-1" class="form-input" placeholder="Pillar 2 Description" />
+                  <input type="text" id="prof-p-title-1" class="form-input" placeholder="e.g. Scalable Test Frameworks" />
+                  <input type="text" id="prof-p-desc-1" class="form-input" placeholder="e.g. Designing maintainable Page Object Model architectures with Java, Selenium, and TestNG." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-p-title-2" class="form-input" placeholder="Pillar 3 Title (e.g. API & Contract Testing)" />
-                  <input type="text" id="prof-p-desc-2" class="form-input" placeholder="Pillar 3 Description" />
+                  <input type="text" id="prof-p-title-2" class="form-input" placeholder="e.g. Agile Quality Collaboration" />
+                  <input type="text" id="prof-p-desc-2" class="form-input" placeholder="e.g. Working closely with product and engineering teams to identify defects before production." />
                 </div>
                 <div class="form-grid-2">
-                  <input type="text" id="prof-p-title-3" class="form-input" placeholder="Pillar 4 Title (e.g. Root Cause Analysis)" />
-                  <input type="text" id="prof-p-desc-3" class="form-input" placeholder="Pillar 4 Description" />
+                  <input type="text" id="prof-p-title-3" class="form-input" placeholder="e.g. Performance &amp; Reliability" />
+                  <input type="text" id="prof-p-desc-3" class="form-input" placeholder="e.g. Measuring throughput, latency, and database query efficiency under heavy load." />
                 </div>
               </div>
             </div>
@@ -396,12 +396,12 @@
 
             <div class="form-group">
               <label class="form-label" for="prof-contact-headline">Contact Headline</label>
-              <input type="text" id="prof-contact-headline" class="form-input" placeholder="e.g. Ready to Elevate Your Software Quality?" />
+              <input type="text" id="prof-contact-headline" class="form-input" placeholder="e.g. Let's Build &amp; Validate High-Impact Software Together" />
             </div>
 
             <div class="form-group">
               <label class="form-label" for="prof-contact-subtext">Contact Subtext / Invitation</label>
-              <textarea id="prof-contact-subtext" class="form-textarea" placeholder="Describe your invitation to connect, collaborate, and build..." rows="3"></textarea>
+              <textarea id="prof-contact-subtext" class="form-textarea" placeholder="e.g. Open to QA Engineer, Automation Tester, and Software Engineering opportunities worldwide. Feel free to reach out!" rows="3"></textarea>
             </div>
           </div>
 
@@ -422,11 +422,11 @@
       </div>
 
       <!-- Stage 06 Display Settings Form -->
-      <div class="admin-card" style="margin-bottom: 24px; padding: 20px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-glass); border-radius: 16px;">
-        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Stage 06 Display Settings</h3>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">Customize the title, subtitle, and status badge displayed on the Stage 06 Technical Skill Garden card.</p>
+      <div class="admin-card-box stage-settings-card" style="margin-bottom: 24px; background: #ffffff !important; background-color: #ffffff !important; border: 1.5px solid #e2e4e9 !important; border-radius: 16px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #1c1c24 !important; margin-bottom: 6px;">Stage 06 Display Settings</h3>
+        <p style="font-size: 0.88rem; color: #5e616e !important; opacity: 1 !important; margin-bottom: 18px; line-height: 1.5;">Customize the title, subtitle, and status badge displayed on the Stage 06 Technical Skill Garden card.</p>
         
-        <form id="skills-header-form" onsubmit="saveSkillsHeaderForm(event)">
+        <form id="skills-header-form" onsubmit="saveSkillsHeaderForm(event)" novalidate>
           <div class="form-grid-2" style="margin-bottom: 14px;">
             <div class="form-group">
               <label class="form-label" for="skill-hdr-title">Stage Title</label>
@@ -443,7 +443,7 @@
             <input type="text" id="skill-hdr-subtitle" class="form-input" placeholder="e.g. Honed through coursework, college engineering, and real internship delivery." />
           </div>
 
-          <button type="submit" class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+          <button type="submit" class="btn-primary" style="padding: 9px 20px; font-size: 0.88rem;">
             <span>Save Stage 06 Settings</span>
           </button>
         </form>
@@ -504,12 +504,12 @@
       </div>
 
       <!-- Stage 03 Header & Badges Settings Form -->
-      <div class="admin-card" style="margin-bottom: 24px; padding: 20px; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-glass); border-radius: 16px;">
-        <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px;">Stage 03 Display Settings</h3>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px;">Customize the top era badge, status badge, title, and description displayed on the live Stage 03 story card.</p>
+      <div class="admin-card-box stage-settings-card" style="margin-bottom: 24px; background: #ffffff !important; background-color: #ffffff !important; border: 1.5px solid #e2e4e9 !important; border-radius: 16px !important; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;">
+        <h3 style="font-size: 1.15rem; font-weight: 800; color: #1c1c24 !important; margin-bottom: 6px;">Stage 03 Display Settings</h3>
+        <p style="font-size: 0.88rem; color: #5e616e !important; opacity: 1 !important; margin-bottom: 18px; line-height: 1.5;">Customize the top era badge, status badge, title, and description displayed on the live Stage 03 story card.</p>
         
-        <form id="courses-header-form" onsubmit="saveCoursesHeaderForm(event)">
-          <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+        <form id="courses-header-form" onsubmit="saveCoursesHeaderForm(event)" novalidate>
+          <div class="form-grid-2" style="margin-bottom: 14px;">
             <div class="form-group">
               <label class="form-label" for="course-hdr-era">Top Era Badge</label>
               <input type="text" id="course-hdr-era" class="form-input" placeholder="e.g. STAGE 03 • SPECIALIZED TRAINING" />
@@ -527,10 +527,10 @@
 
           <div class="form-group" style="margin-bottom: 16px;">
             <label class="form-label" for="course-hdr-subtitle">Stage Subtitle / Description</label>
-            <input type="text" id="course-hdr-subtitle" class="form-input" placeholder="e.g. Hands-on certifications & rigorous testing frameworks." />
+            <input type="text" id="course-hdr-subtitle" class="form-input" placeholder="e.g. Hands-on certifications &amp; rigorous testing frameworks." />
           </div>
 
-          <button type="submit" class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+          <button type="submit" class="btn-primary" style="padding: 9px 20px; font-size: 0.88rem;">
             <span>Save Stage 03 Settings</span>
           </button>
         </form>
@@ -561,11 +561,11 @@
           Enter your current password and choose a new secure password.
         </p>
 
-        <form id="change-password-form" onsubmit="updateAdminPassword(event)">
+        <form id="change-password-form" onsubmit="updateAdminPassword(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="current-pass-input">Current Password <span class="required-star">*</span></label>
             <div class="password-input-wrap">
-              <input type="password" id="current-pass-input" class="form-input" placeholder="Enter current password" required autocomplete="current-password" />
+              <input type="password" id="current-pass-input" class="form-input" placeholder="Enter current admin password" required autocomplete="current-password" />
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('current-pass-input', this)" aria-label="Show password" title="Show password">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
@@ -575,18 +575,18 @@
           <div class="form-group">
             <label class="form-label" for="new-pass-input">New Password <span class="required-star">*</span></label>
             <div class="password-input-wrap">
-              <input type="password" id="new-pass-input" class="form-input" placeholder="Enter new password" required autocomplete="new-password" />
+              <input type="password" id="new-pass-input" class="form-input" placeholder="e.g. Secure@Pass2026 (min 8 chars)" required autocomplete="new-password" />
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('new-pass-input', this)" aria-label="Show password" title="Show password">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
             </div>
-            <p class="field-hint-line">Must be at least 8 characters, with 1 uppercase letter, 1 number, and 1 special character.</p>
+            <p class="field-hint-line">Must be at least 8 characters with 1 uppercase, 1 number, and 1 special symbol.</p>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="confirm-pass-input">Confirm New Password <span class="required-star">*</span></label>
             <div class="password-input-wrap">
-              <input type="password" id="confirm-pass-input" class="form-input" placeholder="Re-enter new password" required autocomplete="new-password" />
+              <input type="password" id="confirm-pass-input" class="form-input" placeholder="Re-enter new password to confirm" required autocomplete="new-password" />
               <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('confirm-pass-input', this)" aria-label="Show password" title="Show password">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               </button>
@@ -641,10 +641,10 @@
           <span id="db-status-text">Checking database connection...</span>
         </div>
 
-        <form id="database-config-form" onsubmit="saveDatabaseConfig(event)">
+        <form id="database-config-form" onsubmit="saveDatabaseConfig(event)" novalidate>
           <div class="form-group">
             <label class="form-label" for="sb-url-input">Supabase Project URL <span class="required-star">*</span></label>
-            <input type="url" id="sb-url-input" class="form-input" placeholder="https://xyzprojectid.supabase.co" required />
+            <input type="url" id="sb-url-input" class="form-input" placeholder="https://your-project.supabase.co" required />
             <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 4px; display: block;">Found in your Supabase Dashboard &gt; Project Settings &gt; API (Saved permanently to js/db-config.js)</small>
           </div>
 
@@ -697,18 +697,18 @@
           <summary style="font-size: 0.92rem; font-weight: 600; cursor: pointer; color: var(--text-secondary);">Optional: Legacy GitHub Commit Sync</summary>
           <div style="margin-top: 16px;">
             <p style="font-size: 0.84rem; color: var(--text-secondary); margin-bottom: 12px;">You can also optionally sync changes directly to your GitHub repo as git commits:</p>
-            <form id="github-sync-form" onsubmit="saveGitHubSyncSettings(event)">
+            <form id="github-sync-form" onsubmit="saveGitHubSyncSettings(event)" novalidate>
               <div class="form-group">
                 <label class="form-label" for="gh-repo-input">GitHub Repository</label>
-                <input type="text" id="gh-repo-input" class="form-input" placeholder="username/portfolio" value="adhithyam0210-ai/portfolio" />
+                <input type="text" id="gh-repo-input" class="form-input" placeholder="e.g. username/repository" value="adhithyam0210-ai/portfolio" />
               </div>
               <div class="form-group">
                 <label class="form-label" for="gh-branch-input">Branch</label>
-                <input type="text" id="gh-branch-input" class="form-input" placeholder="main" value="main" />
+                <input type="text" id="gh-branch-input" class="form-input" placeholder="e.g. main" value="main" />
               </div>
               <div class="form-group">
                 <label class="form-label" for="gh-token-input">Personal Access Token (PAT)</label>
-                <input type="password" id="gh-token-input" class="form-input" placeholder="ghp_xxxx" />
+                <input type="password" id="gh-token-input" class="form-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" />
               </div>
               <div style="display: flex; gap: 10px;">
                 <button type="submit" class="btn-secondary">Save GitHub Settings</button>
@@ -783,15 +783,15 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </button>
       </div>
 
-      <form id="project-form" onsubmit="saveProjectForm(event)">
+      <form id="project-form" onsubmit="saveProjectForm(event)" novalidate>
         <div class="form-group">
           <label class="form-label" for="project-title">Project Title</label>
-          <input type="text" id="project-title" class="form-input" placeholder="e.g. Realtime Analytics Portal" required />
+          <input type="text" id="project-title" class="form-input" placeholder="e.g. Real-Time QA Test Automation Suite" required />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="project-subtitle">Project Subtitle / Role</label>
-          <input type="text" id="project-subtitle" class="form-input" placeholder="e.g. Software Testing &bull; Automation Pipeline" />
+          <input type="text" id="project-subtitle" class="form-input" placeholder="e.g. Lead QA Automation Engineer" />
         </div>
 
         <div class="form-group">
@@ -809,7 +809,7 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         <!-- Custom Category Input (Shown when Others is selected) -->
         <div id="custom-category-group" class="form-group" style="display: none;">
           <label class="form-label" for="custom-category-input">Enter Custom Category Name</label>
-          <input type="text" id="custom-category-input" class="form-input" placeholder="e.g. Automation Testing, Mobile App, AI System..." />
+          <input type="text" id="custom-category-input" class="form-input" placeholder="e.g. Performance Testing" />
         </div>
 
         <!-- File Explorer Image Picker & Live Preview -->
@@ -844,22 +844,22 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <div class="form-group">
           <label class="form-label" for="project-summary">Short Summary (2-3 sentences)</label>
-          <textarea id="project-summary" class="form-textarea" placeholder="Describe the purpose, features, and functionality..." required></textarea>
+          <textarea id="project-summary" class="form-textarea" placeholder="e.g. End-to-end automated testing solution featuring parallel test execution, automated HTML reports, and CI/CD integration..." required></textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="project-tech">Tech Stack (comma-separated)</label>
-          <input type="text" id="project-tech" class="form-input" placeholder="React, TypeScript, Node.js, PostgreSQL" required />
+          <input type="text" id="project-tech" class="form-input" placeholder="e.g. Java, Selenium WebDriver, TestNG, Maven, ExtentReports" required />
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="project-live">Live Preview Demo URL</label>
-            <input type="url" id="project-live" class="form-input" placeholder="https://example.com/demo" />
+            <input type="url" id="project-live" class="form-input" placeholder="https://demo.example.com" />
           </div>
           <div class="form-group">
             <label class="form-label" for="project-github">GitHub Repository URL</label>
-            <input type="url" id="project-github" class="form-input" placeholder="https://github.com/..." />
+            <input type="url" id="project-github" class="form-input" placeholder="https://github.com/adhithyam0210/qa-automation-framework" />
           </div>
         </div>
 
@@ -881,33 +881,33 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </button>
       </div>
 
-      <form id="exp-form" onsubmit="saveExperienceForm(event)">
+      <form id="exp-form" onsubmit="saveExperienceForm(event)" novalidate>
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="exp-card-title">Card Title (Stage 4)</label>
-            <input type="text" id="exp-card-title" class="form-input" placeholder="e.g. My Internship" />
+            <input type="text" id="exp-card-title" class="form-input" placeholder="e.g. QA Automation Intern" />
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-card-badge">Status Badge</label>
-            <input type="text" id="exp-card-badge" class="form-input" placeholder="e.g. LIVE INTERNSHIP" />
+            <input type="text" id="exp-card-badge" class="form-input" placeholder="e.g. CURRENT ROLE" />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="exp-role">Role Title / Position</label>
-            <input type="text" id="exp-role" class="form-input" placeholder="e.g. Software Tester / QA Intern" required />
+            <input type="text" id="exp-role" class="form-input" placeholder="e.g. QA Automation Engineer" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-period">Active Period</label>
-            <input type="text" id="exp-period" class="form-input" placeholder="e.g. Current &bull; QA Intern" required />
+            <input type="text" id="exp-period" class="form-input" placeholder="e.g. 2024 – Present" required />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="exp-company">Company / Organization</label>
-            <input type="text" id="exp-company" class="form-input" placeholder="e.g. Softrate Tech Park, Chennai" required />
+            <input type="text" id="exp-company" class="form-input" placeholder="e.g. ABC Technologies Pvt Ltd" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-location">Location</label>
@@ -922,39 +922,39 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-metric1-lbl">Metric 1 Label</label>
-            <input type="text" id="exp-metric1-lbl" class="form-input" placeholder="e.g. Release Pass Rate" />
+            <input type="text" id="exp-metric1-lbl" class="form-input" placeholder="e.g. Test Pass Rate" />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="exp-metric2-val">Metric 2 Value (Stage 4)</label>
-            <input type="text" id="exp-metric2-val" class="form-input" placeholder="e.g. 30%" />
+            <input type="text" id="exp-metric2-val" class="form-input" placeholder="e.g. 40%" />
           </div>
           <div class="form-group">
             <label class="form-label" for="exp-metric2-lbl">Metric 2 Label</label>
-            <input type="text" id="exp-metric2-lbl" class="form-input" placeholder="e.g. Cycle Reduction" />
+            <input type="text" id="exp-metric2-lbl" class="form-input" placeholder="e.g. Execution Time Saved" />
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="exp-narrative">Journey Story Narrative</label>
-          <textarea id="exp-narrative" class="form-textarea" placeholder="Narrative text displayed on the Stage 4 card..." rows="2"></textarea>
+          <textarea id="exp-narrative" class="form-textarea" placeholder="e.g. Led the development of automated regression suites for enterprise web applications..." rows="2"></textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="exp-takeaway">Core Deliverables &amp; Responsibilities (Takeaway Box)</label>
-          <textarea id="exp-takeaway" class="form-textarea" placeholder="e.g. Executed 450+ verified test cases, authored comprehensive STLC matrices..." rows="2"></textarea>
+          <textarea id="exp-takeaway" class="form-textarea" placeholder="e.g. Architected reusable Selenium POM framework reducing regression cycles from 8 hours to 45 minutes." rows="2"></textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="exp-desc">Summary Description</label>
-          <textarea id="exp-desc" class="form-textarea" placeholder="Key responsibilities and technical focus..." required></textarea>
+          <textarea id="exp-desc" class="form-textarea" placeholder="e.g. Developed and executed automated test suites with Selenium WebDriver and TestNG..." required></textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="exp-bullets">Key Achievements / Bullets (one per line)</label>
-          <textarea id="exp-bullets" class="form-textarea" placeholder="Engineered microservice APIs&#10;Optimized page load speed by 30%"></textarea>
+          <textarea id="exp-bullets" class="form-textarea" placeholder="e.g. Automated 150+ end-to-end regression test cases using Java &amp; Selenium&#10;Integrated automated test suites with Jenkins CI/CD pipeline&#10;Reduced defect leakage to production by 35% through continuous testing"></textarea>
         </div>
 
         <div class="modal-actions-row">
@@ -975,28 +975,28 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </button>
       </div>
 
-      <form id="education-form" onsubmit="saveEducationForm(event)">
+      <form id="education-form" onsubmit="saveEducationForm(event)" novalidate>
         <input type="hidden" id="education-index" value="" />
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="edu-card-title">Card Title (Stages 1 &amp; 2)</label>
-            <input type="text" id="edu-card-title" class="form-input" placeholder="e.g. My College Journey or My Schooling Journey" />
+            <input type="text" id="edu-card-title" class="form-input" placeholder="e.g. Undergraduate Degree" />
           </div>
           <div class="form-group">
             <label class="form-label" for="edu-badge">Status Badge</label>
-            <input type="text" id="edu-badge" class="form-input" placeholder="e.g. 7.4 CGPA or SSLC &amp; HSC DISTINCTION" />
+            <input type="text" id="edu-badge" class="form-input" placeholder="e.g. PURSUING DEGREE" />
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-degree">Degree / Qualification Title <span class="required-star">*</span></label>
-          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. Artificial Intelligence &amp; Data Science or HSC/CS" required />
+          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. B.Tech in Artificial Intelligence &amp; Data Science" required />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-institution">University or School Name <span class="required-star">*</span></label>
-          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. S A Engineering College or Sir Ramaswami Mudaliar HSS" required />
+          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. Panimalar Engineering College, Anna University" required />
         </div>
 
         <div class="form-grid-2">
@@ -1006,7 +1006,7 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
           </div>
           <div class="form-group">
             <label class="form-label" for="edu-score">Marks / CGPA / Percentage <span class="required-star">*</span></label>
-            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 7.4 CGPA or 85.5%" required />
+            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 7.4 CGPA or 85%" required />
           </div>
         </div>
 
@@ -1017,23 +1017,23 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
           </div>
           <div class="form-group">
             <label class="form-label" for="edu-details">Specialization / Honors Details</label>
-            <input type="text" id="edu-details" class="form-input" placeholder="e.g. Distinction Honors in CS, Mathematics &amp; Physics" />
+            <input type="text" id="edu-details" class="form-input" placeholder="e.g. Specialized in Software Testing, Algorithms &amp; Data Science" />
           </div>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-location">Location</label>
-          <input type="text" id="edu-location" class="form-input" placeholder="e.g. Chennai, Tamil Nadu" />
+          <input type="text" id="edu-location" class="form-input" placeholder="e.g. Chennai, India" />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-narrative">Story Walk Narrative (Displayed on Story Card)</label>
-          <textarea id="edu-narrative" class="form-textarea" placeholder="Describe this milestone, your learning focus, and growth..." rows="3"></textarea>
+          <textarea id="edu-narrative" class="form-textarea" placeholder="e.g. Rigorous four-year engineering curriculum focused on computing foundations, automated testing, and software architecture..." rows="3"></textarea>
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-takeaway">Key Learning / Highlights / Takeaway</label>
-          <input type="text" id="edu-takeaway" class="form-input" placeholder="e.g. Data Structures, DBMS, AI Data Pipelines..." />
+          <input type="text" id="edu-takeaway" class="form-input" placeholder="e.g. Built automated testing capstone projects and led technical symposium events." />
         </div>
 
         <div class="modal-actions-row">
@@ -1054,18 +1054,18 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </button>
       </div>
 
-      <form id="course-form" onsubmit="saveCourseForm(event)">
+      <form id="course-form" onsubmit="saveCourseForm(event)" novalidate>
         <input type="hidden" id="course-index" value="" />
 
         <div class="form-group">
           <label class="form-label" for="course-name">Course / Certification Title <span class="required-star">*</span></label>
-          <input type="text" id="course-name" class="form-input" placeholder="e.g. Software Testing & Selenium Automation" required />
+          <input type="text" id="course-name" class="form-input" placeholder="e.g. Selenium WebDriver with Java Automation" required />
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="course-platform">Platform / Institute <span class="required-star">*</span></label>
-            <input type="text" id="course-platform" class="form-input" placeholder="e.g. SLA Institute" required />
+            <input type="text" id="course-platform" class="form-input" placeholder="e.g. SLA Institute / Udemy / Coursera" required />
           </div>
           <div class="form-group">
             <label class="form-label" for="course-year">Completion Year <span class="required-star">*</span></label>
@@ -1086,7 +1086,7 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <div class="form-group">
           <label class="form-label" for="course-desc">Short Description (Floating Card Summary)</label>
-          <textarea id="course-desc" class="form-textarea" placeholder="Key skills mastered, frameworks, and tools..." rows="3" required></textarea>
+          <textarea id="course-desc" class="form-textarea" placeholder="e.g. Mastered page object modeling, data-driven testing, parallel execution, and API automation with Postman." rows="3" required></textarea>
         </div>
 
         <div class="modal-actions-row">
@@ -1102,9 +1102,9 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/db-config.js?v=6.1"></script>
-  <script src="js/config.js?v=6.1"></script>
-  <script src="js/api.js?v=6.1"></script>
-  <script src="js/admin.js?v=6.1"></script>
+  <script src="js/db-config.js?v=15.0"></script>
+  <script src="js/config.js?v=15.0"></script>
+  <script src="js/api.js?v=15.0"></script>
+  <script src="js/admin.js?v=15.0"></script>
 </body>
 </html>

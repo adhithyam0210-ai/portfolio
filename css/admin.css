@@ -370,14 +370,54 @@ button, input, textarea, select {
   color: #ffffff;
 }
 
-/* Card Form Container */
-.admin-card-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-card);
+/* Card Form Container - Pure White Card (No Grey Theme) */
+.admin-card,
+.admin-card-box,
+.stage-settings-card {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid var(--border-light) !important;
+  border-radius: 16px !important;
+  padding: 28px 32px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
   margin-bottom: 24px;
+  color: var(--text-main) !important;
+}
+
+.admin-card h3,
+.admin-card-box h3,
+.stage-settings-card h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main) !important;
+  margin-bottom: 6px;
+}
+
+.admin-card p,
+.admin-card-box p,
+.stage-settings-card p {
+  font-size: 0.88rem;
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.stage-settings-card .form-input,
+.admin-card-box .form-input,
+.admin-card .form-input {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1.5px solid var(--border-light) !important;
+  color: var(--text-main) !important;
+}
+
+.stage-settings-card .form-input:focus,
+.admin-card-box .form-input:focus,
+.admin-card .form-input:focus {
+  border-color: var(--accent-primary) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(252, 128, 25, 0.15) !important;
 }
 
 .form-grid-2 {
@@ -417,6 +457,61 @@ button, input, textarea, select {
 .form-select:focus {
   border-color: var(--accent-primary);
   background: var(--bg-card);
+}
+
+.form-input.input-error,
+.form-textarea.input-error,
+.form-select.input-error {
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.04) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+  animation: adminFieldShake 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.form-input.input-valid,
+.form-textarea.input-valid,
+.form-select.input-valid {
+  border-color: #10b981;
+}
+
+@keyframes adminFieldShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-3px); }
+  40%, 80% { transform: translateX(3px); }
+}
+
+.admin-inline-error {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: #ef4444;
+  font-weight: 600;
+  margin-top: 5px;
+  line-height: 1.3;
+  animation: adminErrorSlide 0.2s ease-out;
+}
+
+.admin-inline-error.visible {
+  display: flex;
+}
+
+.admin-inline-error svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: #ef4444;
+}
+
+@keyframes adminErrorSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .form-textarea {
@@ -539,26 +634,46 @@ button, input, textarea, select {
 /* Skill Manager Specifics */
 .skills-admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 24px;
 }
 
 .skill-category-box {
   background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
+  padding: 22px 24px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
+  transition: all 0.2s ease;
+}
+
+.skill-category-box:hover {
+  border-color: var(--border-medium);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
 }
 
 .skill-box-title {
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
+  color: var(--text-main);
   margin-bottom: 14px;
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1.5px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.skill-count-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: var(--bg-subtle);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
 }
 
 .skill-add-row {
@@ -570,7 +685,7 @@ button, input, textarea, select {
 .skill-tag-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   flex-grow: 1;
 }
 
@@ -578,12 +693,55 @@ button, input, textarea, select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-md);
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-light);
-  font-size: 0.9rem;
+  background: var(--bg-page);
+  border: 1.5px solid var(--border-light);
+  font-size: 0.92rem;
   font-weight: 600;
+  color: var(--text-main);
+  transition: all 0.15s ease;
+}
+
+.skill-tag-item:hover {
+  border-color: var(--border-medium);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.skill-name-text {
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.92rem;
+}
+
+.skill-level-pill {
+  font-size: 0.74rem;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+}
+
+.skill-level-pill.lvl-strong {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.skill-level-pill.lvl-proficient {
+  background: rgba(2, 132, 199, 0.12);
+  color: #0369a1;
+  border: 1px solid rgba(2, 132, 199, 0.28);
+}
+
+.skill-level-pill.lvl-intermediate {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.28);
 }
 
 .skill-delete-btn {
@@ -591,8 +749,11 @@ button, input, textarea, select {
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 4px;
+  justify-content: center;
+  padding: 6px;
   border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
   transition: all 0.15s ease;
 }
 
@@ -601,26 +762,32 @@ button, input, textarea, select {
   background: rgba(226, 55, 68, 0.1);
 }
 
-/* Experience Admin List */
+/* Experience & Courses Admin List */
 .exp-admin-list {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
 }
 
 .exp-admin-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-light);
+  border: 1.5px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 24px;
-  box-shadow: var(--shadow-sm);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 20px;
+  gap: 24px;
   min-width: 0;
   max-width: 100%;
   box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.exp-admin-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .exp-admin-info {
@@ -631,22 +798,71 @@ button, input, textarea, select {
 }
 
 .exp-admin-role {
-  font-size: 1.18rem;
-  font-weight: 700;
-  margin-bottom: 4px;
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 5px;
+  letter-spacing: -0.01em;
 }
 
-.exp-admin-meta {
-  font-size: 0.9rem;
+.exp-admin-company {
+  font-size: 0.94rem;
+  font-weight: 700;
   color: var(--accent-primary);
-  font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.exp-admin-period {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-medium);
+  padding: 4px 11px;
+  border-radius: var(--radius-full);
+}
+
+.exp-admin-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--radius-sm);
+  background: rgba(252, 128, 25, 0.12);
+  color: var(--accent-primary);
+  border: 1px solid rgba(252, 128, 25, 0.24);
 }
 
 .exp-admin-desc {
   font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
+  color: #334155;
+  line-height: 1.6;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
+.exp-admin-meta {
+  font-size: 0.92rem;
+  color: var(--accent-primary);
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.exp-admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Modals */
@@ -883,97 +1099,34 @@ input::-ms-clear {
   pointer-events: none !important;
 }
 
-/* Experience & Education Admin Cards */
-.exp-admin-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.exp-admin-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 22px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  gap: 16px;
-  transition: border-color var(--transition-fast);
-  min-width: 0;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-.exp-admin-card:hover {
-  border-color: var(--border-medium);
-}
-
-.exp-admin-info {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: break-word;
-  word-break: break-word;
-}
-
-.exp-admin-role {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-main);
-  margin-bottom: 4px;
-}
-
-.exp-admin-company {
-  font-size: 0.94rem;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-  font-weight: 500;
-}
-
-.exp-admin-period {
-  display: inline-block;
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
-  background: var(--bg-subtle);
-  color: var(--text-main);
-  border: 1px solid var(--border-light);
-}
-
+/* Education Admin Card Specifics */
 #admin-education-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  max-width: 680px;
+  gap: 14px;
+  max-width: 780px;
 }
 
 #admin-education-container .exp-admin-card {
-  padding: 14px 18px;
-  gap: 12px;
+  padding: 16px 20px;
+  gap: 16px;
+  align-items: center;
 }
 
 #admin-education-container .exp-admin-role {
-  font-size: 1.05rem;
-  margin-bottom: 2px;
+  font-size: 1.08rem;
+  margin-bottom: 3px;
 }
 
 #admin-education-container .exp-admin-company {
-  font-size: 0.88rem;
-  margin-bottom: 2px;
+  font-size: 0.90rem;
+  margin-bottom: 0;
+  color: var(--text-secondary);
 }
 
 #admin-education-container .exp-admin-period {
-  font-size: 0.78rem;
+  font-size: 0.80rem;
   padding: 3px 10px;
-}
-
-.exp-admin-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
 }
 
 /* Responsive */
@@ -1314,9 +1467,106 @@ input::-ms-clear {
     gap: 16px;
   }
 
-  .admin-card-box {
+  .admin-card,
+  .admin-card-box,
+  .stage-settings-card {
     padding: 20px 16px;
-    border-radius: var(--radius-md);
+    border-radius: 14px;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    border: 1.5px solid var(--border-light) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .admin-card h3,
+  .admin-card h4,
+  .admin-card-box h3,
+  .admin-card-box h4,
+  .stage-settings-card h3 {
+    color: var(--text-main) !important;
+    font-weight: 800;
+  }
+
+  .admin-card p,
+  .admin-card-box p,
+  .stage-settings-card p {
+    color: var(--text-secondary) !important;
+    opacity: 1 !important;
+  }
+
+  .admin-card-box .form-label {
+    color: var(--text-main) !important;
+    opacity: 1 !important;
+    font-weight: 700;
+  }
+
+  /* Skills & Capabilities Mobile Grid */
+  .skills-admin-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+
+  .skill-category-box {
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 18px 16px !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+
+  .skill-add-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .skill-add-row .form-input[type="text"] {
+    width: 100% !important;
+    flex: 1 1 100% !important;
+  }
+
+  .skill-add-row select.form-input {
+    flex: 1 !important;
+    min-width: 130px !important;
+  }
+
+  .skill-add-row .btn-primary {
+    flex-shrink: 0 !important;
+    padding: 9px 18px !important;
+  }
+
+  .skill-tag-item {
+    padding: 9px 12px !important;
+    background: var(--bg-page) !important;
+    border: 1px solid var(--border-light) !important;
+  }
+
+  /* Experience & Courses Mobile Cards */
+  .exp-admin-card {
+    background: var(--bg-card) !important;
+    border: 1.5px solid var(--border-light) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 18px 16px !important;
+    box-shadow: var(--shadow-card) !important;
+  }
+
+  .exp-admin-desc {
+    color: #334155 !important;
+    opacity: 1 !important;
+    font-size: 0.88rem !important;
+    line-height: 1.55 !important;
+  }
+
+  /* Resume Upload Mobile Box */
+  .resume-upload-box {
+    background: var(--bg-card) !important;
+    border: 1.5px dashed var(--border-medium) !important;
+    padding: 16px 14px !important;
+  }
+
+  .resume-doc-badge {
+    background: var(--bg-subtle) !important;
+    border: 1.5px solid var(--border-medium) !important;
+    color: var(--text-main) !important;
   }
 
   .form-grid-2,

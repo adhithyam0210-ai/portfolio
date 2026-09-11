@@ -32,12 +32,269 @@ let profileAvatarData = null;
 let resumeDocData = null;
 let resumeDocFilename = null;
 
+/* ==========================================================================
+   Admin Form Validation Engine & Inline Feedback
+   ========================================================================== */
+
+function getOrCreateErrorEl(inputEl) {
+  if (!inputEl) return null;
+  const parent = inputEl.closest('.form-group') || inputEl.parentElement;
+  if (!parent) return null;
+  let errEl = parent.querySelector('.admin-inline-error');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.className = 'admin-inline-error';
+    errEl.setAttribute('role', 'alert');
+    const wrap = inputEl.closest('.password-input-wrap') || inputEl.closest('.file-picker-row') || inputEl;
+    if (wrap.nextSibling) {
+      wrap.parentNode.insertBefore(errEl, wrap.nextSibling);
+    } else {
+      wrap.parentNode.appendChild(errEl);
+    }
+  }
+  return errEl;
+}
+
+function setAdminFieldError(inputEl, message) {
+  if (!inputEl) return;
+  inputEl.classList.add('input-error');
+  inputEl.classList.remove('input-valid');
+  inputEl.setAttribute('aria-invalid', 'true');
+  const errEl = getOrCreateErrorEl(inputEl);
+  if (errEl) {
+    errEl.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      <span>${message}</span>
+    `;
+    errEl.classList.add('visible');
+  }
+}
+
+function clearAdminFieldError(inputEl) {
+  if (!inputEl) return;
+  inputEl.classList.remove('input-error');
+  inputEl.removeAttribute('aria-invalid');
+  if (inputEl.value && inputEl.value.trim().length > 0) {
+    inputEl.classList.add('input-valid');
+  } else {
+    inputEl.classList.remove('input-valid');
+  }
+  const errEl = getOrCreateErrorEl(inputEl);
+  if (errEl) {
+    errEl.textContent = '';
+    errEl.classList.remove('visible');
+  }
+}
+
+/**
+ * Standard Field Validators
+ */
+const AdminValidators = {
+  name(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Full Name is required.' : null;
+    if (v.length < 3) return `Name must be at least 3 characters (currently ${v.length}).`;
+    if (v.length > 50) return `Name cannot exceed 50 characters (currently ${v.length}).`;
+    if (/^\d+$/.test(v)) return 'Name cannot be entirely numbers.';
+    if (!/^[a-zA-Z\s.'\-]+$/.test(v)) return 'Name can only contain letters, spaces, dots, and hyphens.';
+    return null;
+  },
+
+  email(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Email address is required.' : null;
+    if (/\s/.test(v)) return 'Email address cannot contain spaces.';
+    const atCount = (v.match(/@/g) || []).length;
+    if (atCount === 0) return "Email must contain an '@' symbol.";
+    if (atCount > 1) return "Email can only contain one '@' symbol.";
+    const [user, domain] = v.split('@');
+    if (!user) return "Email must include a username before '@'.";
+    if (user.startsWith('.') || user.endsWith('.')) return 'Username cannot begin or end with a dot.';
+    if (user.includes('..')) return 'Username cannot contain consecutive dots (..).';
+    if (!domain) return "Email must include a domain after '@' (e.g. gmail.com).";
+    if (!domain.includes('.')) return 'Domain must include a dot and extension (e.g. .com, .org).';
+    const domainParts = domain.split('.');
+    const tld = domainParts[domainParts.length - 1];
+    if (tld.length < 2) return 'Domain extension must be at least 2 characters (e.g. .com).';
+    if (!/^[a-zA-Z]+$/.test(tld)) return 'Domain extension must contain letters only.';
+    const standardEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    if (!standardEmailRegex.test(v)) return 'Please enter a valid standard email address (e.g. name@domain.com).';
+    return null;
+  },
+
+  url(val, isRequired = false, domainMatch = null) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'URL is required.' : null;
+    if (/\s/.test(v)) return 'URL cannot contain spaces.';
+    if (!/^https?:\/\//i.test(v) && !/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(v)) {
+      return 'Please enter a valid URL (e.g. https://example.com).';
+    }
+    if (domainMatch && !v.toLowerCase().includes(domainMatch.toLowerCase())) {
+      return `URL must be a valid ${domainMatch} link.`;
+    }
+    return null;
+  },
+
+  text(val, fieldName, min = 1, max = 250, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? `${fieldName} is required.` : null;
+    if (v.length < min) return `${fieldName} must be at least ${min} character${min > 1 ? 's' : ''}.`;
+    if (v.length > max) return `${fieldName} cannot exceed ${max} characters.`;
+    return null;
+  },
+
+  yearOrPeriod(val, fieldName, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? `${fieldName} is required.` : null;
+    if (v.length < 4) return `${fieldName} must be at least 4 characters (e.g. 2026).`;
+    if (!/\d{4}/.test(v)) return `${fieldName} must include a valid 4-digit year (e.g. 2026 or 2022 – 2026).`;
+    return null;
+  },
+
+  score(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Score / CGPA is required.' : null;
+    if (v.length < 2) return 'Score must be at least 2 characters (e.g. 7.4 CGPA or 85%).';
+    if (!/\d/.test(v)) return 'Score must contain a numerical mark or CGPA.';
+    return null;
+  },
+
+  password(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Password is required.' : null;
+    if (v.length < 8) return `Password must be at least 8 characters (currently ${v.length}).`;
+    if (!/[A-Z]/.test(v)) return 'Password must contain at least 1 uppercase letter (A-Z).';
+    if (!/[0-9]/.test(v)) return 'Password must contain at least 1 number (0-9).';
+    if (!/[^A-Za-z0-9]/.test(v)) return 'Password must contain at least 1 special character (e.g. !@#$%^&*).';
+    return null;
+  },
+
+  supabaseUrl(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Supabase Project URL is required.' : null;
+    if (/\s/.test(v)) return 'URL cannot contain spaces.';
+    if (!/^https?:\/\//i.test(v)) return 'URL must begin with https:// or http://';
+    if (!v.includes('.')) return 'URL must include a valid project domain.';
+    return null;
+  },
+
+  repo(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Repository is required (e.g. username/repo).' : null;
+    if (/\s/.test(v)) return 'Repository name cannot contain spaces.';
+    if (!v.includes('/')) return 'Repository must follow the owner/repository format (e.g. adhit/portfolio).';
+    const parts = v.split('/');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      return 'Repository must follow the owner/repository format.';
+    }
+    return null;
+  },
+
+  branch(val, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? 'Branch name is required (e.g. main).' : null;
+    if (/\s/.test(v)) return 'Branch name cannot contain spaces.';
+    return null;
+  },
+
+  token(val, fieldName = 'Access Token', min = 15, isRequired = true) {
+    const v = (val || '').trim();
+    if (!v) return isRequired ? `${fieldName} is required.` : null;
+    if (/\s/.test(v)) return `${fieldName} cannot contain spaces.`;
+    if (v.length < min) return `${fieldName} must be at least ${min} characters.`;
+    return null;
+  }
+};
+
+function initAdminValidation() {
+  const fieldRules = [
+    { id: 'prof-name', check: (v) => AdminValidators.name(v, true) },
+    { id: 'prof-role', check: (v) => AdminValidators.text(v, 'Primary Role', 3, 70, true) },
+    { id: 'prof-location', check: (v) => AdminValidators.text(v, 'Location', 2, 70, true) },
+    { id: 'prof-email', check: (v) => AdminValidators.email(v, true) },
+    { id: 'prof-tagline', check: (v) => AdminValidators.text(v, 'Headline', 3, 100, true) },
+    { id: 'prof-bio', check: (v) => AdminValidators.text(v, 'Bio', 10, 600, true) },
+    { id: 'prof-github', check: (v) => AdminValidators.url(v, false, 'github.com') },
+    { id: 'prof-linkedin', check: (v) => AdminValidators.url(v, false, 'linkedin.com') },
+
+    { id: 'project-title', check: (v) => AdminValidators.text(v, 'Project Title', 3, 80, true) },
+    { id: 'project-summary', check: (v) => AdminValidators.text(v, 'Summary', 10, 600, true) },
+    { id: 'project-tech', check: (v) => AdminValidators.text(v, 'Tech Stack', 2, 200, true) },
+    { id: 'project-live', check: (v) => AdminValidators.url(v, false) },
+    { id: 'project-github', check: (v) => AdminValidators.url(v, false, 'github.com') },
+
+    { id: 'exp-role', check: (v) => AdminValidators.text(v, 'Role', 2, 70, true) },
+    { id: 'exp-period', check: (v) => AdminValidators.text(v, 'Active Period', 3, 50, true) },
+    { id: 'exp-company', check: (v) => AdminValidators.text(v, 'Company', 2, 70, true) },
+    { id: 'exp-location', check: (v) => AdminValidators.text(v, 'Location', 2, 70, true) },
+    { id: 'exp-desc', check: (v) => AdminValidators.text(v, 'Summary Description', 10, 600, true) },
+
+    { id: 'edu-degree', check: (v) => AdminValidators.text(v, 'Degree Title', 2, 80, true) },
+    { id: 'edu-institution', check: (v) => AdminValidators.text(v, 'Institution Name', 2, 90, true) },
+    { id: 'edu-year', check: (v) => AdminValidators.yearOrPeriod(v, 'Year / Period', true) },
+    { id: 'edu-score', check: (v) => AdminValidators.score(v, true) },
+
+    { id: 'course-name', check: (v) => AdminValidators.text(v, 'Course Title', 2, 90, true) },
+    { id: 'course-platform', check: (v) => AdminValidators.text(v, 'Platform / Institute', 2, 80, true) },
+    { id: 'course-year', check: (v) => AdminValidators.yearOrPeriod(v, 'Completion Year', true) },
+    { id: 'course-desc', check: (v) => AdminValidators.text(v, 'Course Description', 10, 500, true) },
+
+    { id: 'current-pass-input', check: (v) => AdminValidators.text(v, 'Current Password', 1, 100, true) },
+    { id: 'new-pass-input', check: (v) => AdminValidators.password(v, true) },
+    { id: 'confirm-pass-input', check: (v) => {
+      const newPass = document.getElementById('new-pass-input')?.value || '';
+      if (!v) return 'Confirmation password is required.';
+      if (v !== newPass) return 'Passwords do not match.';
+      return null;
+    }},
+
+    { id: 'sb-url-input', check: (v) => AdminValidators.supabaseUrl(v, true) },
+    { id: 'sb-key-input', check: (v) => AdminValidators.token(v, 'Supabase Public Anon Key', 20, true) },
+
+    { id: 'gh-repo-input', check: (v) => AdminValidators.repo(v, true) },
+    { id: 'gh-branch-input', check: (v) => AdminValidators.branch(v, true) },
+    { id: 'gh-token-input', check: (v) => AdminValidators.token(v, 'GitHub Personal Access Token', 15, true) },
+
+    { id: 'skill-hdr-title', check: (v) => AdminValidators.text(v, 'Stage Title', 2, 80, true) },
+    { id: 'skill-hdr-status', check: (v) => AdminValidators.text(v, 'Status Badge', 2, 60, true) },
+    { id: 'skill-hdr-subtitle', check: (v) => AdminValidators.text(v, 'Stage Subtitle', 5, 250, true) },
+
+    { id: 'course-hdr-era', check: (v) => AdminValidators.text(v, 'Era Badge', 2, 60, true) },
+    { id: 'course-hdr-status', check: (v) => AdminValidators.text(v, 'Status Badge', 2, 60, true) },
+    { id: 'course-hdr-title', check: (v) => AdminValidators.text(v, 'Stage Title', 2, 80, true) },
+    { id: 'course-hdr-subtitle', check: (v) => AdminValidators.text(v, 'Stage Subtitle', 5, 250, true) }
+  ];
+
+  fieldRules.forEach(item => {
+    const el = document.getElementById(item.id);
+    if (el) {
+      el.addEventListener('blur', () => {
+        const err = item.check(el.value);
+        if (err) setAdminFieldError(el, err);
+        else clearAdminFieldError(el);
+      });
+      el.addEventListener('input', () => {
+        if (el.classList.contains('input-error')) {
+          const err = item.check(el.value);
+          if (err) setAdminFieldError(el, err);
+          else clearAdminFieldError(el);
+        }
+      });
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initTabs();
   initImagePicker();
   initProfileAvatarPicker();
   initResumeDocPicker();
+  initAdminValidation();
   renderAll();
 });
 
@@ -424,8 +681,41 @@ async function editProject(id) {
 async function saveProjectForm(e) {
   e.preventDefault();
 
-  const title = document.getElementById('project-title').value.trim();
-  const subtitle = document.getElementById('project-subtitle')?.value.trim() || '';
+  const titleEl = document.getElementById('project-title');
+  const subtitleEl = document.getElementById('project-subtitle');
+  const summaryEl = document.getElementById('project-summary');
+  const techEl = document.getElementById('project-tech');
+  const liveEl = document.getElementById('project-live');
+  const ghEl = document.getElementById('project-github');
+
+  const validations = [
+    { el: titleEl, err: AdminValidators.text(titleEl?.value, 'Project Title', 3, 80, true) },
+    { el: summaryEl, err: AdminValidators.text(summaryEl?.value, 'Summary', 10, 600, true) },
+    { el: techEl, err: AdminValidators.text(techEl?.value, 'Tech Stack', 2, 200, true) },
+    { el: liveEl, err: AdminValidators.url(liveEl?.value, false) },
+    { el: ghEl, err: AdminValidators.url(ghEl?.value, false, 'github.com') }
+  ];
+
+  let firstInvalid = null;
+  validations.forEach(({ el, err }) => {
+    if (el) {
+      if (err) {
+        setAdminFieldError(el, err);
+        if (!firstInvalid) firstInvalid = el;
+      } else {
+        clearAdminFieldError(el);
+      }
+    }
+  });
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    showToast('Please correct the highlighted project fields.');
+    return;
+  }
+
+  const title = titleEl.value.trim();
+  const subtitle = subtitleEl?.value.trim() || '';
   const rawCategory = document.getElementById('project-category').value;
   let category = rawCategory;
   let categoryLabel = 'Software Testing';
@@ -447,10 +737,10 @@ async function saveProjectForm(e) {
   }
 
   const image = selectedImageData || 'assets/projects/nexus_ai.jpg';
-  const summary = document.getElementById('project-summary').value.trim();
-  const techStr = document.getElementById('project-tech').value.trim();
-  const liveUrl = document.getElementById('project-live').value.trim();
-  const githubUrl = document.getElementById('project-github').value.trim();
+  const summary = summaryEl.value.trim();
+  const techStr = techEl.value.trim();
+  const liveUrl = liveEl.value.trim();
+  const githubUrl = ghEl.value.trim();
 
   const tech = techStr ? techStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
@@ -565,21 +855,60 @@ async function renderProfileForm() {
 async function saveProfileForm(e) {
   e.preventDefault();
 
+  const nameEl = document.getElementById('prof-name');
+  const roleEl = document.getElementById('prof-role');
+  const locEl = document.getElementById('prof-location');
+  const emailEl = document.getElementById('prof-email');
+  const tagEl = document.getElementById('prof-tagline');
+  const bioEl = document.getElementById('prof-bio');
+  const ghEl = document.getElementById('prof-github');
+  const liEl = document.getElementById('prof-linkedin');
+
+  const validations = [
+    { el: nameEl, err: AdminValidators.name(nameEl?.value, true) },
+    { el: roleEl, err: AdminValidators.text(roleEl?.value, 'Primary Role', 3, 70, true) },
+    { el: locEl, err: AdminValidators.text(locEl?.value, 'Location', 2, 70, true) },
+    { el: emailEl, err: AdminValidators.email(emailEl?.value, true) },
+    { el: tagEl, err: AdminValidators.text(tagEl?.value, 'Headline', 3, 100, true) },
+    { el: bioEl, err: AdminValidators.text(bioEl?.value, 'Bio', 10, 600, true) },
+    { el: ghEl, err: AdminValidators.url(ghEl?.value, false, 'github.com') },
+    { el: liEl, err: AdminValidators.url(liEl?.value, false, 'linkedin.com') }
+  ];
+
+  let firstInvalid = null;
+  validations.forEach(({ el, err }) => {
+    if (el) {
+      if (err) {
+        setAdminFieldError(el, err);
+        if (!firstInvalid) firstInvalid = el;
+      } else {
+        clearAdminFieldError(el);
+      }
+    }
+  });
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    showToast('Please correct the highlighted profile fields.');
+    return;
+  }
+
   const currentData = await PortfolioAPI.getPortfolio();
   const existingAvatar = currentData.profile?.avatar || '';
 
   const profilePayload = {
-    name: document.getElementById('prof-name').value.trim(),
-    role: document.getElementById('prof-role').value.trim(),
-    location: document.getElementById('prof-location').value.trim(),
+    name: nameEl.value.trim(),
+    role: roleEl.value.trim(),
+    location: locEl.value.trim(),
     degreeTag: document.getElementById('prof-degree')?.value.trim() || '',
     contactHeadline: document.getElementById('prof-contact-headline')?.value.trim() || '',
     contactSubtext: document.getElementById('prof-contact-subtext')?.value.trim() || '',
-    tagline: document.getElementById('prof-tagline').value.trim(),
-    bio: document.getElementById('prof-bio').value.trim(),
-    email: document.getElementById('prof-email').value.trim(),
-    github: document.getElementById('prof-github').value.trim(),
-    linkedin: document.getElementById('prof-linkedin').value.trim(),
+    tagline: tagEl.value.trim(),
+    bio: bioEl.value.trim(),
+    email: emailEl.value.trim(),
+    github: ghEl.value.trim(),
+    linkedin: liEl.value.trim(),
     avatar: profileAvatarData || existingAvatar,
     resumeUrl: resumeDocData || currentData.profile?.resumeUrl || localStorage.getItem('portfolio_resume_doc') || '',
     resumeFilename: resumeDocFilename || currentData.profile?.resumeFilename || localStorage.getItem('portfolio_resume_filename') || ''
@@ -658,13 +987,25 @@ async function renderSkillsManager() {
     { key: 'programming', title: 'Programming' }
   ];
 
+  const catPlaceholders = {
+    testing: 'e.g. Manual Testing, Test Case Design',
+    automation: 'e.g. Selenium WebDriver, Playwright',
+    database: 'e.g. PostgreSQL, MySQL, Supabase',
+    tools: 'e.g. Postman, Git & GitHub, Jira',
+    programming: 'e.g. Java, Python, JavaScript'
+  };
+
   container.innerHTML = categories.map(cat => {
     const items = skills[cat.key]?.items || [];
+    const ph = catPlaceholders[cat.key] || 'e.g. Selenium WebDriver';
     return `
       <div class="skill-category-box">
-        <h4 class="skill-box-title">${cat.title} (${items.length})</h4>
+        <h4 class="skill-box-title">
+          <span>${cat.title}</span>
+          <span class="skill-count-badge">${items.length} ${items.length === 1 ? 'skill' : 'skills'}</span>
+        </h4>
         <div class="skill-add-row" style="display: flex; gap: 8px;">
-          <input type="text" id="add-skill-input-${cat.key}" class="form-input" style="flex: 1;" placeholder="Skill name (e.g. Selenium WebDriver)..." />
+          <input type="text" id="add-skill-input-${cat.key}" class="form-input" style="flex: 1;" placeholder="${ph}" />
           <select id="add-skill-level-${cat.key}" class="form-input" style="width: 130px;">
             <option value="Strong">Strong</option>
             <option value="Intermediate">Intermediate</option>
@@ -676,10 +1017,13 @@ async function renderSkillsManager() {
           ${items.map((item, index) => {
             const name = typeof item === 'string' ? item : (item.name || item.title || '');
             const level = typeof item === 'object' && item.level ? item.level : 'Strong';
+            const lvlClass = 'lvl-' + (level || 'strong').toLowerCase();
             return `
-              <div class="skill-tag-item" style="display: inline-flex; align-items: center; gap: 8px;">
-                <span><strong>${escapeHtml(name)}</strong></span>
-                <span class="skill-level-pill" style="font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; background: rgba(56,189,248,0.15); color: #0284c7; font-weight: 700;">${escapeHtml(level)}</span>
+              <div class="skill-tag-item">
+                <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                  <span class="skill-name-text">${escapeHtml(name)}</span>
+                  <span class="skill-level-pill ${lvlClass}">${escapeHtml(level)}</span>
+                </div>
                 <button class="skill-delete-btn" onclick="deleteSkill('${cat.key}', ${index})" title="Delete Skill">
                   ${ADMIN_ICONS.trash}
                 </button>
@@ -698,7 +1042,17 @@ async function addSkill(catKey) {
   if (!input) return;
 
   const text = input.value.trim();
-  if (!text) return;
+  if (!text) {
+    setAdminFieldError(input, 'Skill Name is required.');
+    input.focus();
+    return;
+  }
+  if (text.length < 2) {
+    setAdminFieldError(input, 'Skill Name must be at least 2 characters.');
+    input.focus();
+    return;
+  }
+  clearAdminFieldError(input);
   const level = levelSelect ? levelSelect.value : 'Strong';
 
   const data = await PortfolioAPI.getPortfolio();
@@ -725,14 +1079,35 @@ async function deleteSkill(catKey, index) {
 
 async function saveSkillsHeaderForm(e) {
   e.preventDefault();
-  const title = document.getElementById('skill-hdr-title')?.value.trim() || 'Technical Skill Garden';
-  const statusBadge = document.getElementById('skill-hdr-status')?.value.trim() || 'QUALITATIVE PROFICIENCY';
-  const subtitle = document.getElementById('skill-hdr-subtitle')?.value.trim() || 'Honed through coursework, college engineering, and real internship delivery.';
+  const titleEl = document.getElementById('skill-hdr-title');
+  const statusEl = document.getElementById('skill-hdr-status');
+  const subtitleEl = document.getElementById('skill-hdr-subtitle');
+
+  const titleErr = AdminValidators.text(titleEl?.value, 'Stage Title', 2, 80, true);
+  const statusErr = AdminValidators.text(statusEl?.value, 'Status Badge', 2, 60, true);
+  const subtitleErr = AdminValidators.text(subtitleEl?.value, 'Stage Subtitle', 5, 250, true);
+
+  if (titleErr) setAdminFieldError(titleEl, titleErr);
+  else clearAdminFieldError(titleEl);
+
+  if (statusErr) setAdminFieldError(statusEl, statusErr);
+  else clearAdminFieldError(statusEl);
+
+  if (subtitleErr) setAdminFieldError(subtitleEl, subtitleErr);
+  else clearAdminFieldError(subtitleEl);
+
+  if (titleErr || statusErr || subtitleErr) {
+    if (titleErr && titleEl) titleEl.focus();
+    else if (statusErr && statusEl) statusEl.focus();
+    else if (subtitleErr && subtitleEl) subtitleEl.focus();
+    showToast('Please correct the highlighted settings.');
+    return;
+  }
 
   const headerPayload = {
-    title,
-    statusBadge,
-    subtitle
+    title: titleEl.value.trim(),
+    statusBadge: statusEl.value.trim(),
+    subtitle: subtitleEl.value.trim()
   };
 
   showToast('Saving Stage 06 settings...');
@@ -844,6 +1219,38 @@ async function editExperience(index) {
 async function saveExperienceForm(e) {
   e.preventDefault();
 
+  const roleEl = document.getElementById('exp-role');
+  const compEl = document.getElementById('exp-company');
+  const locEl = document.getElementById('exp-location');
+  const periodEl = document.getElementById('exp-period');
+  const descEl = document.getElementById('exp-desc');
+
+  const validations = [
+    { el: roleEl, err: AdminValidators.text(roleEl?.value, 'Role Title', 2, 70, true) },
+    { el: periodEl, err: AdminValidators.text(periodEl?.value, 'Active Period', 3, 50, true) },
+    { el: compEl, err: AdminValidators.text(compEl?.value, 'Company', 2, 70, true) },
+    { el: locEl, err: AdminValidators.text(locEl?.value, 'Location', 2, 70, true) },
+    { el: descEl, err: AdminValidators.text(descEl?.value, 'Summary Description', 10, 600, true) }
+  ];
+
+  let firstInvalid = null;
+  validations.forEach(({ el, err }) => {
+    if (el) {
+      if (err) {
+        setAdminFieldError(el, err);
+        if (!firstInvalid) firstInvalid = el;
+      } else {
+        clearAdminFieldError(el);
+      }
+    }
+  });
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    showToast('Please correct the highlighted milestone fields.');
+    return;
+  }
+
   const data = await PortfolioAPI.getPortfolio();
   data.experience = data.experience || [];
 
@@ -851,11 +1258,11 @@ async function saveExperienceForm(e) {
   const badge = document.getElementById('exp-card-badge')?.value.trim() || '';
   const takeaway = document.getElementById('exp-takeaway')?.value.trim() || '';
 
-  const role = document.getElementById('exp-role').value.trim();
-  const company = document.getElementById('exp-company').value.trim();
-  const location = document.getElementById('exp-location').value.trim();
-  const period = document.getElementById('exp-period').value.trim();
-  const description = document.getElementById('exp-desc').value.trim();
+  const role = roleEl.value.trim();
+  const company = compEl.value.trim();
+  const location = locEl.value.trim();
+  const period = periodEl.value.trim();
+  const description = descEl.value.trim();
   const bulletsStr = document.getElementById('exp-bullets').value.trim();
   const narrative = document.getElementById('exp-narrative')?.value.trim() || '';
 
@@ -1024,6 +1431,36 @@ async function editEducation(index) {
 async function saveEducationForm(e) {
   e.preventDefault();
 
+  const degreeEl = document.getElementById('edu-degree');
+  const instEl = document.getElementById('edu-institution');
+  const yearEl = document.getElementById('edu-year');
+  const scoreEl = document.getElementById('edu-score');
+
+  const validations = [
+    { el: degreeEl, err: AdminValidators.text(degreeEl?.value, 'Degree Title', 2, 80, true) },
+    { el: instEl, err: AdminValidators.text(instEl?.value, 'University / School Name', 2, 90, true) },
+    { el: yearEl, err: AdminValidators.yearOrPeriod(yearEl?.value, 'Year / Period', true) },
+    { el: scoreEl, err: AdminValidators.score(scoreEl?.value, true) }
+  ];
+
+  let firstInvalid = null;
+  validations.forEach(({ el, err }) => {
+    if (el) {
+      if (err) {
+        setAdminFieldError(el, err);
+        if (!firstInvalid) firstInvalid = el;
+      } else {
+        clearAdminFieldError(el);
+      }
+    }
+  });
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    showToast('Please correct the highlighted education fields.');
+    return;
+  }
+
   const data = await PortfolioAPI.getPortfolio();
   data.education = data.education || [];
 
@@ -1032,10 +1469,10 @@ async function saveEducationForm(e) {
   const scorePrefix = document.getElementById('edu-score-prefix')?.value.trim() || '';
   const details = document.getElementById('edu-details')?.value.trim() || '';
 
-  const degree = document.getElementById('edu-degree').value.trim();
-  const institution = document.getElementById('edu-institution').value.trim();
-  const year = document.getElementById('edu-year').value.trim();
-  const score = document.getElementById('edu-score').value.trim();
+  const degree = degreeEl.value.trim();
+  const institution = instEl.value.trim();
+  const year = yearEl.value.trim();
+  const score = scoreEl.value.trim();
   const location = document.getElementById('edu-location').value.trim();
   const narrativeInput = document.getElementById('edu-narrative');
   const takeawayInput = document.getElementById('edu-takeaway');
@@ -1124,11 +1561,14 @@ async function renderCoursesManager() {
     <div class="exp-admin-card">
       <div class="exp-admin-info">
         <div class="exp-admin-role">${escapeHtml(item.name || 'Course Title')}</div>
-        <div class="exp-admin-company">${escapeHtml(item.platform || '')} • ${escapeHtml(item.category || 'General')}</div>
-        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
-          <span class="exp-admin-period">${escapeHtml(item.year || '')}</span>
+        <div class="exp-admin-company">
+          <span>${escapeHtml(item.platform || '')}</span>
+          ${item.category ? `<span class="exp-admin-badge">${escapeHtml(item.category)}</span>` : ''}
         </div>
-        <p style="font-size: 0.88rem; color: var(--text-secondary); margin-top: 8px;">${escapeHtml(item.description || '')}</p>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap;">
+          ${item.year ? `<span class="exp-admin-period"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px; vertical-align: middle;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${escapeHtml(item.year)}</span>` : ''}
+        </div>
+        ${item.description ? `<p class="exp-admin-desc">${escapeHtml(item.description)}</p>` : ''}
       </div>
       <div class="exp-admin-actions">
         <button class="btn-card-edit" onclick="editCourse(${index})" title="Edit">
@@ -1181,14 +1621,45 @@ async function editCourse(index) {
 
 async function saveCourseForm(e) {
   e.preventDefault();
+
+  const nameEl = document.getElementById('course-name');
+  const platEl = document.getElementById('course-platform');
+  const yearEl = document.getElementById('course-year');
+  const descEl = document.getElementById('course-desc');
+
+  const validations = [
+    { el: nameEl, err: AdminValidators.text(nameEl?.value, 'Course Title', 2, 90, true) },
+    { el: platEl, err: AdminValidators.text(platEl?.value, 'Platform / Institute', 2, 80, true) },
+    { el: yearEl, err: AdminValidators.yearOrPeriod(yearEl?.value, 'Completion Year', true) },
+    { el: descEl, err: AdminValidators.text(descEl?.value, 'Description', 10, 500, true) }
+  ];
+
+  let firstInvalid = null;
+  validations.forEach(({ el, err }) => {
+    if (el) {
+      if (err) {
+        setAdminFieldError(el, err);
+        if (!firstInvalid) firstInvalid = el;
+      } else {
+        clearAdminFieldError(el);
+      }
+    }
+  });
+
+  if (firstInvalid) {
+    firstInvalid.focus();
+    showToast('Please correct the highlighted course fields.');
+    return;
+  }
+
   const data = await PortfolioAPI.getPortfolio();
   data.courses = data.courses || [];
 
-  const name = document.getElementById('course-name').value.trim();
-  const platform = document.getElementById('course-platform').value.trim();
-  const year = document.getElementById('course-year').value.trim();
+  const name = nameEl.value.trim();
+  const platform = platEl.value.trim();
+  const year = yearEl.value.trim();
   const category = document.getElementById('course-category').value.trim();
-  const description = document.getElementById('course-desc').value.trim();
+  const description = descEl.value.trim();
 
   const entry = {
     id: `course-${Date.now()}`,
@@ -1226,16 +1697,42 @@ async function deleteCourse(index) {
 
 async function saveCoursesHeaderForm(e) {
   e.preventDefault();
-  const eraBadge = document.getElementById('course-hdr-era').value.trim();
-  const statusBadge = document.getElementById('course-hdr-status').value.trim();
-  const title = document.getElementById('course-hdr-title').value.trim();
-  const subtitle = document.getElementById('course-hdr-subtitle').value.trim();
+  const eraEl = document.getElementById('course-hdr-era');
+  const statusEl = document.getElementById('course-hdr-status');
+  const titleEl = document.getElementById('course-hdr-title');
+  const subtitleEl = document.getElementById('course-hdr-subtitle');
+
+  const eraErr = AdminValidators.text(eraEl?.value, 'Era Badge', 2, 60, true);
+  const statusErr = AdminValidators.text(statusEl?.value, 'Status Badge', 2, 60, true);
+  const titleErr = AdminValidators.text(titleEl?.value, 'Stage Title', 2, 80, true);
+  const subtitleErr = AdminValidators.text(subtitleEl?.value, 'Stage Subtitle', 5, 250, true);
+
+  if (eraErr) setAdminFieldError(eraEl, eraErr);
+  else clearAdminFieldError(eraEl);
+
+  if (statusErr) setAdminFieldError(statusEl, statusErr);
+  else clearAdminFieldError(statusEl);
+
+  if (titleErr) setAdminFieldError(titleEl, titleErr);
+  else clearAdminFieldError(titleEl);
+
+  if (subtitleErr) setAdminFieldError(subtitleEl, subtitleErr);
+  else clearAdminFieldError(subtitleEl);
+
+  if (eraErr || statusErr || titleErr || subtitleErr) {
+    if (eraErr && eraEl) eraEl.focus();
+    else if (statusErr && statusEl) statusEl.focus();
+    else if (titleErr && titleEl) titleEl.focus();
+    else if (subtitleErr && subtitleEl) subtitleEl.focus();
+    showToast('Please correct the highlighted course stage settings.');
+    return;
+  }
 
   const headerPayload = {
-    eraBadge: eraBadge || 'STAGE 03 • SPECIALIZED TRAINING',
-    statusBadge: statusBadge || 'CERTIFIED • INDUSTRY-READY',
-    title: title || 'What I Learned Along the Way',
-    subtitle: subtitle || 'Hands-on certifications & rigorous testing frameworks.'
+    eraBadge: eraEl.value.trim(),
+    statusBadge: statusEl.value.trim(),
+    title: titleEl.value.trim(),
+    subtitle: subtitleEl.value.trim()
   };
 
   showToast('Saving Stage 03 settings...');
@@ -1254,83 +1751,57 @@ function updateAdminPassword(e) {
   const confirmInput = document.getElementById('confirm-pass-input');
   const errorMsg = document.getElementById('password-error-msg');
 
-  const currentPass = currentInput.value.trim();
-  const newPass = newInput.value.trim();
-  const confirmPass = confirmInput.value.trim();
+  if (errorMsg) {
+    errorMsg.textContent = '';
+    errorMsg.style.display = 'none';
+  }
+  clearAdminFieldError(currentInput);
+  clearAdminFieldError(newInput);
+  clearAdminFieldError(confirmInput);
 
-  function showError(msg) {
-    if (errorMsg) {
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
-    }
+  const currentPass = currentInput ? currentInput.value.trim() : '';
+  const newPass = newInput ? newInput.value.trim() : '';
+  const confirmPass = confirmInput ? confirmInput.value.trim() : '';
+
+  let hasError = false;
+
+  if (!currentPass) {
+    setAdminFieldError(currentInput, 'Current password is required.');
+    hasError = true;
+  } else if (currentPass !== getStoredPin()) {
+    setAdminFieldError(currentInput, 'Current password does not match.');
+    hasError = true;
   }
 
-  function hideError() {
-    if (errorMsg) {
-      errorMsg.textContent = '';
-      errorMsg.style.display = 'none';
-    }
+  const newPassErr = AdminValidators.password(newPass, true);
+  if (newPassErr) {
+    setAdminFieldError(newInput, newPassErr);
+    hasError = true;
   }
 
-  hideError();
-
-  // 1. Mandatory fields check
-  if (!currentPass || !newPass || !confirmPass) {
-    showError('All password fields are mandatory.');
-    if (!currentPass) currentInput.focus();
-    else if (!newPass) newInput.focus();
-    else confirmInput.focus();
-    return;
+  if (!confirmPass) {
+    setAdminFieldError(confirmInput, 'Confirmation password is required.');
+    hasError = true;
+  } else if (newPass && confirmPass !== newPass) {
+    setAdminFieldError(confirmInput, 'Confirmation password does not match new password.');
+    hasError = true;
   }
 
-  // 2. Verify previous / current password
-  if (currentPass !== getStoredPin()) {
-    showError('Current password does not match.');
-    currentInput.focus();
-    return;
-  }
-
-  // 3. Standards for new password:
-  // - Minimum 8 characters
-  if (newPass.length < 8) {
-    showError('New password must be at least 8 characters long.');
-    newInput.focus();
-    return;
-  }
-
-  // - At least 1 uppercase letter
-  if (!/[A-Z]/.test(newPass)) {
-    showError('New password must contain at least 1 uppercase letter (A-Z).');
-    newInput.focus();
-    return;
-  }
-
-  // - At least 1 number
-  if (!/[0-9]/.test(newPass)) {
-    showError('New password must contain at least 1 number (0-9).');
-    newInput.focus();
-    return;
-  }
-
-  // - At least 1 special character
-  if (!/[^A-Za-z0-9]/.test(newPass)) {
-    showError('New password must contain at least 1 special character (e.g. !@#$%^&*).');
-    newInput.focus();
-    return;
-  }
-
-  // 4. Confirm password matches
-  if (newPass !== confirmPass) {
-    showError('New password and confirmation password do not match.');
-    confirmInput.focus();
+  if (hasError) {
+    if (!currentPass || currentPass !== getStoredPin()) currentInput?.focus();
+    else if (newPassErr) newInput?.focus();
+    else confirmInput?.focus();
     return;
   }
 
   // Save updated password
   localStorage.setItem(PIN_KEY, newPass);
-  currentInput.value = '';
-  newInput.value = '';
-  confirmInput.value = '';
+  if (currentInput) currentInput.value = '';
+  if (newInput) newInput.value = '';
+  if (confirmInput) confirmInput.value = '';
+  clearAdminFieldError(currentInput);
+  clearAdminFieldError(newInput);
+  clearAdminFieldError(confirmInput);
 
   showToast('Admin password updated successfully');
 }
@@ -1466,15 +1937,23 @@ async function saveDatabaseConfig(e) {
   const alertBox = document.getElementById('db-config-alert');
   const saveBtn = document.getElementById('btn-save-db');
 
-  const rawUrl = urlInput.value.trim();
+  const rawUrl = urlInput ? urlInput.value.trim() : '';
   const url = DatabaseManager.cleanSupabaseUrl(rawUrl);
-  const key = keyInput.value.trim();
+  const key = keyInput ? keyInput.value.trim() : '';
 
-  if (!url || !key) {
-    if (alertBox) {
-      alertBox.textContent = 'Please enter both Supabase Project URL and Public Anon Key.';
-      alertBox.style.display = 'block';
-    }
+  const urlErr = AdminValidators.supabaseUrl(rawUrl, true);
+  const keyErr = AdminValidators.token(key, 'Supabase Public Anon Key', 20, true);
+
+  if (urlErr) setAdminFieldError(urlInput, urlErr);
+  else clearAdminFieldError(urlInput);
+
+  if (keyErr) setAdminFieldError(keyInput, keyErr);
+  else clearAdminFieldError(keyInput);
+
+  if (urlErr || keyErr) {
+    if (urlErr && urlInput) urlInput.focus();
+    else if (keyErr && keyInput) keyInput.focus();
+    showToast('Please provide valid Supabase database configuration.');
     return;
   }
 
@@ -1692,12 +2171,32 @@ function renderCloudSyncTab() {
 async function saveGitHubSyncSettings(e) {
   e.preventDefault();
 
-  const repo = document.getElementById('gh-repo-input').value.trim();
-  const branch = document.getElementById('gh-branch-input').value.trim();
-  const token = document.getElementById('gh-token-input').value.trim();
+  const repoInput = document.getElementById('gh-repo-input');
+  const branchInput = document.getElementById('gh-branch-input');
+  const tokenInput = document.getElementById('gh-token-input');
 
-  if (!token) {
-    alert('Please enter a GitHub Personal Access Token.');
+  const repo = repoInput ? repoInput.value.trim() : '';
+  const branch = branchInput ? branchInput.value.trim() : '';
+  const token = tokenInput ? tokenInput.value.trim() : '';
+
+  const repoErr = AdminValidators.repo(repo, true);
+  const branchErr = AdminValidators.branch(branch, true);
+  const tokenErr = AdminValidators.token(token, 'GitHub Personal Access Token', 15, true);
+
+  if (repoErr) setAdminFieldError(repoInput, repoErr);
+  else clearAdminFieldError(repoInput);
+
+  if (branchErr) setAdminFieldError(branchInput, branchErr);
+  else clearAdminFieldError(branchInput);
+
+  if (tokenErr) setAdminFieldError(tokenInput, tokenErr);
+  else clearAdminFieldError(tokenInput);
+
+  if (repoErr || branchErr || tokenErr) {
+    if (repoErr && repoInput) repoInput.focus();
+    else if (branchErr && branchInput) branchInput.focus();
+    else if (tokenErr && tokenInput) tokenInput.focus();
+    showToast('Please correct the highlighted GitHub configuration fields.');
     return;
   }
 

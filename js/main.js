@@ -79,7 +79,7 @@ function initCanvasFrameEngine() {
   frameCtx = frameCanvas.getContext('2d', { alpha: false });
 
   function resizeCanvas() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     frameCanvas.width = Math.round(window.innerWidth * dpr);
     frameCanvas.height = Math.round(window.innerHeight * dpr);
     frameCtx.imageSmoothingEnabled = true;
@@ -341,6 +341,10 @@ function initJourneyScrollEngine() {
   let currentProgress = 0;
   let activeStageIndex = 0;
 
+  function isMobileViewport() {
+    return window.innerWidth <= 768 || 'ontouchstart' in window;
+  }
+
   function onScroll() {
     if (!scrollTrack) return;
     const maxScroll = scrollTrack.scrollHeight - window.innerHeight;
@@ -351,9 +355,11 @@ function initJourneyScrollEngine() {
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  // 60FPS Native Scrubbing Loop
+  // 60FPS Native Scrubbing Loop (Dynamic fast lerp on mobile for immediate finger response)
   function tickEngine() {
-    currentProgress += (targetProgress - currentProgress) * 0.14;
+    const isMobile = isMobileViewport();
+    const lerpSpeed = isMobile ? 0.28 : 0.14;
+    currentProgress += (targetProgress - currentProgress) * lerpSpeed;
 
     // 1. Render Frame to Canvas
     renderFrameAtProgress(currentProgress);
@@ -384,6 +390,132 @@ function initJourneyScrollEngine() {
   }
 
   requestAnimationFrame(tickEngine);
+
+  // =========================================================================
+  // Mobile Touch & Gesture Engine (Seamless Card Scrolling & Quick Flick Swipes)
+  // =========================================================================
+  let touchStartY = 0;
+  let touchStartX = 0;
+  let touchStartTime = 0;
+  let lastTouchY = 0;
+  let isTouching = false;
+  let scrollSnapTimer = null;
+
+  window.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    touchStartY = e.touches[0].clientY;
+    lastTouchY = touchStartY;
+    touchStartX = e.touches[0].clientX;
+    touchStartTime = Date.now();
+    isTouching = true;
+    if (scrollSnapTimer) clearTimeout(scrollSnapTimer);
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e) => {
+    if (!isTouching || e.touches.length !== 1) return;
+    const currentY = e.touches[0].clientY;
+    const currentX = e.touches[0].clientX;
+    const deltaY = currentY - lastTouchY;
+    const totalDy = currentY - touchStartY;
+    const totalDx = currentX - touchStartX;
+    lastTouchY = currentY;
+
+    // Check if touch originated within an internally scrollable card
+    let scrollable = null;
+    let el = e.target;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.classList && (
+        el.classList.contains('chapter-card-glass') ||
+        el.classList.contains('projects-dynamic-container') ||
+        el.classList.contains('connect-terminal-card')
+      )) {
+        if (el.scrollHeight > el.clientHeight + 4) {
+          scrollable = el;
+          break;
+        }
+      }
+      el = el.parentElement;
+    }
+
+    if (!scrollable) {
+      // Target card fits on screen without overflow:
+      // Propagate vertical touch movement directly to window scroll so there are NO dead zones!
+      if (Math.abs(totalDy) > Math.abs(totalDx) && Math.abs(deltaY) > 0) {
+        window.scrollBy({ top: -deltaY * 1.05, behavior: 'auto' });
+      }
+    } else {
+      // Target card has internal overflow:
+      const atTop = scrollable.scrollTop <= 1 && deltaY > 0;
+      const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2) && deltaY < 0;
+      if ((atTop || atBottom) && Math.abs(totalDy) > Math.abs(totalDx)) {
+        window.scrollBy({ top: -deltaY * 1.05, behavior: 'auto' });
+      }
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', (e) => {
+    if (!isTouching) return;
+    isTouching = false;
+    const touchEndTime = Date.now();
+    const duration = touchEndTime - touchStartTime;
+    const touchEndY = e.changedTouches[0] ? e.changedTouches[0].clientY : lastTouchY;
+    const touchEndX = e.changedTouches[0] ? e.changedTouches[0].clientX : touchStartX;
+    const dy = touchEndY - touchStartY;
+    const dx = touchEndX - touchStartX;
+
+    // Quick Flick Stage Navigation (up/down or left/right)
+    if (isMobileViewport() && duration < 340) {
+      // Check if inside actively scrolling inner card that wasn't at boundary
+      let isInsideScrollable = false;
+      let el = e.target;
+      while (el && el !== document.body && el !== document.documentElement) {
+        if (el.classList && (
+          el.classList.contains('chapter-card-glass') ||
+          el.classList.contains('projects-dynamic-container') ||
+          el.classList.contains('connect-terminal-card')
+        )) {
+          if (el.scrollHeight > el.clientHeight + 6) {
+            isInsideScrollable = true;
+            break;
+          }
+        }
+        el = el.parentElement;
+      }
+
+      if (!isInsideScrollable) {
+        // Vertical flick (swiping up = go to next milestone, swiping down = go to prev)
+        if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx) * 1.3) {
+          if (dy < -40 && activeStageIndex < STAGES.length - 1) {
+            window._portfolioScroll.scrollToMilestone(activeStageIndex + 1);
+            return;
+          } else if (dy > 40 && activeStageIndex > 0) {
+            window._portfolioScroll.scrollToMilestone(activeStageIndex - 1);
+            return;
+          }
+        }
+
+        // Horizontal flick (swipe left = next, swipe right = prev)
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.3) {
+          if (dx < -55 && activeStageIndex < STAGES.length - 1) {
+            window._portfolioScroll.scrollToMilestone(activeStageIndex + 1);
+            return;
+          } else if (dx > 55 && activeStageIndex > 0) {
+            window._portfolioScroll.scrollToMilestone(activeStageIndex - 1);
+            return;
+          }
+        }
+      }
+    }
+
+    // Smooth snap settle on mobile after scrolling stops
+    if (isMobileViewport()) {
+      scrollSnapTimer = setTimeout(() => {
+        if (!isTouching) {
+          window._portfolioScroll.scrollToMilestone(activeStageIndex);
+        }
+      }, 260);
+    }
+  }, { passive: true });
 
   function updateActiveMilestone(index) {
     const stage = STAGES[index] || STAGES[0];
@@ -459,6 +591,31 @@ function initHUDAndNavigation() {
       e.preventDefault();
       if (window._portfolioScroll) {
         window._portfolioScroll.scrollToMilestone(0);
+      }
+    });
+  }
+
+  // HUD Chapter Pill click (tap to cycle to next milestone on mobile)
+  const hudChapterPill = document.getElementById('hud-chapter-pill');
+  if (hudChapterPill) {
+    hudChapterPill.addEventListener('click', (e) => {
+      e.preventDefault();
+      const currentActiveNode = document.querySelector('.scrubber-node.active');
+      const currentIdx = currentActiveNode ? parseInt(currentActiveNode.getAttribute('data-target'), 10) : 0;
+      const nextIdx = (currentIdx + 1) % STAGES.length;
+      if (window._portfolioScroll) {
+        window._portfolioScroll.scrollToMilestone(nextIdx);
+      }
+    });
+  }
+
+  // Starting Hero scroll hint click (tap to start journey)
+  const scrollHint = document.querySelector('.hero-scroll-hint');
+  if (scrollHint) {
+    scrollHint.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (window._portfolioScroll) {
+        window._portfolioScroll.scrollToMilestone(1);
       }
     });
   }
@@ -637,16 +794,266 @@ function initContactForm() {
   const form = document.getElementById('contact-form');
   const sendBtn = document.getElementById('terminal-send-btn');
   const resumeBtn = document.getElementById('terminal-resume-btn');
+  const alertBox = document.getElementById('contact-form-alert');
+
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const messageInput = document.getElementById('message');
+
+  const nameError = document.getElementById('name-error');
+  const emailError = document.getElementById('email-error');
+  const messageError = document.getElementById('message-error');
+
+  // Track fields user has interacted with
+  const touched = {
+    name: false,
+    email: false,
+    message: false
+  };
+
+  /**
+   * Name Validation Standards:
+   * - Min 5 characters, Max 15 characters
+   * - Alphanumeric and underscore (_) only, no spaces or other special chars
+   * - Cannot be fully numbers (must contain letters)
+   */
+  function validateName(rawVal) {
+    const val = (rawVal || '').trim();
+    if (!val) {
+      return 'Name is required.';
+    }
+    if (val.length < 5) {
+      return `Name must be at least 5 characters (currently ${val.length}).`;
+    }
+    if (val.length > 15) {
+      return `Name cannot exceed 15 characters (currently ${val.length}).`;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(val)) {
+      return 'Only letters, numbers, and underscores (_) are allowed.';
+    }
+    if (/^\d+$/.test(val)) {
+      return 'Name cannot be entirely numbers (must contain letters).';
+    }
+    if (!/[a-zA-Z]/.test(val)) {
+      return 'Name must contain at least one letter.';
+    }
+    return null;
+  }
+
+  /**
+   * Email Validation Standards:
+   * - Username (local part before @): valid RFC chars, no consecutive or edge dots
+   * - Exactly one @ symbol
+   * - Domain name (after @): valid domain label
+   * - Top-Level Domain (TLD): dot followed by >= 2 alphabetic chars (e.g. .com, .org, .in)
+   * - No spaces allowed
+   * - Standard RFC-compliant structure
+   */
+  function validateEmail(rawVal) {
+    const val = (rawVal || '').trim();
+    if (!val) {
+      return 'Email address is required.';
+    }
+    if (/\s/.test(val)) {
+      return 'Email address cannot contain spaces.';
+    }
+    const atCount = (val.match(/@/g) || []).length;
+    if (atCount === 0) {
+      return "Email must contain an '@' symbol.";
+    }
+    if (atCount > 1) {
+      return "Email can only contain one '@' symbol.";
+    }
+
+    const [user, domain] = val.split('@');
+    if (!user) {
+      return "Email must include a username before '@'.";
+    }
+    if (user.startsWith('.') || user.endsWith('.')) {
+      return 'Username cannot begin or end with a dot.';
+    }
+    if (user.includes('..')) {
+      return 'Username cannot contain consecutive dots (..).';
+    }
+    if (!/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+$/.test(user)) {
+      return 'Username contains invalid characters.';
+    }
+
+    if (!domain) {
+      return "Email must include a domain after '@' (e.g. gmail.com).";
+    }
+    if (!domain.includes('.')) {
+      return 'Domain must include a dot and extension (e.g. .com, .org).';
+    }
+
+    const domainParts = domain.split('.');
+    const tld = domainParts[domainParts.length - 1];
+
+    if (domain.startsWith('.') || domain.endsWith('.')) {
+      return 'Domain cannot begin or end with a dot.';
+    }
+    if (domain.includes('..')) {
+      return 'Domain cannot contain consecutive dots (..).';
+    }
+    if (!/^[a-zA-Z0-9.-]+$/.test(domain)) {
+      return 'Domain contains invalid characters.';
+    }
+    if (domainParts.some(part => part.startsWith('-') || part.endsWith('-'))) {
+      return 'Domain labels cannot start or end with a hyphen.';
+    }
+    if (!tld || tld.length < 2) {
+      return 'Domain extension must be at least 2 characters long (e.g. .com).';
+    }
+    if (!/^[a-zA-Z]+$/.test(tld)) {
+      return 'Domain extension must contain letters only (e.g. .com, .in).';
+    }
+
+    // Standard RFC-compliant email regex
+    const standardEmailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/;
+    if (!standardEmailRegex.test(val)) {
+      return 'Please enter a valid standard email address (e.g. name@domain.com).';
+    }
+
+    return null;
+  }
+
+  /**
+   * Message Validation Standards:
+   * - Required
+   * - Min 10 characters
+   * - Max 1000 characters
+   */
+  function validateMessage(rawVal) {
+    const val = (rawVal || '').trim();
+    if (!val) {
+      return 'Message is required.';
+    }
+    if (val.length < 10) {
+      return `Message must be at least 10 characters (currently ${val.length}).`;
+    }
+    if (val.length > 1000) {
+      return 'Message cannot exceed 1000 characters.';
+    }
+    return null;
+  }
+
+  function setFieldError(inputEl, errorEl, errorMsg) {
+    if (!inputEl || !errorEl) return;
+    if (errorMsg) {
+      inputEl.classList.add('input-error');
+      inputEl.classList.remove('input-valid');
+      inputEl.setAttribute('aria-invalid', 'true');
+      errorEl.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <span>${errorMsg}</span>
+      `;
+      errorEl.classList.add('visible');
+    } else {
+      inputEl.classList.remove('input-error');
+      if (inputEl.value.trim().length > 0) {
+        inputEl.classList.add('input-valid');
+      } else {
+        inputEl.classList.remove('input-valid');
+      }
+      inputEl.setAttribute('aria-invalid', 'false');
+      errorEl.textContent = '';
+      errorEl.classList.remove('visible');
+    }
+  }
+
+  function showBanner(type, message) {
+    if (!alertBox) return;
+    alertBox.className = `terminal-form-alert ${type}`;
+    const icon = type === 'success'
+      ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+      : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+    alertBox.innerHTML = `${icon}<span>${message}</span>`;
+    alertBox.style.display = 'flex';
+  }
+
+  function hideBanner() {
+    if (!alertBox) return;
+    alertBox.style.display = 'none';
+  }
 
   if (form) {
+    // Real-time & blur listeners for Name
+    if (nameInput) {
+      nameInput.addEventListener('blur', () => {
+        touched.name = true;
+        setFieldError(nameInput, nameError, validateName(nameInput.value));
+      });
+      nameInput.addEventListener('input', () => {
+        if (touched.name || nameInput.classList.contains('input-error')) {
+          setFieldError(nameInput, nameError, validateName(nameInput.value));
+        }
+      });
+    }
+
+    // Real-time & blur listeners for Email
+    if (emailInput) {
+      emailInput.addEventListener('blur', () => {
+        touched.email = true;
+        setFieldError(emailInput, emailError, validateEmail(emailInput.value));
+      });
+      emailInput.addEventListener('input', () => {
+        if (touched.email || emailInput.classList.contains('input-error')) {
+          setFieldError(emailInput, emailError, validateEmail(emailInput.value));
+        }
+      });
+    }
+
+    // Real-time & blur listeners for Message
+    if (messageInput) {
+      messageInput.addEventListener('blur', () => {
+        touched.message = true;
+        setFieldError(messageInput, messageError, validateMessage(messageInput.value));
+      });
+      messageInput.addEventListener('input', () => {
+        if (touched.message || messageInput.classList.contains('input-error')) {
+          setFieldError(messageInput, messageError, validateMessage(messageInput.value));
+        }
+      });
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      hideBanner();
 
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const message = document.getElementById('message').value.trim();
+      // Mark all touched
+      touched.name = true;
+      touched.email = true;
+      touched.message = true;
 
-      if (!name || !email || !message) return;
+      const nameVal = nameInput ? nameInput.value.trim() : '';
+      const emailVal = emailInput ? emailInput.value.trim() : '';
+      const messageVal = messageInput ? messageInput.value.trim() : '';
+
+      const nameErr = validateName(nameVal);
+      const emailErr = validateEmail(emailVal);
+      const messageErr = validateMessage(messageVal);
+
+      setFieldError(nameInput, nameError, nameErr);
+      setFieldError(emailInput, emailError, emailErr);
+      setFieldError(messageInput, messageError, messageErr);
+
+      // If invalid, focus the first failing field and prevent submission
+      if (nameErr) {
+        nameInput.focus();
+        return;
+      }
+      if (emailErr) {
+        emailInput.focus();
+        return;
+      }
+      if (messageErr) {
+        messageInput.focus();
+        return;
+      }
 
       if (sendBtn) {
         sendBtn.disabled = true;
@@ -654,17 +1061,53 @@ function initContactForm() {
       }
 
       try {
-        await PortfolioAPI.sendContact({ name, email, message });
-        alert('Message received! Adhithya will get back to you shortly.');
+        await PortfolioAPI.sendContact({ name: nameVal, email: emailVal, message: messageVal });
+        showBanner('success', 'Message dispatched successfully! Adhithya will get back to you shortly.');
         form.reset();
+        touched.name = false;
+        touched.email = false;
+        touched.message = false;
+        [nameInput, emailInput, messageInput].forEach(el => {
+          if (el) {
+            el.classList.remove('input-valid', 'input-error');
+            el.removeAttribute('aria-invalid');
+          }
+        });
+        [nameError, emailError, messageError].forEach(el => {
+          if (el) {
+            el.textContent = '';
+            el.classList.remove('visible');
+          }
+        });
       } catch (err) {
         console.warn('[Contact] Form fallback:', err);
-        alert('Transmission sent! Thank you for reaching out.');
+        showBanner('success', 'Transmission sent! Thank you for reaching out.');
         form.reset();
+        touched.name = false;
+        touched.email = false;
+        touched.message = false;
+        [nameInput, emailInput, messageInput].forEach(el => {
+          if (el) {
+            el.classList.remove('input-valid', 'input-error');
+            el.removeAttribute('aria-invalid');
+          }
+        });
+        [nameError, emailError, messageError].forEach(el => {
+          if (el) {
+            el.textContent = '';
+            el.classList.remove('visible');
+          }
+        });
       } finally {
         if (sendBtn) {
           sendBtn.disabled = false;
-          sendBtn.innerHTML = `<span>Start a Conversation</span>`;
+          sendBtn.innerHTML = `
+            <span>Start a Conversation</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          `;
         }
       }
     });
@@ -809,7 +1252,12 @@ function hydrateStory(data) {
     const terminalEmailLink = document.getElementById('terminal-email-link');
     if (p.email) {
       if (terminalEmail) terminalEmail.textContent = p.email;
-      if (terminalEmailLink) terminalEmailLink.href = `mailto:${p.email}`;
+      if (terminalEmailLink) {
+        terminalEmailLink.href = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(p.email)}`;
+        terminalEmailLink.target = '_blank';
+        terminalEmailLink.rel = 'noopener noreferrer';
+        terminalEmailLink.title = `Send Email to ${p.email} via Google Mail`;
+      }
     }
 
     const ghLink = document.getElementById('terminal-github-link');

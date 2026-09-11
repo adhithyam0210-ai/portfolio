@@ -30,7 +30,7 @@
     rel="stylesheet">
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="css/style.css?v=8.0">
+  <link rel="stylesheet" href="css/style.css?v=12.0">
 </head>
 
 <body class="journey-body">
@@ -449,7 +449,7 @@
               <div class="terminal-direct-channel">
                 <div class="channel-headline">Direct Communication:</div>
                 
-                <a href="mailto:adhithyam0210@gmail.com" class="direct-contact-tile" id="terminal-email-link" title="Send Email">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=adhithyam0210@gmail.com" target="_blank" rel="noopener noreferrer" class="direct-contact-tile" id="terminal-email-link" title="Send Email">
                   <div class="tile-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -493,19 +493,23 @@
               <!-- Right Instant Message Dispatcher -->
               <div class="terminal-dispatcher-channel">
                 <div class="channel-headline">Send a Direct Message:</div>
-                <form id="contact-form" class="terminal-form">
+                <form id="contact-form" class="terminal-form" novalidate>
                   <div class="form-field-group">
                     <label for="name" class="terminal-label">Your Name</label>
                     <input type="text" id="name" class="terminal-input" placeholder="Your Name" required>
+                    <div class="inline-error-msg" id="name-error" role="alert" aria-live="polite"></div>
                   </div>
                   <div class="form-field-group">
                     <label for="email" class="terminal-label">Email Address</label>
                     <input type="email" id="email" class="terminal-input" placeholder="Your Email" required>
+                    <div class="inline-error-msg" id="email-error" role="alert" aria-live="polite"></div>
                   </div>
                   <div class="form-field-group">
                     <label for="message" class="terminal-label">Opportunity / Message</label>
                     <textarea id="message" class="terminal-textarea" placeholder="Your Message..." rows="3" required></textarea>
+                    <div class="inline-error-msg" id="message-error" role="alert" aria-live="polite"></div>
                   </div>
+                  <div class="terminal-form-alert" id="contact-form-alert" style="display:none;" role="status"></div>
                   <button type="submit" class="terminal-submit-btn" id="terminal-send-btn">
                     <span>Start a Conversation</span>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -532,10 +536,10 @@
 
   <!-- Database & Application Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/db-config.js?v=8.0"></script>
-  <script src="js/config.js?v=8.0"></script>
-  <script src="js/api.js?v=8.0"></script>
-  <script src="js/main.js?v=8.0"></script>
+  <script src="js/db-config.js?v=12.0"></script>
+  <script src="js/config.js?v=12.0"></script>
+  <script src="js/api.js?v=12.0"></script>
+  <script src="js/main.js?v=12.0"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
   </script>
