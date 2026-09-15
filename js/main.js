@@ -531,7 +531,49 @@ function initJourneyScrollEngine() {
   window.addEventListener('touchmove', (e) => {
     if (!isTouching || e.touches.length !== 1) return;
     const currentY = e.touches[0].clientY;
+    const currentX = e.touches[0].clientX;
+    const deltaY = currentY - lastTouchY;
+    const totalDy = currentY - touchStartY;
+    const totalDx = currentX - touchStartX;
     lastTouchY = currentY;
+
+    // Check if touch originated within an internally scrollable card
+    let scrollable = null;
+    let el = e.target;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.classList && (
+        el.classList.contains('chapter-card-glass') ||
+        el.classList.contains('projects-dynamic-container') ||
+        el.classList.contains('skills-garden-container') ||
+        el.classList.contains('connect-terminal-card')
+      )) {
+        if (el.scrollHeight > el.clientHeight + 4) {
+          scrollable = el;
+          break;
+        }
+      }
+      el = el.parentElement;
+    }
+
+    if (scrollable) {
+      // deltaY > 0: finger dragging down (scrolling content up)
+      // deltaY < 0: finger dragging up (scrolling content down)
+      const atTop = scrollable.scrollTop <= 1 && deltaY > 0;
+      const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2) && deltaY < 0;
+
+      // If internal card still has content to scroll in that direction, scroll card internally
+      if (!atTop && !atBottom) {
+        scrollable.scrollTop -= deltaY;
+        return;
+      }
+    }
+
+    // Target card fits on screen without overflow, or has reached its boundary:
+    // Propagate vertical movement directly to window scroll so dragging on the cards scrubs the journey!
+    if (Math.abs(totalDy) >= Math.abs(totalDx) && Math.abs(deltaY) > 0) {
+      const scrollMultiplier = 1.35;
+      window.scrollBy({ top: -deltaY * scrollMultiplier, behavior: 'auto' });
+    }
   }, { passive: true });
 
   window.addEventListener('touchend', (e) => {
@@ -552,11 +594,16 @@ function initJourneyScrollEngine() {
         if (el.classList && (
           el.classList.contains('chapter-card-glass') ||
           el.classList.contains('projects-dynamic-container') ||
+          el.classList.contains('skills-garden-container') ||
           el.classList.contains('connect-terminal-card')
         )) {
           if (el.scrollHeight > el.clientHeight + 6) {
-            isInsideScrollable = true;
-            break;
+            const atTop = el.scrollTop <= 2 && dy > 0;
+            const atBottom = (el.scrollTop + el.clientHeight >= el.scrollHeight - 3) && dy < 0;
+            if (!atTop && !atBottom) {
+              isInsideScrollable = true;
+              break;
+            }
           }
         }
         el = el.parentElement;
@@ -564,22 +611,22 @@ function initJourneyScrollEngine() {
 
       if (!isInsideScrollable) {
         // Vertical flick (swiping up = go to next milestone, swiping down = go to prev)
-        if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx) * 1.3) {
-          if (dy < -40 && activeStageIndex < STAGES.length - 1) {
+        if (Math.abs(dy) > 35 && Math.abs(dy) > Math.abs(dx) * 1.2) {
+          if (dy < -35 && activeStageIndex < STAGES.length - 1) {
             window._portfolioScroll.scrollToMilestone(activeStageIndex + 1);
             return;
-          } else if (dy > 40 && activeStageIndex > 0) {
+          } else if (dy > 35 && activeStageIndex > 0) {
             window._portfolioScroll.scrollToMilestone(activeStageIndex - 1);
             return;
           }
         }
 
         // Horizontal flick (swipe left = next, swipe right = prev)
-        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.3) {
-          if (dx < -55 && activeStageIndex < STAGES.length - 1) {
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+          if (dx < -45 && activeStageIndex < STAGES.length - 1) {
             window._portfolioScroll.scrollToMilestone(activeStageIndex + 1);
             return;
-          } else if (dx > 55 && activeStageIndex > 0) {
+          } else if (dx > 45 && activeStageIndex > 0) {
             window._portfolioScroll.scrollToMilestone(activeStageIndex - 1);
             return;
           }
@@ -593,7 +640,7 @@ function initJourneyScrollEngine() {
         if (!isTouching) {
           window._portfolioScroll.scrollToMilestone(activeStageIndex);
         }
-      }, 260);
+      }, 320);
     }
   }, { passive: true });
 

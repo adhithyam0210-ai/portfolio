@@ -224,6 +224,11 @@ function initAdminValidation() {
     { id: 'project-title', check: (v) => AdminValidators.text(v, 'Project Title', 3, 80, true) },
     { id: 'project-summary', check: (v) => AdminValidators.text(v, 'Summary', 10, 600, true) },
     { id: 'project-tech', check: (v) => AdminValidators.text(v, 'Tech Stack', 2, 200, true) },
+    { id: 'custom-category-input', check: (v) => {
+      const cat = document.getElementById('project-category')?.value;
+      if (cat === 'others') return AdminValidators.text(v, 'Custom Category Name', 2, 50, true);
+      return null;
+    }},
     { id: 'project-live', check: (v) => AdminValidators.url(v, false) },
     { id: 'project-github', check: (v) => AdminValidators.url(v, false, 'github.com') },
 
@@ -352,6 +357,11 @@ function initAuth() {
    Tab Navigation & URL Hash Routing
    ========================================================================== */
 function switchTab(target, updateHash = true) {
+  // Database and Cloud tab is permanently hidden per user requirements
+  if (target === 'database' || target === 'cloud-sync') {
+    target = 'projects';
+  }
+
   const tabBtns = document.querySelectorAll('.tab-btn');
   const tabPanes = document.querySelectorAll('.tab-pane');
   const targetBtn = document.querySelector(`.tab-btn[data-tab="${target}"]`);
@@ -376,8 +386,6 @@ function switchTab(target, updateHash = true) {
   if (target === 'skills') renderSkillsManager();
   if (target === 'profile') renderProfileForm();
   if (target === 'messages') renderInquiriesManager();
-  if (target === 'database') renderDatabaseTab();
-  if (target === 'cloud-sync') renderDatabaseTab();
 }
 
 function initTabs() {
@@ -386,19 +394,20 @@ function initTabs() {
   tabBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.getAttribute('data-tab');
+      if (target === 'database' || target === 'cloud-sync') return;
       switchTab(target, true);
     });
   });
 
   // Check URL hash on initial load (e.g. #skills or #projects)
   const hash = window.location.hash.replace('#', '').trim();
-  if (hash) {
+  if (hash && hash !== 'database' && hash !== 'cloud-sync') {
     switchTab(hash, false);
   }
 
   window.addEventListener('hashchange', () => {
     const currentHash = window.location.hash.replace('#', '').trim();
-    if (currentHash) {
+    if (currentHash && currentHash !== 'database' && currentHash !== 'cloud-sync') {
       switchTab(currentHash, false);
     }
   });
@@ -688,6 +697,9 @@ async function saveProjectForm(e) {
   const liveEl = document.getElementById('project-live');
   const ghEl = document.getElementById('project-github');
 
+  const rawCategory = document.getElementById('project-category').value;
+  const customCategoryEl = document.getElementById('custom-category-input');
+
   const validations = [
     { el: titleEl, err: AdminValidators.text(titleEl?.value, 'Project Title', 3, 80, true) },
     { el: summaryEl, err: AdminValidators.text(summaryEl?.value, 'Summary', 10, 600, true) },
@@ -695,6 +707,13 @@ async function saveProjectForm(e) {
     { el: liveEl, err: AdminValidators.url(liveEl?.value, false) },
     { el: ghEl, err: AdminValidators.url(ghEl?.value, false, 'github.com') }
   ];
+
+  if (rawCategory === 'others') {
+    validations.push({
+      el: customCategoryEl,
+      err: AdminValidators.text(customCategoryEl?.value, 'Custom Category Name', 2, 50, true)
+    });
+  }
 
   let firstInvalid = null;
   validations.forEach(({ el, err }) => {
@@ -716,7 +735,6 @@ async function saveProjectForm(e) {
 
   const title = titleEl.value.trim();
   const subtitle = subtitleEl?.value.trim() || '';
-  const rawCategory = document.getElementById('project-category').value;
   let category = rawCategory;
   let categoryLabel = 'Software Testing';
 
@@ -1004,14 +1022,26 @@ async function renderSkillsManager() {
           <span>${cat.title}</span>
           <span class="skill-count-badge">${items.length} ${items.length === 1 ? 'skill' : 'skills'}</span>
         </h4>
-        <div class="skill-add-row" style="display: flex; gap: 8px;">
-          <input type="text" id="add-skill-input-${cat.key}" class="form-input" style="flex: 1;" placeholder="${ph}" />
-          <select id="add-skill-level-${cat.key}" class="form-input" style="width: 130px;">
-            <option value="Strong">Strong</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Proficient">Proficient</option>
-          </select>
-          <button class="btn-primary" onclick="addSkill('${cat.key}')">Add</button>
+        <div style="margin-bottom: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="form-label" for="add-skill-input-${cat.key}" style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0;">
+              Skill Name <span class="required-star">*</span>
+            </label>
+            <span style="font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">
+              Proficiency Level <span class="required-star">*</span>
+            </span>
+          </div>
+          <div class="skill-add-row" style="display: flex; gap: 8px; align-items: flex-start;">
+            <div style="flex: 1; position: relative;">
+              <input type="text" id="add-skill-input-${cat.key}" class="form-input" placeholder="${ph}" minlength="2" maxlength="50" required autocomplete="off" />
+            </div>
+            <select id="add-skill-level-${cat.key}" class="form-input" style="width: 155px; flex-shrink: 0;" required>
+              <option value="Strong">Strong / Expert</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Proficient">Proficient / Working</option>
+            </select>
+            <button class="btn-primary" style="flex-shrink: 0; padding: 11px 18px;" onclick="addSkill('${cat.key}')">Add</button>
+          </div>
         </div>
         <div class="skill-tag-list" style="margin-top: 12px;">
           ${items.map((item, index) => {
@@ -1034,6 +1064,35 @@ async function renderSkillsManager() {
       </div>
     `;
   }).join('');
+
+  // Attach real-time validation and Enter-key listener to each category input
+  categories.forEach(cat => {
+    const input = document.getElementById(`add-skill-input-${cat.key}`);
+    if (input) {
+      input.addEventListener('blur', () => {
+        if (input.value.trim().length > 0) {
+          const err = AdminValidators.text(input.value, 'Skill Name', 2, 50, true);
+          if (err) setAdminFieldError(input, err);
+          else clearAdminFieldError(input);
+        } else {
+          clearAdminFieldError(input);
+        }
+      });
+      input.addEventListener('input', () => {
+        if (input.classList.contains('input-error')) {
+          const err = AdminValidators.text(input.value, 'Skill Name', 2, 50, true);
+          if (err) setAdminFieldError(input, err);
+          else clearAdminFieldError(input);
+        }
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addSkill(cat.key);
+        }
+      });
+    }
+  });
 }
 
 async function addSkill(catKey) {
@@ -1042,23 +1101,32 @@ async function addSkill(catKey) {
   if (!input) return;
 
   const text = input.value.trim();
-  if (!text) {
-    setAdminFieldError(input, 'Skill Name is required.');
+  const validationErr = AdminValidators.text(text, 'Skill Name', 2, 50, true);
+  if (validationErr) {
+    setAdminFieldError(input, validationErr);
     input.focus();
     return;
   }
-  if (text.length < 2) {
-    setAdminFieldError(input, 'Skill Name must be at least 2 characters.');
-    input.focus();
-    return;
-  }
-  clearAdminFieldError(input);
-  const level = levelSelect ? levelSelect.value : 'Strong';
 
   const data = await PortfolioAPI.getPortfolio();
   data.skills = data.skills || {};
   data.skills[catKey] = data.skills[catKey] || { title: catKey, items: [] };
   data.skills[catKey].items = data.skills[catKey].items || [];
+
+  // Check duplicate skill in category
+  const isDuplicate = data.skills[catKey].items.some(item => {
+    const existingName = typeof item === 'string' ? item : (item.name || item.title || '');
+    return existingName.toLowerCase() === text.toLowerCase();
+  });
+
+  if (isDuplicate) {
+    setAdminFieldError(input, `"${text}" is already added in this category.`);
+    input.focus();
+    return;
+  }
+
+  clearAdminFieldError(input);
+  const level = levelSelect ? levelSelect.value : 'Strong';
 
   data.skills[catKey].items.push({ name: text, level: level });
   await PortfolioAPI.updateSkills(data.skills);
@@ -2129,7 +2197,10 @@ async function renderInquiriesManager() {
 
           ${isUnread ? `
             <button class="btn-inquiry-action" onclick="markInquiryAsRead('${msg.id}')">
-              ${ADMIN_ICONS.check}
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6 7 17l-5-5"/>
+                <path d="m22 10-7.5 7.5-1.5-1.5"/>
+              </svg>
               <span>Mark as Read</span>
             </button>
           ` : ''}
@@ -2308,7 +2379,15 @@ async function renderInquiriesManager() {
               <a href="mailto:${escapeHtml(msg.email || '')}" class="inquiry-email">${escapeHtml(msg.email || '')}</a>
             </div>
             <div class="inquiry-meta">
-              <span class="inquiry-badge ${isUnread ? 'new' : 'read'}">${isUnread ? 'New' : 'Read'}</span>
+              <span class="inquiry-badge ${isUnread ? 'new' : 'read'}">
+                ${!isUnread ? `
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -1px;">
+                    <path d="M18 6 7 17l-5-5"/>
+                    <path d="m22 10-7.5 7.5-1.5-1.5"/>
+                  </svg>
+                ` : ''}
+                ${isUnread ? 'New' : 'Read'}
+              </span>
               <span class="inquiry-date">${dateStr}</span>
             </div>
           </div>
@@ -2321,12 +2400,15 @@ async function renderInquiriesManager() {
               </svg>
               <span>Reply via Email</span>
             </a>
-            <button type="button" class="btn-inquiry-action" onclick="toggleMessageRead('${msg.id}', ${!isUnread})">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              <span>${isUnread ? 'Mark as Read' : 'Mark as Unread'}</span>
-            </button>
+            ${isUnread ? `
+              <button type="button" class="btn-inquiry-action btn-mark-read" onclick="markMessageAsRead('${msg.id}')" title="Mark as Read">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6 7 17l-5-5"/>
+                  <path d="m22 10-7.5 7.5-1.5-1.5"/>
+                </svg>
+                <span>Mark as Read</span>
+              </button>
+            ` : ''}
             <button type="button" class="btn-inquiry-action" style="color: var(--accent-danger);" onclick="removeInquiry('${msg.id}')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -2348,15 +2430,19 @@ async function renderInquiriesManager() {
   }
 }
 
-async function toggleMessageRead(id, newStatus) {
+async function markMessageAsRead(id) {
   try {
-    await PortfolioAPI.markMessageRead(id, newStatus);
-    showToast(newStatus ? 'Marked as read' : 'Marked as unread');
+    await PortfolioAPI.markMessageRead(id, true);
+    showToast('Marked as read');
     await renderInquiriesManager();
   } catch (err) {
     console.error('Error updating message:', err);
-    showToast('Failed to update message status');
+    showToast('Failed to mark message as read');
   }
+}
+
+async function toggleMessageRead(id, newStatus = true) {
+  return markMessageAsRead(id);
 }
 
 async function removeInquiry(id) {

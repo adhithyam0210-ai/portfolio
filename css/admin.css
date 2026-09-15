@@ -438,6 +438,13 @@ button, input, textarea, select {
   margin-bottom: 6px;
 }
 
+.required-star {
+  color: #ef4444;
+  margin-left: 3px;
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
 .form-input,
 .form-textarea,
 .form-select {

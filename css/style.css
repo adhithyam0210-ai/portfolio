@@ -2129,6 +2129,10 @@ body.mode-canvas .floating-landmarks-container {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
+.terminal-textarea {
+  resize: none !important;
+}
+
 .terminal-input:focus,
 .terminal-textarea:focus {
   border-color: var(--primary);
@@ -2326,7 +2330,10 @@ body.mode-canvas .floating-landmarks-container {
 }
 
 .splash-subtitle {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   color: #94a3b8;
   margin-bottom: 26px;
   line-height: 1.45;
@@ -2801,7 +2808,7 @@ body.mode-canvas .floating-landmarks-container {
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
-    overscroll-behavior: contain;
+    overscroll-behavior: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.28) transparent !important;
     display: flex !important;
@@ -3057,6 +3064,7 @@ body.mode-canvas .floating-landmarks-container {
     padding: 6px 10px !important;
     font-size: 0.78rem !important;
     height: 48px !important;
+    resize: none !important;
   }
 
   #chapter-8 .terminal-submit-btn {

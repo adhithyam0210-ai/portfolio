@@ -64,7 +64,7 @@
       </div>
 
       <div class="header-actions">
-        <button id="db-header-btn" class="btn-header" onclick="switchTab('database')" title="Manage Cloud Database (Supabase PostgreSQL)">
+        <button id="db-header-btn" class="btn-header" onclick="switchTab('database')" title="Manage Cloud Database (Supabase PostgreSQL)" style="display: none !important;">
           <span id="db-pill-dot" class="cloud-pill-status"></span>
           <span id="db-header-label">Database</span>
         </button>
@@ -141,7 +141,7 @@
         <span>Inquiries</span>
         <span id="inquiries-badge-count" class="badge-count" style="display: none;">0</span>
       </button>
-      <button class="tab-btn" data-tab="database">
+      <button class="tab-btn" data-tab="database" style="display: none !important;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
           <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
@@ -245,19 +245,19 @@
 
           <div class="form-grid-2">
             <div class="form-group">
-              <label class="form-label" for="prof-name">Full Name</label>
-              <input type="text" id="prof-name" class="form-input" placeholder="e.g. Adhithya M" required />
+              <label class="form-label" for="prof-name">Full Name <span class="required-star">*</span></label>
+              <input type="text" id="prof-name" class="form-input" placeholder="e.g. Adhithya M" required minlength="3" />
             </div>
             <div class="form-group">
-              <label class="form-label" for="prof-role">Primary Role / Specialization</label>
-              <input type="text" id="prof-role" class="form-input" placeholder="e.g. QA Automation Engineer &amp; SDET" required />
+              <label class="form-label" for="prof-role">Primary Role / Specialization <span class="required-star">*</span></label>
+              <input type="text" id="prof-role" class="form-input" placeholder="e.g. QA Automation Engineer &amp; SDET" required minlength="3" />
             </div>
           </div>
 
           <div class="form-grid-2">
             <div class="form-group">
-              <label class="form-label" for="prof-location">Location</label>
-              <input type="text" id="prof-location" class="form-input" placeholder="e.g. Chennai, India" required />
+              <label class="form-label" for="prof-location">Location <span class="required-star">*</span></label>
+              <input type="text" id="prof-location" class="form-input" placeholder="e.g. Chennai, India" required minlength="2" />
             </div>
             <div class="form-group">
               <label class="form-label" for="prof-degree">Academic Degree Tag (Card 0)</label>
@@ -267,18 +267,18 @@
 
           <div class="form-grid-2">
             <div class="form-group">
-              <label class="form-label" for="prof-email">Email Address</label>
+              <label class="form-label" for="prof-email">Email Address <span class="required-star">*</span></label>
               <input type="email" id="prof-email" class="form-input" placeholder="e.g. adhithyam0210@gmail.com" required />
             </div>
             <div class="form-group">
-              <label class="form-label" for="prof-tagline">Main Headline</label>
-              <input type="text" id="prof-tagline" class="form-input" placeholder="e.g. Building Resilient QA Automation &amp; Full-Stack Systems" required />
+              <label class="form-label" for="prof-tagline">Main Headline <span class="required-star">*</span></label>
+              <input type="text" id="prof-tagline" class="form-input" placeholder="e.g. Building Resilient QA Automation &amp; Full-Stack Systems" required minlength="3" />
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" for="prof-bio">Short Bio / Elevator Pitch</label>
-            <textarea id="prof-bio" class="form-textarea" placeholder="e.g. Detail-oriented QA Engineer specializing in automated regression frameworks, test architecture, and scalable full-stack delivery..." required></textarea>
+            <label class="form-label" for="prof-bio">Short Bio / Elevator Pitch <span class="required-star">*</span></label>
+            <textarea id="prof-bio" class="form-textarea" placeholder="e.g. Detail-oriented QA Engineer specializing in automated regression frameworks, test architecture, and scalable full-stack delivery..." required minlength="10"></textarea>
           </div>
 
           <div class="form-grid-2">
@@ -429,18 +429,18 @@
         <form id="skills-header-form" onsubmit="saveSkillsHeaderForm(event)" novalidate>
           <div class="form-grid-2" style="margin-bottom: 14px;">
             <div class="form-group">
-              <label class="form-label" for="skill-hdr-title">Stage Title</label>
-              <input type="text" id="skill-hdr-title" class="form-input" placeholder="e.g. Technical Skill Garden" />
+              <label class="form-label" for="skill-hdr-title">Stage Title <span class="required-star">*</span></label>
+              <input type="text" id="skill-hdr-title" class="form-input" placeholder="e.g. Technical Skill Garden" required minlength="2" maxlength="80" />
             </div>
             <div class="form-group">
-              <label class="form-label" for="skill-hdr-status">Status Badge</label>
-              <input type="text" id="skill-hdr-status" class="form-input" placeholder="e.g. QUALITATIVE PROFICIENCY" />
+              <label class="form-label" for="skill-hdr-status">Status Badge <span class="required-star">*</span></label>
+              <input type="text" id="skill-hdr-status" class="form-input" placeholder="e.g. QUALITATIVE PROFICIENCY" required minlength="2" maxlength="60" />
             </div>
           </div>
 
           <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label" for="skill-hdr-subtitle">Stage Subtitle / Description</label>
-            <input type="text" id="skill-hdr-subtitle" class="form-input" placeholder="e.g. Honed through coursework, college engineering, and real internship delivery." />
+            <label class="form-label" for="skill-hdr-subtitle">Stage Subtitle / Description <span class="required-star">*</span></label>
+            <input type="text" id="skill-hdr-subtitle" class="form-input" placeholder="e.g. Honed through coursework, college engineering, and real internship delivery." required minlength="5" maxlength="250" />
           </div>
 
           <button type="submit" class="btn-primary" style="padding: 9px 20px; font-size: 0.88rem;">
@@ -511,23 +511,23 @@
         <form id="courses-header-form" onsubmit="saveCoursesHeaderForm(event)" novalidate>
           <div class="form-grid-2" style="margin-bottom: 14px;">
             <div class="form-group">
-              <label class="form-label" for="course-hdr-era">Top Era Badge</label>
-              <input type="text" id="course-hdr-era" class="form-input" placeholder="e.g. STAGE 03 • SPECIALIZED TRAINING" />
+              <label class="form-label" for="course-hdr-era">Top Era Badge <span class="required-star">*</span></label>
+              <input type="text" id="course-hdr-era" class="form-input" placeholder="e.g. STAGE 03 • SPECIALIZED TRAINING" required minlength="2" maxlength="60" />
             </div>
             <div class="form-group">
-              <label class="form-label" for="course-hdr-status">Status Badge</label>
-              <input type="text" id="course-hdr-status" class="form-input" placeholder="e.g. CERTIFIED • INDUSTRY-READY" />
+              <label class="form-label" for="course-hdr-status">Status Badge <span class="required-star">*</span></label>
+              <input type="text" id="course-hdr-status" class="form-input" placeholder="e.g. CERTIFIED • INDUSTRY-READY" required minlength="2" maxlength="60" />
             </div>
           </div>
 
           <div class="form-group" style="margin-bottom: 14px;">
-            <label class="form-label" for="course-hdr-title">Stage Title</label>
-            <input type="text" id="course-hdr-title" class="form-input" placeholder="e.g. What I Learned Along the Way" />
+            <label class="form-label" for="course-hdr-title">Stage Title <span class="required-star">*</span></label>
+            <input type="text" id="course-hdr-title" class="form-input" placeholder="e.g. What I Learned Along the Way" required minlength="2" maxlength="80" />
           </div>
 
           <div class="form-group" style="margin-bottom: 16px;">
-            <label class="form-label" for="course-hdr-subtitle">Stage Subtitle / Description</label>
-            <input type="text" id="course-hdr-subtitle" class="form-input" placeholder="e.g. Hands-on certifications &amp; rigorous testing frameworks." />
+            <label class="form-label" for="course-hdr-subtitle">Stage Subtitle / Description <span class="required-star">*</span></label>
+            <input type="text" id="course-hdr-subtitle" class="form-input" placeholder="e.g. Hands-on certifications &amp; rigorous testing frameworks." required minlength="5" maxlength="250" />
           </div>
 
           <button type="submit" class="btn-primary" style="padding: 9px 20px; font-size: 0.88rem;">
@@ -626,8 +626,8 @@
       </div>
     </section>
 
-    <!-- 7. CLOUD DATABASE & LIVE PREVIEW TAB -->
-    <section id="tab-database" class="tab-pane">
+    <!-- 7. CLOUD DATABASE & LIVE PREVIEW TAB (HIDDEN PER USER REQUEST) -->
+    <section id="tab-database" class="tab-pane" style="display: none !important;">
       <div class="pane-head">
         <div>
           <h2 class="pane-title">Cloud Database &amp; Live Preview</h2>
@@ -785,8 +785,8 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
       <form id="project-form" onsubmit="saveProjectForm(event)" novalidate>
         <div class="form-group">
-          <label class="form-label" for="project-title">Project Title</label>
-          <input type="text" id="project-title" class="form-input" placeholder="e.g. Real-Time QA Test Automation Suite" required />
+          <label class="form-label" for="project-title">Project Title <span class="required-star">*</span></label>
+          <input type="text" id="project-title" class="form-input" placeholder="e.g. Real-Time QA Test Automation Suite" required minlength="3" />
         </div>
 
         <div class="form-group">
@@ -795,7 +795,7 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="project-category">Project Category</label>
+          <label class="form-label" for="project-category">Project Category <span class="required-star">*</span></label>
           <select id="project-category" class="form-select" onchange="handleCategoryChange(this)" required>
             <option value="testing">Software Testing</option>
             <option value="fullstack">Full Stack</option>
@@ -808,8 +808,8 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <!-- Custom Category Input (Shown when Others is selected) -->
         <div id="custom-category-group" class="form-group" style="display: none;">
-          <label class="form-label" for="custom-category-input">Enter Custom Category Name</label>
-          <input type="text" id="custom-category-input" class="form-input" placeholder="e.g. Performance Testing" />
+          <label class="form-label" for="custom-category-input">Enter Custom Category Name <span class="required-star">*</span></label>
+          <input type="text" id="custom-category-input" class="form-input" placeholder="e.g. Performance Testing" minlength="2" maxlength="50" />
         </div>
 
         <!-- File Explorer Image Picker & Live Preview -->
@@ -843,13 +843,13 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="project-summary">Short Summary (2-3 sentences)</label>
-          <textarea id="project-summary" class="form-textarea" placeholder="e.g. End-to-end automated testing solution featuring parallel test execution, automated HTML reports, and CI/CD integration..." required></textarea>
+          <label class="form-label" for="project-summary">Short Summary (2-3 sentences) <span class="required-star">*</span></label>
+          <textarea id="project-summary" class="form-textarea" placeholder="e.g. End-to-end automated testing solution featuring parallel test execution, automated HTML reports, and CI/CD integration..." required minlength="10"></textarea>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="project-tech">Tech Stack (comma-separated)</label>
-          <input type="text" id="project-tech" class="form-input" placeholder="e.g. Java, Selenium WebDriver, TestNG, Maven, ExtentReports" required />
+          <label class="form-label" for="project-tech">Tech Stack (comma-separated) <span class="required-star">*</span></label>
+          <input type="text" id="project-tech" class="form-input" placeholder="e.g. Java, Selenium WebDriver, TestNG, Maven, ExtentReports" required minlength="2" />
         </div>
 
         <div class="form-grid-2">
@@ -895,23 +895,23 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label" for="exp-role">Role Title / Position</label>
-            <input type="text" id="exp-role" class="form-input" placeholder="e.g. QA Automation Engineer" required />
+            <label class="form-label" for="exp-role">Role Title / Position <span class="required-star">*</span></label>
+            <input type="text" id="exp-role" class="form-input" placeholder="e.g. QA Automation Engineer" required minlength="2" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="exp-period">Active Period</label>
-            <input type="text" id="exp-period" class="form-input" placeholder="e.g. 2024 – Present" required />
+            <label class="form-label" for="exp-period">Active Period <span class="required-star">*</span></label>
+            <input type="text" id="exp-period" class="form-input" placeholder="e.g. 2024 – Present" required minlength="3" />
           </div>
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
-            <label class="form-label" for="exp-company">Company / Organization</label>
-            <input type="text" id="exp-company" class="form-input" placeholder="e.g. ABC Technologies Pvt Ltd" required />
+            <label class="form-label" for="exp-company">Company / Organization <span class="required-star">*</span></label>
+            <input type="text" id="exp-company" class="form-input" placeholder="e.g. ABC Technologies Pvt Ltd" required minlength="2" />
           </div>
           <div class="form-group">
-            <label class="form-label" for="exp-location">Location</label>
-            <input type="text" id="exp-location" class="form-input" placeholder="e.g. Chennai, India" required />
+            <label class="form-label" for="exp-location">Location <span class="required-star">*</span></label>
+            <input type="text" id="exp-location" class="form-input" placeholder="e.g. Chennai, India" required minlength="2" />
           </div>
         </div>
 
@@ -948,8 +948,8 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="exp-desc">Summary Description</label>
-          <textarea id="exp-desc" class="form-textarea" placeholder="e.g. Developed and executed automated test suites with Selenium WebDriver and TestNG..." required></textarea>
+          <label class="form-label" for="exp-desc">Summary Description <span class="required-star">*</span></label>
+          <textarea id="exp-desc" class="form-textarea" placeholder="e.g. Developed and executed automated test suites with Selenium WebDriver and TestNG..." required minlength="10"></textarea>
         </div>
 
         <div class="form-group">
@@ -991,22 +991,22 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <div class="form-group">
           <label class="form-label" for="edu-degree">Degree / Qualification Title <span class="required-star">*</span></label>
-          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. B.Tech in Artificial Intelligence &amp; Data Science" required />
+          <input type="text" id="edu-degree" class="form-input" placeholder="e.g. B.Tech in Artificial Intelligence &amp; Data Science" required minlength="2" maxlength="80" />
         </div>
 
         <div class="form-group">
           <label class="form-label" for="edu-institution">University or School Name <span class="required-star">*</span></label>
-          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. Panimalar Engineering College, Anna University" required />
+          <input type="text" id="edu-institution" class="form-input" placeholder="e.g. Panimalar Engineering College, Anna University" required minlength="2" maxlength="90" />
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="edu-year">Year / Period <span class="required-star">*</span></label>
-            <input type="text" id="edu-year" class="form-input" placeholder="e.g. 2022 – 2026" required />
+            <input type="text" id="edu-year" class="form-input" placeholder="e.g. 2022 – 2026" required minlength="4" maxlength="50" />
           </div>
           <div class="form-group">
             <label class="form-label" for="edu-score">Marks / CGPA / Percentage <span class="required-star">*</span></label>
-            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 7.4 CGPA or 85%" required />
+            <input type="text" id="edu-score" class="form-input" placeholder="e.g. 7.4 CGPA or 85%" required minlength="2" maxlength="30" />
           </div>
         </div>
 
@@ -1059,23 +1059,23 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
 
         <div class="form-group">
           <label class="form-label" for="course-name">Course / Certification Title <span class="required-star">*</span></label>
-          <input type="text" id="course-name" class="form-input" placeholder="e.g. Selenium WebDriver with Java Automation" required />
+          <input type="text" id="course-name" class="form-input" placeholder="e.g. Selenium WebDriver with Java Automation" required minlength="2" maxlength="90" />
         </div>
 
         <div class="form-grid-2">
           <div class="form-group">
             <label class="form-label" for="course-platform">Platform / Institute <span class="required-star">*</span></label>
-            <input type="text" id="course-platform" class="form-input" placeholder="e.g. SLA Institute / Udemy / Coursera" required />
+            <input type="text" id="course-platform" class="form-input" placeholder="e.g. SLA Institute / Udemy / Coursera" required minlength="2" maxlength="80" />
           </div>
           <div class="form-group">
             <label class="form-label" for="course-year">Completion Year <span class="required-star">*</span></label>
-            <input type="text" id="course-year" class="form-input" placeholder="e.g. 2026" required />
+            <input type="text" id="course-year" class="form-input" placeholder="e.g. 2026" required minlength="4" maxlength="20" />
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="course-category">Category</label>
-          <select id="course-category" class="form-input">
+          <label class="form-label" for="course-category">Category <span class="required-star">*</span></label>
+          <select id="course-category" class="form-input" required>
             <option value="Automation">Automation Testing</option>
             <option value="Testing">Manual Testing</option>
             <option value="Database">SQL &amp; Database</option>
@@ -1085,8 +1085,8 @@ CREATE POLICY "Public update messages" ON public.messages FOR UPDATE TO anon, au
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="course-desc">Short Description (Floating Card Summary)</label>
-          <textarea id="course-desc" class="form-textarea" placeholder="e.g. Mastered page object modeling, data-driven testing, parallel execution, and API automation with Postman." rows="3" required></textarea>
+          <label class="form-label" for="course-desc">Short Description (Floating Card Summary) <span class="required-star">*</span></label>
+          <textarea id="course-desc" class="form-textarea" placeholder="e.g. Mastered page object modeling, data-driven testing, parallel execution, and API automation with Postman." rows="3" required minlength="10" maxlength="500"></textarea>
         </div>
 
         <div class="modal-actions-row">
