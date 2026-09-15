@@ -13,6 +13,7 @@ const TOTAL_FRAMES = 240;
 let frameCanvas = null;
 let frameCtx = null;
 let lastRenderedImg = null;
+let lastRenderedFrameIdx = -1;
 const frameCache = new Map(); // url -> HTMLImageElement
 
 // 9 Milestone Stages Configuration (Starting Hero + Stages 01 to 08)
@@ -83,7 +84,7 @@ function initCanvasFrameEngine() {
     frameCanvas.width = Math.round(window.innerWidth * dpr);
     frameCanvas.height = Math.round(window.innerHeight * dpr);
     frameCtx.imageSmoothingEnabled = true;
-    frameCtx.imageSmoothingQuality = 'high';
+    frameCtx.imageSmoothingQuality = 'medium';
     if (lastRenderedImg) {
       drawImageCover(frameCtx, lastRenderedImg, frameCanvas.width, frameCanvas.height);
     }
@@ -97,12 +98,25 @@ function initCanvasFrameEngine() {
 }
 
 /**
+ * Returns frame index (1 to 240) for the given progress
+ */
+function getFrameIndexForProgress(progress) {
+  const p = Math.max(0, Math.min(1, progress));
+  return Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
+}
+
+/**
+ * Returns frame URL for the given frame index
+ */
+function getFrameUrlForIndex(idx) {
+  return `assets/city_frames/city-frame-${String(idx).padStart(3, '0')}.jpg`;
+}
+
+/**
  * Returns frame URL for the given progress across the 240 Modern City Walk frames
  */
 function getFrameUrlForProgress(progress) {
-  const p = Math.max(0, Math.min(1, progress));
-  const idx = Math.min(TOTAL_FRAMES, Math.max(1, Math.round(p * (TOTAL_FRAMES - 1)) + 1));
-  return `assets/city_frames/city-frame-${String(idx).padStart(3, '0')}.jpg`;
+  return getFrameUrlForIndex(getFrameIndexForProgress(progress));
 }
 
 function escapeHtml(str) {
@@ -222,7 +236,7 @@ function preloadImage(url) {
 function drawImageCover(ctx, img, cw, ch) {
   if (!img || !ctx) return;
   ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingQuality = 'medium';
   const iw = img.naturalWidth || img.width;
   const ih = img.naturalHeight || img.height;
   if (!iw || !ih) return;
@@ -248,21 +262,27 @@ function drawImageCover(ctx, img, cw, ch) {
 
 /**
  * Draw frame on canvas corresponding to progress
+ * Equipped with frame gate: skips expensive GPU redraw if frame index is unchanged!
  */
-function renderFrameAtProgress(progress) {
+function renderFrameAtProgress(progress, force = false) {
   if (!frameCtx || !frameCanvas) return;
-  const url = getFrameUrlForProgress(progress);
+  const frameIdx = getFrameIndexForProgress(progress);
+  if (!force && frameIdx === lastRenderedFrameIdx && lastRenderedImg) {
+    return; // Frame hasn't changed; zero GPU draw calls needed!
+  }
+  const url = getFrameUrlForIndex(frameIdx);
   const img = frameCache.get(url);
 
   if (img && img.complete && img.naturalWidth > 0) {
     lastRenderedImg = img;
+    lastRenderedFrameIdx = frameIdx;
     drawImageCover(frameCtx, img, frameCanvas.width, frameCanvas.height);
   } else {
-    if (lastRenderedImg) {
+    if (lastRenderedImg && force) {
       drawImageCover(frameCtx, lastRenderedImg, frameCanvas.width, frameCanvas.height);
     }
     preloadImage(url).then(loadedImg => {
-      if (loadedImg && frameCtx && frameCanvas) {
+      if (loadedImg && frameCtx && frameCanvas && frameIdx === lastRenderedFrameIdx) {
         lastRenderedImg = loadedImg;
         drawImageCover(frameCtx, loadedImg, frameCanvas.width, frameCanvas.height);
       }
@@ -301,7 +321,12 @@ function initParticleCanvas() {
     });
   }
 
-  function renderParticles() {
+  let lastParticleTime = 0;
+  function renderParticles(now) {
+    requestAnimationFrame(renderParticles);
+    if (now && now - lastParticleTime < 33) return; // 30 FPS throttle to preserve GPU cycles
+    lastParticleTime = now || performance.now();
+
     ctx.clearRect(0, 0, width, height);
 
     for (let i = 0; i < particles.length; i++) {
@@ -320,15 +345,13 @@ function initParticleCanvas() {
       ctx.globalAlpha = p.alpha;
       ctx.fill();
     }
-
-    requestAnimationFrame(renderParticles);
   }
 
-  renderParticles();
+  requestAnimationFrame(renderParticles);
 }
 
 /* ==========================================================================
-   3. CONTINUOUS SCROLL-DRIVEN SCRUBBING ENGINE (Modern City Walk)
+   3. CONTINUOUS SCROLL-DRIVEN SCRUBBING ENGINE & SMOOTH MOMENTUM SCROLLER
    ========================================================================== */
 function initJourneyScrollEngine() {
   const scrollTrack = document.getElementById('journey-scroll-track');
@@ -340,31 +363,122 @@ function initJourneyScrollEngine() {
   let targetProgress = 0;
   let currentProgress = 0;
   let activeStageIndex = 0;
+  let lastPercentInt = -1;
+
+  // Smooth Momentum Virtual Scroll State
+  let virtualScrollY = window.scrollY;
+  let targetVirtualScrollY = window.scrollY;
+  let isWheeling = false;
+  let wheelTimeout = null;
+  let isProgrammaticScrolling = false;
+  let programmaticAnimId = null;
 
   function isMobileViewport() {
     return window.innerWidth <= 768 || 'ontouchstart' in window;
   }
 
+  function getMaxScroll() {
+    if (!scrollTrack) return 1;
+    return Math.max(1, scrollTrack.scrollHeight - window.innerHeight);
+  }
+
   function onScroll() {
     if (!scrollTrack) return;
-    const maxScroll = scrollTrack.scrollHeight - window.innerHeight;
-    if (maxScroll <= 0) return;
+    const maxScroll = getMaxScroll();
+    if (!isWheeling && !isProgrammaticScrolling) {
+      virtualScrollY = window.scrollY;
+      targetVirtualScrollY = window.scrollY;
+    }
     targetProgress = Math.max(0, Math.min(1, window.scrollY / maxScroll));
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  // 60FPS Native Scrubbing Loop (Dynamic fast lerp on mobile for immediate finger response)
+  // Desktop Silky-Smooth Momentum Wheel Handler
+  window.addEventListener('wheel', (e) => {
+    if (isMobileViewport()) return;
+
+    // Check if mouse cursor is inside an internally scrollable card
+    let scrollable = null;
+    let el = e.target;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.classList && (
+        el.classList.contains('chapter-card-glass') ||
+        el.classList.contains('projects-dynamic-container') ||
+        el.classList.contains('skills-garden-container') ||
+        el.classList.contains('connect-terminal-card')
+      )) {
+        if (el.scrollHeight > el.clientHeight + 4) {
+          scrollable = el;
+          break;
+        }
+      }
+      el = el.parentElement;
+    }
+
+    if (scrollable) {
+      const atTop = scrollable.scrollTop <= 1 && e.deltaY < 0;
+      const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2) && e.deltaY > 0;
+      // Allow internal card to scroll freely if not at boundary
+      if (!atTop && !atBottom) {
+        return;
+      }
+    }
+
+    // Intercept default chunky stepped wheel jumps to provide gliding momentum
+    e.preventDefault();
+    if (isProgrammaticScrolling && programmaticAnimId) {
+      cancelAnimationFrame(programmaticAnimId);
+      isProgrammaticScrolling = false;
+    }
+
+    isWheeling = true;
+    if (wheelTimeout) clearTimeout(wheelTimeout);
+    wheelTimeout = setTimeout(() => {
+      isWheeling = false;
+    }, 180);
+
+    const maxScroll = getMaxScroll();
+    let delta = e.deltaY;
+    if (e.deltaMode === 1) delta *= 36;
+    else if (e.deltaMode === 2) delta *= window.innerHeight;
+
+    targetVirtualScrollY = Math.max(0, Math.min(maxScroll, targetVirtualScrollY + delta));
+  }, { passive: false });
+
+  // 60-120FPS Native Scrubbing & Momentum Loop
   function tickEngine() {
     const isMobile = isMobileViewport();
-    const lerpSpeed = isMobile ? 0.28 : 0.14;
-    currentProgress += (targetProgress - currentProgress) * lerpSpeed;
+    const maxScroll = getMaxScroll();
 
-    // 1. Render Frame to Canvas
+    // 1. Smooth Momentum Interpolation on Desktop Wheel
+    if (!isMobile && isWheeling) {
+      const diff = targetVirtualScrollY - virtualScrollY;
+      if (Math.abs(diff) > 0.4) {
+        virtualScrollY += diff * 0.16; // Silky-smooth gliding inertia
+        window.scrollTo(0, virtualScrollY);
+        targetProgress = virtualScrollY / maxScroll;
+      } else {
+        virtualScrollY = targetVirtualScrollY;
+        window.scrollTo(0, virtualScrollY);
+        targetProgress = virtualScrollY / maxScroll;
+      }
+    }
+
+    // 2. Immediate, Responsive Progress Tracking (Zero Rubber-Band Lag)
+    const lerpSpeed = isMobile ? 0.35 : 0.45;
+    const progressDiff = targetProgress - currentProgress;
+    if (Math.abs(progressDiff) < 0.0001) {
+      currentProgress = targetProgress;
+    } else {
+      currentProgress += progressDiff * lerpSpeed;
+    }
+
+    // 3. Render Frame to Canvas (Guarded by frameIdx cache for zero redundant paints)
     renderFrameAtProgress(currentProgress);
 
-    // 2. Active Milestone Determination (Starting Hero + Stages 01 to 08)
+    // 4. Active Milestone Determination (Starting Hero + Stages 01 to 08)
     let newStageIndex = 0;
     if (currentProgress < 0.08) newStageIndex = 0;       // Starting Hero: Profile & About Me
     else if (currentProgress < 0.20) newStageIndex = 1;  // Stage 01: Schooling
@@ -381,10 +495,13 @@ function initJourneyScrollEngine() {
       updateActiveMilestone(activeStageIndex);
     }
 
-    // 3. Update Scrubber Fill and Percent Readout
+    // 5. Update Scrubber Fill and Percent Readout (Only when integer changes to eliminate DOM thrashing)
     const percentInt = Math.round(currentProgress * 100);
-    if (scrubberFill) scrubberFill.style.width = `${percentInt}%`;
-    if (scrubberPercent) scrubberPercent.textContent = `${percentInt}%`;
+    if (percentInt !== lastPercentInt) {
+      lastPercentInt = percentInt;
+      if (scrubberFill) scrubberFill.style.width = `${percentInt}%`;
+      if (scrubberPercent) scrubberPercent.textContent = `${percentInt}%`;
+    }
 
     requestAnimationFrame(tickEngine);
   }
@@ -414,43 +531,7 @@ function initJourneyScrollEngine() {
   window.addEventListener('touchmove', (e) => {
     if (!isTouching || e.touches.length !== 1) return;
     const currentY = e.touches[0].clientY;
-    const currentX = e.touches[0].clientX;
-    const deltaY = currentY - lastTouchY;
-    const totalDy = currentY - touchStartY;
-    const totalDx = currentX - touchStartX;
     lastTouchY = currentY;
-
-    // Check if touch originated within an internally scrollable card
-    let scrollable = null;
-    let el = e.target;
-    while (el && el !== document.body && el !== document.documentElement) {
-      if (el.classList && (
-        el.classList.contains('chapter-card-glass') ||
-        el.classList.contains('projects-dynamic-container') ||
-        el.classList.contains('connect-terminal-card')
-      )) {
-        if (el.scrollHeight > el.clientHeight + 4) {
-          scrollable = el;
-          break;
-        }
-      }
-      el = el.parentElement;
-    }
-
-    if (!scrollable) {
-      // Target card fits on screen without overflow:
-      // Propagate vertical touch movement directly to window scroll so there are NO dead zones!
-      if (Math.abs(totalDy) > Math.abs(totalDx) && Math.abs(deltaY) > 0) {
-        window.scrollBy({ top: -deltaY * 1.05, behavior: 'auto' });
-      }
-    } else {
-      // Target card has internal overflow:
-      const atTop = scrollable.scrollTop <= 1 && deltaY > 0;
-      const atBottom = (scrollable.scrollTop + scrollable.clientHeight >= scrollable.scrollHeight - 2) && deltaY < 0;
-      if ((atTop || atBottom) && Math.abs(totalDy) > Math.abs(totalDx)) {
-        window.scrollBy({ top: -deltaY * 1.05, behavior: 'auto' });
-      }
-    }
   }, { passive: true });
 
   window.addEventListener('touchend', (e) => {
@@ -465,7 +546,6 @@ function initJourneyScrollEngine() {
 
     // Quick Flick Stage Navigation (up/down or left/right)
     if (isMobileViewport() && duration < 340) {
-      // Check if inside actively scrolling inner card that wasn't at boundary
       let isInsideScrollable = false;
       let el = e.target;
       while (el && el !== document.body && el !== document.documentElement) {
@@ -548,7 +628,6 @@ function initJourneyScrollEngine() {
       const t = parseInt(node.getAttribute('data-target'), 10);
       node.classList.toggle('active', t === index);
     });
-    // Sound disabled as requested
   }
 
   // Expose scroll helper for milestone clicks
@@ -557,12 +636,48 @@ function initJourneyScrollEngine() {
       if (!scrollTrack) return;
       const stage = STAGES[index];
       if (!stage) return;
-      const maxScroll = scrollTrack.scrollHeight - window.innerHeight;
-      const targetScrollY = maxScroll * stage.progress;
-      window.scrollTo({
-        top: targetScrollY,
-        behavior: 'smooth'
-      });
+      const maxScroll = getMaxScroll();
+      const destY = Math.round(maxScroll * stage.progress);
+
+      if (isMobileViewport()) {
+        window.scrollTo({
+          top: destY,
+          behavior: 'smooth'
+        });
+        return;
+      }
+
+      // Smooth programmatic ease-out curve on desktop
+      if (programmaticAnimId) cancelAnimationFrame(programmaticAnimId);
+      isProgrammaticScrolling = true;
+      const startY = window.scrollY;
+      const distance = destY - startY;
+      const startTime = performance.now();
+      const duration = Math.min(850, Math.max(380, Math.abs(distance) * 0.08));
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function stepProgrammatic(now) {
+        const elapsed = now - startTime;
+        const p = Math.min(1, elapsed / duration);
+        const ease = easeOutCubic(p);
+        const newY = Math.round(startY + distance * ease);
+        virtualScrollY = newY;
+        targetVirtualScrollY = newY;
+        window.scrollTo(0, newY);
+        targetProgress = newY / maxScroll;
+
+        if (p < 1) {
+          programmaticAnimId = requestAnimationFrame(stepProgrammatic);
+        } else {
+          isProgrammaticScrolling = false;
+          programmaticAnimId = null;
+        }
+      }
+
+      programmaticAnimId = requestAnimationFrame(stepProgrammatic);
     }
   };
 }
