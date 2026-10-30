@@ -1736,6 +1736,7 @@ function hydrateStory(data) {
     const categories = Object.keys(skillsSource);
 
     categories.forEach(catKey => {
+      if (catKey === 'backend' || catKey === 'frontend') return;
       const cat = skillsSource[catKey];
       if (!cat) return;
       const catTitle = cat.title || catKey.replace(/[-_]/g, ' ').toUpperCase();

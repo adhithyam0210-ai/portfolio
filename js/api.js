@@ -552,18 +552,32 @@ const PortfolioAPI = (() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.skills) {
+          delete parsed.skills.backend;
+          delete parsed.skills.frontend;
+        }
+        return parsed;
       } catch (e) {
         console.error('Error parsing local portfolio data:', e);
       }
     }
     if (typeof PORTFOLIO_DATA !== 'undefined') {
-      return JSON.parse(JSON.stringify(PORTFOLIO_DATA));
+      const data = JSON.parse(JSON.stringify(PORTFOLIO_DATA));
+      if (data && data.skills) {
+        delete data.skills.backend;
+        delete data.skills.frontend;
+      }
+      return data;
     }
     return { profile: {}, categories: [], projects: [], skills: {}, experience: [], education: [] };
   }
 
   function setLocalData(data) {
+    if (data && data.skills) {
+      delete data.skills.backend;
+      delete data.skills.frontend;
+    }
     cachedPortfolio = data;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));

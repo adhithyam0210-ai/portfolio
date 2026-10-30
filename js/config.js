@@ -135,19 +135,14 @@ const PORTFOLIO_DATA = {
       ],
       "title": "Tools & DevOps"
     },
-    "backend": {
+    "testing": {
       "items": [
-        "java",
-        "MySql"
+        {
+          "name": "Manual testing",
+          "level": "Strong"
+        }
       ],
-      "title": "Backend & Architecture"
-    },
-    "frontend": {
-      "items": [
-        "Css",
-        "react"
-      ],
-      "title": "Frontend Development"
+      "title": "Testing"
     },
     "programming": {
       "items": [
